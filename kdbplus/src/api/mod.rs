@@ -1772,6 +1772,7 @@ pub fn new_dictionary(keys: K, values: K) -> K{
 /// Constructor of q general null.
 /// # Example
 /// ```no_run
+/// use kdbplus::qtype;
 /// use kdbplus::api::*;
 /// 
 /// #[no_mangle]

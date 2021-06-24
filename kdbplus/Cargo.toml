@@ -1,6 +1,6 @@
 [package]
 name = "kdbplus"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["diamondrod"]
 edition = "2018"
 license = "Apache-2.0"
@@ -31,6 +31,5 @@ ipc=["once_cell", "chrono", "trust-dns-resolver", "tokio", "tokio-native-tls", "
 # IPC test and example
 async-std={version="1.8.0", features=["tokio1", "attributes"]}
 float-cmp="^0.8"
-rand="^0.7"
 # C API test and example
 libc="^0.2"

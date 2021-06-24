@@ -24,15 +24,18 @@
 //!  a user name and SHA-1 hashed password in each line which are delimited by `':'` without any space. For example, a file containing two credentials
 //!  `"mattew:oracle"` and `"reluctant:slowday"` looks like this:
 //! 
+//!      ```bash
 //!       mattew:431364b6450fc47ccdbf6a2205dfdb1baeb79412
 //!       reluctant:d03f5cc1cdb11a77410ee34e26ca1102e67a893c
-//! 
+//!      ```
 //!       
 //!     The hashed password can be generated with q using a function `.Q.sha1`:
 //!  
+//!      ```q
 //!       q).Q.sha1 "slowday"
 //!       0xd03f5cc1cdb11a77410ee34e26ca1102e67a893c
-//!  
+//!      ```
+//! 
 //! - `KDBPLUS_TLS_KEY_FILE` and `KDBPLUS_TLS_KEY_FILE_SECRET`: The pkcs12 file and its password which TLS acceptor uses.
 //! - `QUDSPATH` (optional): q-native environmental variable to define an astract namespace. This environmental variable is used by UDS acceptor too.
 //!  The abstract nameapace will be `@${QUDSPATH}/kx.[server process port]` if this environmental variable is defined. Otherwise it will be `@/tmp/kx.[server process port]`.
