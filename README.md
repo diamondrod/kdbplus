@@ -155,10 +155,8 @@ q)h:hopen `::7000:reluctant:slowday
 Use `kdbplus` as a library name in `Cargo.toml` with `"ipc"` feature.
 
 ```toml
-
 [dependencies]
 kdbplus={version="^0.1", features=["ipc"]}
-
 ```
 
 ## Rust Wrapper of q/kdb+ C API
@@ -174,10 +172,8 @@ In order to avoid writing too large `unsafe` block which leads to poor optimizat
 Use `kdbplus` as a library name in `Cargo.toml` with `"api"` feature.
 
 ```toml
-
 [dependencies]
 kdbplus={version="^0.1", features=["api"]}
-
 ```
 
 ### Examples
@@ -339,12 +335,35 @@ time                          temperature
 2008.08.12D23:12:24.018691392 30.5  
 ```
 
-### Test
+#### Test
 
-Tests are conducted with the example functions in `tests/test.q` by loading the functions into q process.
+Test is conducted in two ways:
+
+1. Using cargo
+2. Running a q test script
+
+##### 1. Using Cargo
+
+Before starting the test, you need to start a q process on the port 5000:
 
 ```bash
+kdbplus]$ q -p 5000
+q)
+```
 
+Then fire the cargo test:
+
+```bash
+kdbplus]$ cargo test
+```
+
+**Note:** Currently 20 tests fails for `api` examples in document. This is because the examples do not have `main` function by nature of `api` but still use `#[macro_use]`.
+
+##### 2. Running a q Test Script
+
+Tests are conducted with `tests/test.q` by loading the example functions built in `api_examples`.
+
+```bash
 kdbplus]$ cargo build
 kdbplus]$ cp target/debug/libapi_examples.so tests/
 kdbplus]$ cd tests
@@ -391,7 +410,6 @@ FYI: type
 test result: ok. 127 passed; 0 failed
 What are the three largest elements?: `belief`love`hope
 q)
-
 ```
 
 ## Document
