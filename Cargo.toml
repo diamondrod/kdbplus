@@ -1,0 +1,2 @@
+[workspace]
+members=["kdbplus", "api_examples", "ipc_examples"]
