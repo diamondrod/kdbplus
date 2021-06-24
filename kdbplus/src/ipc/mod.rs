@@ -847,7 +847,7 @@ pub(crate) enum k0_inner{
 
 //%% k0 %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
-/// Underlying struct of `K` object.
+/// Underlying struct of q object.
 #[derive(Clone, Debug)]
 pub(crate) struct k0{
   /// Type indicator.
@@ -860,6 +860,7 @@ pub(crate) struct k0{
 
 //%% K %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
+/// Struct representing q object.
 #[derive(Clone, Debug)]
 pub struct K(pub(crate) Box<k0>);
 
