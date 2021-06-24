@@ -133,6 +133,8 @@ LIBPATH_: `libapi_examples 2:
 .api.keyed_to_simple_table: LIBPATH_ (`keyed_to_simple_table; 1);
 // unkey
 .api.keyed_to_simple_table2: LIBPATH_ (`keyed_to_simple_table2; 1);
+// set_attribute
+.api.labeling: LIBPATH_ (`labeling; 1);
 // qnull_base::J
 .api.long_borders: LIBPATH_ (`long_borders; 1);
 // as_mut_slice
@@ -145,6 +147,8 @@ LIBPATH_: `libapi_examples 2:
 .api.numbers: LIBPATH_ (`numbers; 1);
 // error_to_string
 .api.no_panick: LIBPATH_ (`no_panick; 2);
+// new_null
+.api.nullify: LIBPATH_ (`nullify; 1);
 // setm
 .api.parallel_sym_change: LIBPATH_ (`parallel_sym_change; 1);
 // r1
@@ -365,6 +369,11 @@ guid: first 1?0Ng;
 planet: .api.eden[];
 .test.ASSERT_EQ["set_qtype"; type planet; 112h]
 
+// set_attribute
+.test.ASSERT_EQ["set_attribute"; .api.labeling 1 2 3; `s#1 2 3]
+// set_attribute - failure
+.test.ASSERT_ERROR["set_attribute - failure"; .api.labeling; enlist 777; "not a simple list"]
+
 // q_ipc_encode
 list: (til 3; "abc"; 2018.02.18D04:30:00.000000000; `revive);
 .test.ASSERT_EQ["q_ipc_encode"; .api.encrypt[list]; bytes:-8!list]
@@ -540,6 +549,9 @@ get_item2:{[man] "boiling pot, facing away from the north"}
 
 // new_second
 .test.ASSERT_EQ["new_second"; .api.create_second[]; -02:00:00]
+
+// new_null
+.test.ASSERT_EQ["new_second"; .api.nullify[]; (::; "null is not a general null"; ::)]
 
 // new_error
 .test.ASSERT_ERROR["new_error"; .api.keep_out; enlist (::); "No means no"]

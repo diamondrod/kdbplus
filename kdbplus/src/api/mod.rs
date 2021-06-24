@@ -801,7 +801,33 @@ pub trait KUtility{
   /// Set a type of `K` object.
   /// # Example
   /// See the example of [`load_as_q_function](fn.load_as_q_function.html).
-  fn set_type(&self, qtype: i8);
+  fn set_type(&mut self, qtype: i8);
+
+  /// Set an attribute to q list object.
+  /// # Example
+  /// ```no_run
+  /// use kdbplus::qattribute;
+  /// use kdbplus::api::*;
+  /// 
+  /// #[no_mangle]
+  /// pub extern "C" fn labeling(mut list: K) -> K{
+  ///   match list.set_attribute(qattribute::SORTED){
+  ///     Ok(_) => increment_reference_count(list),
+  ///     Err(error) => new_error(error)
+  ///   }
+  /// }
+  /// ```
+  /// ```q
+  /// q)setter: `libapi_examples.so (`labeling; 1);
+  /// q)setter 1 2 3
+  /// `s#1 2 3
+  /// q)setter 777
+  /// 'not a simple list
+  /// ```
+  /// # Note
+  /// q does NOT validate the attribute. Wrong attribute can lead to suboptimal behavior or application crash if
+  ///  you are unfortunate.
+  fn set_attribute(&mut self, attribute: i8) -> Result<(), &'static str>;
 
   /// Serialize q object and return serialized q byte list object on success: otherwise null. 
   ///  Mode is either of:
@@ -1086,8 +1112,16 @@ impl KUtility for K{
   }
 
   #[inline]
-  fn set_type(&self, qtype: i8){
+  fn set_type(&mut self, qtype: i8){
     unsafe{(**self).qtype=qtype};
+  }
+
+  #[inline]
+  fn set_attribute(&mut self, attribute: i8) -> Result<(), &'static str>{
+    match unsafe{(**self).qtype}{
+      _t@qtype::BOOL_LIST..=qtype::TIME_LIST => Ok(unsafe{(**self).attribute=attribute}),
+      _ => Err("not a simple list\0")
+    }
   }
 
   #[inline]
@@ -1735,6 +1769,37 @@ pub fn new_dictionary(keys: K, values: K) -> K{
   }
 }
 
+/// Constructor of q general null.
+/// # Example
+/// ```no_run
+/// use kdbplus::api::*;
+/// 
+/// #[no_mangle]
+/// pub extern "C" fn nullify(_: K) -> K{
+///   let nulls=new_simple_list(qtype::COMPOUND_LIST, 3);
+///   let null_slice=nulls.as_mut_slice::<K>();
+///   null_slice[0]=new_null();
+///   null_slice[1]=new_string("null is not a general null");
+///   null_slice[2]=new_null();
+///   nulls
+/// }
+/// ```
+/// ```q
+/// q)void: `libapi_examples 2: (`nullify; 1);
+/// q)void[]
+/// ::
+/// "null is not a general null"
+/// ::
+/// ```
+#[inline]
+pub fn new_null() -> K{
+  unsafe{
+    let null=native::ka(qtype::NULL as I);
+    (*null).value.byte=0;
+    null
+  }
+}
+
 /// Constructor of q error. The input must be null-terminated.
 /// # Example
 /// ```no_run
@@ -2224,7 +2289,7 @@ pub extern "C" fn drop_q_object(obj: K) -> K{
 /// #[no_mangle]
 /// pub extern "C" fn eden(_: K) -> K{
 ///   let earth=Planet::new("earth", 7500_000_000, true);
-///   let foreign=new_simple_list(qtype::COMPOUND_LIST, 2);
+///   let mut foreign=new_simple_list(qtype::COMPOUND_LIST, 2);
 ///   let foreign_slice=foreign.as_mut_slice::<K>();
 ///   foreign_slice[0]=drop_q_object as K;
 ///   foreign_slice[1]=Box::into_raw(Box::new(earth)) as K;

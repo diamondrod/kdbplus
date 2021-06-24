@@ -357,6 +357,15 @@ pub extern "C" fn murmur(list: K) -> K{
   }
 }
 
+/// Example of `set_attribute`.
+#[no_mangle]
+pub extern "C" fn labeling(mut list: K) -> K{
+  match list.set_attribute(qattribute::SORTED){
+    Ok(_) => increment_reference_count(list),
+    Err(error) => new_error(error)
+  }
+}
+
 /// Example of `len`.
 #[no_mangle]
 pub extern "C" fn numbers(obj: K) -> K{
@@ -850,6 +859,17 @@ pub extern "C" fn create_second(_: K) -> K{
   new_second(-7200)
 }
 
+/// Example of `new_null`.
+#[no_mangle]
+pub extern "C" fn nullify(_: K) -> K{
+  let nulls=new_simple_list(qtype::COMPOUND_LIST, 3);
+  let null_slice=nulls.as_mut_slice::<K>();
+  null_slice[0]=new_null();
+  null_slice[1]=new_string("null is not a general null");
+  null_slice[2]=new_null();
+  nulls
+}
+
 /// Example of `new_error`.
 #[no_mangle]
 pub extern "C" fn keep_out(_: K) -> K{
@@ -998,7 +1018,7 @@ impl Planet{
 #[no_mangle]
 pub extern "C" fn eden(_: K) -> K{
   let earth=Planet::new("earth", 7500_000_000, true);
-  let foreign=new_simple_list(qtype::COMPOUND_LIST, 2);
+  let mut foreign=new_simple_list(qtype::COMPOUND_LIST, 2);
   let foreign_slice=foreign.as_mut_slice::<K>();
   foreign_slice[0]=drop_q_object as K;
   foreign_slice[1]=Box::into_raw(Box::new(earth)) as K;
