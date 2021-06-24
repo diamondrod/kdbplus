@@ -407,7 +407,7 @@ FYI: type
 おいしい！
 おいしい！
 "Collect the clutter of apples!"
-test result: ok. 127 passed; 0 failed
+test result: ok. 130 passed; 0 failed
 What are the three largest elements?: `belief`love`hope
 q)
 ```

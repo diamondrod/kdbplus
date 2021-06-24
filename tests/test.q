@@ -324,8 +324,15 @@ guid: first 1?0Ng;
 
 // get_dictionary
 .test.ASSERT_EQ["get_string"; .api.hidden_key[([] t: `timestamp$.z.p+1e9*til 9; chr:"ljppkgfgs"; is: 7 8 12 14 21 316 400 1000 6000i)]; -8!`t`chr`is]
-// get_string - error
+// get_dictionary - error
 .test.ASSERT_ERROR["get_dictionary - failure"; .api.hidden_key; enlist 777; "not a table"]
+
+// get_attribute - sorted
+.test.ASSERT_EQ["get_attribute - sorted"; .api.murmur[`s#1 2 3]; "Clean"]
+// get_attribute - unique
+.test.ASSERT_EQ["get_attribute - unique"; .api.murmur[`u#1 2 3]; `Alone]
+// get_attribute - parted
+.test.ASSERT_EQ["get_attribute - parted"; .api.murmur[`p#1 2 3]; (::)]
 
 // append
 .test.ASSERT_EQ["append - compound"; .api.concat_list2[(::; `metals; `fire); ("clay"; 316)]; (::; `metals; `fire; "clay"; 316)]
