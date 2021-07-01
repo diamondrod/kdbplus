@@ -114,7 +114,7 @@ pub mod native;
 //                          Global Variables                            //
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 
-/// `K` nullptr. This value is used as general null returned value (`(::)`).
+/// `K` nullptr. This value is used as void value of a function which returns `K`.
 /// # Example
 /// ```
 /// use kdbplus::api::*;
@@ -610,7 +610,7 @@ pub trait KUtility{
   ///  marker indicating a table type.
   fn get_dictionary(&self) -> Result<K, &'static str>;
 
-  /// Get an underlying error symbol as `&str`.
+  /// Get an underlying error symbol as `&str`. This function avoids false positive of processing `KNULL` as an error.
   /// # Example
   /// See the example of [`error_to_string`](fn.error_to_string.html).
   fn get_error_string(&self) -> Result<&str, &'static str>;
@@ -1018,7 +1018,12 @@ impl KUtility for K{
   fn get_error_string(&self) -> Result<&str, &'static str>{
     match unsafe{(**self).qtype}{
       qtype::ERROR => {
-        Ok(S_to_str(unsafe{(**self).value.symbol}))
+        if unsafe{(**self).value.symbol} != std::ptr::null_mut::<C>(){
+          Ok(S_to_str(unsafe{(**self).value.symbol}))
+        }
+        else{
+          Err("not an error\0")
+        }
       },
       _ => Err("not an error\0")
     }
@@ -1833,7 +1838,7 @@ pub fn new_error_os(message: &str) -> K{
   }
 }
 
-/// Convert an error object into usual K object which has the error string in the field `s`.
+/// Convert an error object into usual `K` object which has the error string in the field `symbol`.
 /// # Example
 /// ```no_run
 /// use kdbplus::*;
@@ -1841,8 +1846,8 @@ pub fn new_error_os(message: &str) -> K{
 /// 
 /// extern "C" fn no_panick(func: K, args: K) -> K{
 ///   let result=error_to_string(apply(func, args));
-///   if result.get_type() == qtype::ERROR{
-///     println!("FYI: {}", result.get_error_string().unwrap());
+///   if let Ok(error) = result.get_error_string(){
+///     println!("FYI: {}", error);
 ///     // Decrement reference count of the error object which is no longer used.
 ///     decrement_reference_count(result);
 ///     KNULL
@@ -1860,11 +1865,69 @@ pub fn new_error_os(message: &str) -> K{
 /// q)chill[+; (1; `a)]
 /// FYI: type
 /// ```
+/// # Note
+/// If you intend to use the error string only in Rust side and not to return the value, you need
+///  to decrement the reference count of the error object created by `error_to_string` as shown above.
+///  If you want to propagate the error to q side after some operation, you can just return it (See the
+///  example of [`is_error`](fn.is_error.html)).
+/// 
+/// # Warning
+/// In q, an error is a 0 pointer. This causes a problem of false positive by `error_to_string`, i.e.,
+///  `KNULL` is also catched as an error object and its type is set `qtype::ERROR`. In such a case you must NOT
+///  return the catched object because it causes segmentation fault. If you want to check if the catched object
+///  is an error and then return if it is, you should use [`is_error`](fn.is_error.html). If you want to use the
+///  underlying error string of the catched object, you should use [`get_error_string`](trait.KUtility.html#tymethod.get_error_string).
 #[inline]
 pub fn error_to_string(error: K) -> K{
   unsafe{
     native::ee(error)
   }
+}
+
+/// Judge if a catched object by [`error_to_string`](fn.error_to_string.html) is a genuine error object of type
+///  `qtype::ERROR` (This means false positive of the case `KNULL` is eliminated).
+/// # Examples
+/// ```no_run
+/// use kdbplus::api::*;
+/// 
+/// fn love_even(arg: K) -> K{
+///   let int = arg.get_int().unwrap();
+///   if int % 2 == 0{
+///     // Silent for even value
+///     KNULL
+///   }
+///   else{
+///     // Shout against odd value
+///     new_error("great is the even value!!")
+///   }
+/// }
+/// 
+/// #[no_mangle]
+/// pub extern "C" fn propagate(arg: K) -> K{
+///   let result=error_to_string(love_even(arg));
+///   if is_error(result){
+///     // Propagate the error
+///     result
+///   }
+///   else{
+///     // KNULL
+///     println!("this is KNULL");
+///     decrement_reference_count(result);
+///     KNULL
+///   }
+/// }
+/// ```
+/// ```q
+/// q)convey: `libapi_examples 2: (`propagate; 1);
+/// q)convey[7i]
+/// 'great is the even value!!
+/// q)convey[12i]
+/// this is KNULL
+/// q)
+/// ```
+#[inline]
+pub fn is_error(catched: K) -> bool{
+  unsafe{(*catched).value.symbol != std::ptr::null_mut::<C>()}
 }
 
 //%% Symbol %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
@@ -2239,7 +2302,7 @@ pub fn unpin_symbol() -> I{
 /// - `obj`: List of (function to free the object; foreign object).
 /// # Example
 /// See the example of [`load_as_q_function`](fn.load_as_q_function.html).
-pub extern "C" fn drop_q_object(obj: K) -> K{
+pub fn drop_q_object(obj: K) -> K{
   let obj_slice=obj.as_mut_slice::<K>();
   // Take ownership of `K` object from a raw pointer and drop at the end of this scope.
   unsafe{Box::from_raw(obj_slice[1])};

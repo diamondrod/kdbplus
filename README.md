@@ -406,6 +406,9 @@ What do you see, son of man?: boiling pot, facing away from the north
 symbol: `rust
 success!
 FYI: type
+this is KNULL
+Planet { name: "earth", population: 7500000000, water: true }
+Planet { name: "earth", population: 7500000000, water: true }
 おいしい！
 おいしい！
 おいしい！
@@ -417,9 +420,8 @@ FYI: type
 おいしい！
 おいしい！
 "Collect the clutter of apples!"
-test result: ok. 133 passed; 0 failed
-What are the three largest elements?: `belief`love`hope
-q)
+test result: ok. 135 passed; 0 failed
+q)What are the three largest elements?: `belief`love`hope
 ```
 
 ## Document

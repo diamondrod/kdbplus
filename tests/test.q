@@ -187,6 +187,8 @@ LIBPATH_: `libapi_examples 2:
 .api.print_symbol2: LIBPATH_ (`print_symbol2; 1);
 // load_as_q_function
 .api.probe: LIBPATH_ (`probe; 1);
+// error_to_string
+.api.propagate: LIBPATH_ (`propagate; 1);
 // qnull_base::E
 .api.real_borders: LIBPATH_ (`real_borders; 1);
 // d9
@@ -558,8 +560,12 @@ get_item2:{[man] "boiling pot, facing away from the north"}
 
 // error_to_string
 .test.ASSERT_EQ["error_to_string"; .api.no_panick[sum; enlist til 10]; 45]
-// error_to_string -failure
+// error_to_string - failure
 .test.ASSERT_EQ["error_to_string - failure"; .api.no_panick[sum; enlist `cannot`add`symbol]; (::)]
+// error_to_string - positive true
+.test.ASSERT_ERROR["error_to_string - positive true"; .api.propagate; enlist 7i; "great is the even value!!"]
+// error_to_string - positive false
+.test.ASSERT_EQ["error_to_string - positive false"; .api.propagate[12i]; (::)]
 
 // flip
 .test.ASSERT_EQ["flip"; .api.create_table2[]; table:([] time: 2003.10.10D02:24:19.167018272 2006.05.24D06:16:49.419710368 2008.08.12D23:12:24.018691392; temperature: 22.1, 24.7, 30.5)]

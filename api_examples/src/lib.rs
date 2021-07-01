@@ -880,8 +880,8 @@ pub extern "C" fn keep_out(_: K) -> K{
 #[no_mangle]
 pub extern "C" fn no_panick(func: K, args: K) -> K{
   let result=error_to_string(apply(func, args));
-  if result.get_type() == qtype::ERROR{
-    println!("FYI: {}", result.get_error_string().unwrap());
+  if let Ok(error) = result.get_error_string(){
+    println!("FYI: {}", error);
     // Decrement reference count of the error object which is no longer used.
     decrement_reference_count(result);
     KNULL
@@ -889,6 +889,34 @@ pub extern "C" fn no_panick(func: K, args: K) -> K{
   else{
     println!("success!");
     result
+  }
+}
+
+fn love_even(arg: K) -> K{
+  let int = arg.get_int().unwrap();
+  if int % 2 == 0{
+    // Silent for even value
+    KNULL
+  }
+  else{
+    // Shout against odd value
+    new_error("great is the even value!!\0")
+  }
+}
+
+/// Example of `is_error`.
+#[no_mangle]
+pub extern "C" fn propagate(arg: K) -> K{
+  let result=error_to_string(love_even(arg));
+  if is_error(result){
+    // Propagate the error
+    result
+  }
+  else{
+    // KNULL
+    println!("this is KNULL");
+    decrement_reference_count(result);
+    KNULL
   }
 }
 
