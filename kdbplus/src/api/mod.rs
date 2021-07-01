@@ -37,8 +37,8 @@
 //! #[no_mangle]
 //! fn no_panick(func: K, args: K) -> K{
 //!   let result=error_to_string(apply(func, args));
-//!   if result.get_type() == qtype::ERROR{
-//!     println!("FYI: {}", result.get_symbol().unwrap());
+//!   if let Ok(error) = result.error_to_string(){
+//!     println!("FYI: {}", error);
 //!     // Decrement reference count of the error object which is no longer used.
 //!     decrement_reference_count(result);
 //!     KNULL
@@ -1891,14 +1891,19 @@ pub fn error_to_string(error: K) -> K{
 /// use kdbplus::api::*;
 /// 
 /// fn love_even(arg: K) -> K{
-///   let int = arg.get_int().unwrap();
-///   if int % 2 == 0{
-///     // Silent for even value
-///     KNULL
+///   if let Ok(int) = arg.get_int(){
+///     if int % 2 == 0{
+///       // Silent for even value
+///       KNULL
+///     }
+///     else{
+///       // Shout against odd value
+///       new_error("great is the even value!!\0")
+///     }
 ///   }
 ///   else{
-///     // Shout against odd value
-///     new_error("great is the even value!!")
+///     // Pass through
+///     increment_reference_count(arg)
 ///   }
 /// }
 /// 
@@ -1909,11 +1914,15 @@ pub fn error_to_string(error: K) -> K{
 ///     // Propagate the error
 ///     result
 ///   }
-///   else{
+///   else if result.get_type() == qtype::ERROR{
 ///     // KNULL
 ///     println!("this is KNULL");
 ///     decrement_reference_count(result);
 ///     KNULL
+///   }
+///   else{
+///     // Other
+///     new_symbol("sonomama")
 ///   }
 /// }
 /// ```
@@ -1923,11 +1932,12 @@ pub fn error_to_string(error: K) -> K{
 /// 'great is the even value!!
 /// q)convey[12i]
 /// this is KNULL
-/// q)
+/// q)convey[5.5]
+/// `sonomama
 /// ```
 #[inline]
 pub fn is_error(catched: K) -> bool{
-  unsafe{(*catched).value.symbol != std::ptr::null_mut::<C>()}
+  (unsafe{(*catched).qtype} == qtype::ERROR) && (unsafe{(*catched).value.symbol} != std::ptr::null_mut::<C>())
 }
 
 //%% Symbol %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/

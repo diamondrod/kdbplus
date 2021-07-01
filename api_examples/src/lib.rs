@@ -893,14 +893,19 @@ pub extern "C" fn no_panick(func: K, args: K) -> K{
 }
 
 fn love_even(arg: K) -> K{
-  let int = arg.get_int().unwrap();
-  if int % 2 == 0{
-    // Silent for even value
-    KNULL
+  if let Ok(int) = arg.get_int(){
+    if int % 2 == 0{
+      // Silent for even value
+      KNULL
+    }
+    else{
+      // Shout against odd value
+      new_error("great is the even value!!\0")
+    }
   }
   else{
-    // Shout against odd value
-    new_error("great is the even value!!\0")
+    // Pass through
+    increment_reference_count(arg)
   }
 }
 
@@ -912,11 +917,15 @@ pub extern "C" fn propagate(arg: K) -> K{
     // Propagate the error
     result
   }
-  else{
+  else if result.get_type() == qtype::ERROR{
     // KNULL
     println!("this is KNULL");
     decrement_reference_count(result);
     KNULL
+  }
+  else{
+    // Other
+    new_symbol("sonomama")
   }
 }
 

@@ -562,10 +562,12 @@ get_item2:{[man] "boiling pot, facing away from the north"}
 .test.ASSERT_EQ["error_to_string"; .api.no_panick[sum; enlist til 10]; 45]
 // error_to_string - failure
 .test.ASSERT_EQ["error_to_string - failure"; .api.no_panick[sum; enlist `cannot`add`symbol]; (::)]
-// error_to_string - positive true
-.test.ASSERT_ERROR["error_to_string - positive true"; .api.propagate; enlist 7i; "great is the even value!!"]
-// error_to_string - positive false
-.test.ASSERT_EQ["error_to_string - positive false"; .api.propagate[12i]; (::)]
+// is_error - positive true
+.test.ASSERT_ERROR["is_error - positive true"; .api.propagate; enlist 7i; "great is the even value!!"]
+// is_error - positive false
+.test.ASSERT_EQ["is_error - positive false"; .api.propagate[12i]; (::)]
+// is_error - other
+.test.ASSERT_EQ["error_to_string - other"; .api.propagate[5.5]; `sonomama]
 
 // flip
 .test.ASSERT_EQ["flip"; .api.create_table2[]; table:([] time: 2003.10.10D02:24:19.167018272 2006.05.24D06:16:49.419710368 2008.08.12D23:12:24.018691392; temperature: 22.1, 24.7, 30.5)]

@@ -291,8 +291,8 @@ pub extern "C" fn create_symbol_list2(_: K) -> K{
 #[no_mangle]
 fn no_panick(func: K, args: K) -> K{
   let result=error_to_string(apply(func, args));
-  if result.get_type() == qtype::ERROR{
-    println!("FYI: {}", result.get_error_string().unwrap());
+  if let Ok(error) = result.error_to_string(){
+    println!("FYI: {}", error);
     // Decrement reference count of the error object which is no longer used.
     decrement_reference_count(result);
     KNULL
@@ -420,7 +420,7 @@ Planet { name: "earth", population: 7500000000, water: true }
 おいしい！
 おいしい！
 "Collect the clutter of apples!"
-test result: ok. 135 passed; 0 failed
+test result: ok. 136 passed; 0 failed
 q)What are the three largest elements?: `belief`love`hope
 ```
 
