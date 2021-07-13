@@ -1,6 +1,6 @@
 # Rust Dual Interface for q/kdb+
 
-As Rust is becoming a popular programming language for its performance and type safety, the desire to use it with still a maniac time-series database kdb+ is brewing. The aspiration is understandable since we know kdb+ is fast and its interface or a shared library should be fast as well. This interface was created to satisfy such a natural demand, furthermore, in a manner users do not feel any pain to use. The notrious ethoteric function names of the q/kdb+ C API is not an interest of Rust developers.
+As Rust is becoming a popular programming language for its performance and type safety, the desire to use it with still a maniac time-series database kdb+ is brewing. The aspiration is understandable since we know kdb+ is fast and its interface or a shared library should be fast as well. This interface was created to satisfy such a natural demand, furthermore, in a manner users do not feel any pain to use. The notrious esoteric function names of the q/kdb+ C API is not an interest of Rust developers.
 
   *"Give us a **Rust** interface!!"*
 
@@ -22,7 +22,7 @@ As Rust was conceived to address type unsafety of C/C++, replacing C/C++ with Ru
 
 Compression/decompression of messages is also implemented following [kdb+ implementation](https://code.kx.com/q/basics/ipc/#compression).
 
-As for connect method, usually client interfaces of q/kdb+ do not provide a listener due to its protocol. However, sometimes Rust process is connecting to upstream and q/kdb+ starts afterward or is restarted more frequently. Then providing a listener method is a natural direction and it was achieved here. Following ways are supported to connect to kdb+:
+As for connect method, usually client interfaces of q/kdb+ do not provide a listener due to its protocol. However, sometimes Rust process is connecting to an upstream and q/kdb+ starts afterward or is restarted more frequently. Then providing a listener method is a natural direction and it was achieved here. Following ways are supported to connect to kdb+:
 
 - TCP
 - TLS
@@ -30,7 +30,7 @@ As for connect method, usually client interfaces of q/kdb+ do not provide a list
 
 Furthermore, in order to improve inter-operatability some casting, getter and setter methods are provided.
 
-### Environmentl Variables
+### Environmental Variables
 
 This crate uses q-native or crate-specific environmental variables.
 
@@ -46,7 +46,7 @@ This crate uses q-native or crate-specific environmental variables.
       0xd03f5cc1cdb11a77410ee34e26ca1102e67a893c
  
 - `KDBPLUS_TLS_KEY_FILE` and `KDBPLUS_TLS_KEY_FILE_SECRET`: The pkcs12 file and its password which TLS acceptor uses.
-- `QUDSPATH` (optional): q-native environmental variable to define an astract namespace. This environmental variable is used by UDS acceptor too. The abstract nameapace will be `@${QUDSPATH}/kx.[server process port]` if this environmental variable is defined. Otherwise it will be `@/tmp/kx.[server process port]`.
+- `QUDSPATH` (optional): q-native environmental variable to define an astract namespace. This environmental variable is used by UDS acceptor too. The abstract nameapace will be `@${QUDSPATH}/kx.[server process port]` if this environmental variable is defined; otherwise it will be `@/tmp/kx.[server process port]`.
 
 *Notes:*
 
@@ -56,7 +56,7 @@ This crate uses q-native or crate-specific environmental variables.
 ### Type Mapping
 
 All types are expressed as `K` struct which is quite similar to the `K` struct of `api` module but its structure is optimized for IPC
-usage and for convenience to interact with. The table below shows the input types of each q type which is used to construct `K` object.
+usage and for the convenience to interact with. The table below shows the input types of each q type which is used to construct `K` object.
 Note that the input type can be different from the inner type. For example, timestamp has an input type of `chrono::DateTime<Utc>` but
 the inner type is `i64` denoting an elapsed time in nanoseconds since `2000.01.01D00:00:00`.
 
@@ -113,7 +113,7 @@ async fn main()->io::Result<()>{
 
   // Send a functional query.
   let mut message=K::new_compound_list(vec![K::new_symbol(String::from("collatz")), K::new_long(100)]);
-  result=socket.send_message(&message).await?;
+  result=socket.send_sync_message(&message).await?;
   println!("collatz[100]: {}", result);
 
   // Modify query to (`collatz; 20)
@@ -145,7 +145,7 @@ async fn main() -> io::Result<()>{
   let mut socket_tcp=QStream::accept(ConnectionMethod::TCP, "127.0.0.1", 7000).await?;
 
   // Send a query with the socket.
-  let greeting=socket_tcp.send_message(&"string `Hello").await?;
+  let greeting=socket_tcp.send_sync_message(&"string `Hello").await?;
   println!("Greeting: {}", greeting);
 
   socket_tcp.shutdown().await?;
@@ -260,8 +260,8 @@ q)catchy[$; ("J"; "42")]
 42
 q)catchy[+; (1; `a)]
 error: type
-q)unfortunate_fact: `libc_api_examples 2: (`dictionary_list_to_table; 1);
-q)unfortunate_fact[]
+q)behold: `libc_api_examples 2: (`dictionary_list_to_table; 1);
+q)behold[]
 a  b  
 ------
 0  0  
@@ -291,7 +291,7 @@ pub extern "C" fn create_symbol_list2(_: K) -> K{
 #[no_mangle]
 fn no_panick(func: K, args: K) -> K{
   let result=error_to_string(apply(func, args));
-  if let Ok(error) = result.error_to_string(){
+  if let Ok(error) = result.get_error_string(){
     println!("FYI: {}", error);
     // Decrement reference count of the error object which is no longer used.
     decrement_reference_count(result);
