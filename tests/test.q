@@ -113,6 +113,8 @@ LIBPATH_: `libapi_examples 2:
 .api.decrypt: LIBPATH_ (`decrypt; 1);
 // k
 .api.dictionary_list_to_table: LIBPATH_ (`dictionary_list_to_table; 1);
+// simple_to_compound
+.api.drift: LIBPATH_ (`drift; 1);
 // set_qtype
 .api.eden: LIBPATH_ (`eden; 1);
 // q_ipc_encode
@@ -593,6 +595,9 @@ eat:{[apple] show "Collect the clutter of apples!";};
 // register_callback
 shout:{[precious] -1 "What are the three largest elements?: ", .Q.s1 precious;};
 .test.ASSERT_EQ["register_callback"; .api.plumber[]; (::)]
+
+// simple_to_compound
+.test.ASSERT_EQ["simple_to_compound"; .api.drift[]; (12i; 34i; `vague; -3000i)]
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 //                          	  Result   	        		                  //

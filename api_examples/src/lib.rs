@@ -34,7 +34,7 @@ pub extern "C" fn guid_border(_: K) -> K{
 /// Example of `qnull::H`, `qinf::H` and `qninf::H`.
 #[no_mangle]
 pub extern "C" fn short_borders(_: K) -> K{
-  let shorts=new_simple_list(qtype::SHORT_LIST, 3);
+  let shorts=new_list(qtype::SHORT_LIST, 3);
   let shorts_slice=shorts.as_mut_slice::<H>();
   shorts_slice[0]=qnull_base::H;
   shorts_slice[1]=qinf_base::H;
@@ -45,7 +45,7 @@ pub extern "C" fn short_borders(_: K) -> K{
 /// Example of `qnull::I`, `qinf::I` and `qninf::I`.
 #[no_mangle]
 pub extern "C" fn int_borders(_: K) -> K{
-  let ints=new_simple_list(qtype::INT_LIST, 3);
+  let ints=new_list(qtype::INT_LIST, 3);
   let ints_slice=ints.as_mut_slice::<I>();
   ints_slice[0]=qnull_base::I;
   ints_slice[1]=qinf_base::I;
@@ -56,7 +56,7 @@ pub extern "C" fn int_borders(_: K) -> K{
 /// Example of `qnull::J`, `qinf::J` and `qninf::J`.
 #[no_mangle]
 pub extern "C" fn long_borders(_: K) -> K{
-  let timestamps=new_simple_list(qtype::TIMESTAMP_LIST, 3);
+  let timestamps=new_list(qtype::TIMESTAMP_LIST, 3);
   let timestamps_slice=timestamps.as_mut_slice::<J>();
   timestamps_slice[0]=qnull_base::J;
   timestamps_slice[1]=qinf_base::J;
@@ -67,7 +67,7 @@ pub extern "C" fn long_borders(_: K) -> K{
 /// Example of `qnull::E`, `qinf::E` and `qninf::E`.
 #[no_mangle]
 pub extern "C" fn real_borders(_: K) -> K{
-  let reals=new_simple_list(qtype::REAL_LIST, 3);
+  let reals=new_list(qtype::REAL_LIST, 3);
   let reals_slice=reals.as_mut_slice::<E>();
   reals_slice[0]=qnull_base::E;
   reals_slice[1]=qinf_base::E;
@@ -78,7 +78,7 @@ pub extern "C" fn real_borders(_: K) -> K{
 /// Example of `qnull::F`, `qinf::F` and `qninf::F`.
 #[no_mangle]
 pub extern "C" fn float_borders(_: K) -> K{
-  let datetimes=new_simple_list(qtype::DATETIME_LIST, 3);
+  let datetimes=new_list(qtype::DATETIME_LIST, 3);
   let datetimes_slice=datetimes.as_mut_slice::<F>();
   datetimes_slice[0]=qnull_base::F;
   datetimes_slice[1]=qinf_base::F;
@@ -95,7 +95,7 @@ pub extern "C" fn char_border(_: K) -> K{
 /// Example of `qnull::S`.
 #[no_mangle]
 pub extern "C" fn string_borders(_: K) -> K{
-  let compound=new_simple_list(qtype::COMPOUND_LIST, 2);
+  let compound=new_list(qtype::COMPOUND_LIST, 2);
   let compound_slice=compound.as_mut_slice::<K>();
   compound_slice[0]=new_symbol(qnull_base::S);
   compound_slice[1]=new_string(qnull_base::S);
@@ -303,7 +303,7 @@ pub extern "C" fn hidden_key(table: K) -> K{
 /// Example of `append`.
 #[no_mangle]
 pub extern "C" fn concat_list2(mut list1: K, list2: K) -> K{
-  if let Err(err) = list1.append(list2){
+  if let Err(err) = list1.append(increment_reference_count(list2)){
     new_error(err)
   }
   else{
@@ -314,7 +314,7 @@ pub extern "C" fn concat_list2(mut list1: K, list2: K) -> K{
 /// Example of `push`.
 #[no_mangle]
 pub extern "C" fn create_compound_list2(int: K) -> K{
-  let mut list=new_simple_list(qtype::COMPOUND_LIST, 0);
+  let mut list=new_list(qtype::COMPOUND_LIST, 0);
   for i in 0..5{
     list.push(new_long(i)).unwrap();
   }
@@ -325,7 +325,7 @@ pub extern "C" fn create_compound_list2(int: K) -> K{
 /// Example of `push_raw`.
 #[no_mangle]
 pub extern "C" fn create_simple_list2(_: K) -> K{
-  let mut list=new_simple_list(qtype::DATE_LIST, 0);
+  let mut list=new_list(qtype::DATE_LIST, 0);
   for i in 0..5{
     list.push_raw(i).unwrap();
   }
@@ -335,7 +335,7 @@ pub extern "C" fn create_simple_list2(_: K) -> K{
 /// Example of `push_symbol`.
 #[no_mangle]
 pub extern "C" fn create_symbol_list2(_: K) -> K{
-  let mut list=new_simple_list(qtype::SYMBOL_LIST, 0);
+  let mut list=new_list(qtype::SYMBOL_LIST, 0);
   list.push_symbol("Abraham").unwrap();
   list.push_symbol("Isaac").unwrap();
   list.push_symbol("Jacob").unwrap();
@@ -862,7 +862,7 @@ pub extern "C" fn create_second(_: K) -> K{
 /// Example of `new_null`.
 #[no_mangle]
 pub extern "C" fn nullify(_: K) -> K{
-  let nulls=new_simple_list(qtype::COMPOUND_LIST, 3);
+  let nulls=new_list(qtype::COMPOUND_LIST, 3);
   let null_slice=nulls.as_mut_slice::<K>();
   null_slice[0]=new_null();
   null_slice[1]=new_string("null is not a general null");
@@ -933,15 +933,15 @@ pub extern "C" fn propagate(arg: K) -> K{
 
 #[no_mangle]
 pub extern "C" fn create_table2(_: K) -> K{
-  let keys=new_simple_list(qtype::SYMBOL_LIST, 2);
+  let keys=new_list(qtype::SYMBOL_LIST, 2);
   let keys_slice=keys.as_mut_slice::<S>();
   keys_slice[0]=internalize(str_to_S!("time"));
   keys_slice[1]=internalize_n(str_to_S!("temperature_and_humidity"), 11);
-  let values=new_simple_list(qtype::COMPOUND_LIST, 2);
-  let time=new_simple_list(qtype::TIMESTAMP_LIST, 3);
+  let values=new_list(qtype::COMPOUND_LIST, 2);
+  let time=new_list(qtype::TIMESTAMP_LIST, 3);
   // 2003.10.10D02:24:19.167018272 2006.05.24D06:16:49.419710368 2008.08.12D23:12:24.018691392
   time.as_mut_slice::<J>().copy_from_slice(&[119067859167018272_i64, 201766609419710368, 271897944018691392]);
-  let temperature=new_simple_list(qtype::FLOAT_LIST, 3);
+  let temperature=new_list(qtype::FLOAT_LIST, 3);
   temperature.as_mut_slice::<F>().copy_from_slice(&[22.1_f64, 24.7, 30.5]);
   values.as_mut_slice::<K>().copy_from_slice(&[time, temperature]);
   flip(new_dictionary(keys, values))
@@ -1012,7 +1012,7 @@ pub extern "C" fn plumber(_: K) -> K{
   // Lock symbol in a worker thread.
   pin_symbol();
   let handle=std::thread::spawn(move ||{
-    let mut precious=new_simple_list(qtype::SYMBOL_LIST, 3);
+    let mut precious=new_list(qtype::SYMBOL_LIST, 3);
     let precious_array=precious.as_mut_slice::<S>();
     precious_array[0]=internalize(null_terminated_str_to_S("belief\0"));
     precious_array[1]=internalize(null_terminated_str_to_S("love\0"));
@@ -1055,7 +1055,7 @@ impl Planet{
 #[no_mangle]
 pub extern "C" fn eden(_: K) -> K{
   let earth=Planet::new("earth", 7500_000_000, true);
-  let mut foreign=new_simple_list(qtype::COMPOUND_LIST, 2);
+  let mut foreign=new_list(qtype::COMPOUND_LIST, 2);
   let foreign_slice=foreign.as_mut_slice::<K>();
   foreign_slice[0]=drop_q_object as K;
   foreign_slice[1]=Box::into_raw(Box::new(earth)) as K;
@@ -1082,4 +1082,15 @@ extern "C" fn invade(planet: K, action: K) -> K{
 pub extern "C" fn probe(planet: K)->K{
   // Return monadic function
   unsafe{native::k(0, str_to_S!("{[func; planet] func[planet]}"), load_as_q_function(invade as *const V, 2), planet, KNULL)}
+}
+
+/// Example of `simple_to_compound`.
+#[no_mangle]
+pub extern "C" fn drift(_: K)->K{
+  let simple=new_list(qtype::INT_LIST, 2);
+  simple.as_mut_slice::<I>().copy_from_slice(&[12, 34]);
+  let extra=new_list(qtype::COMPOUND_LIST, 2);
+  extra.as_mut_slice::<K>().copy_from_slice(&[new_symbol("vague"), new_int(-3000)]);
+  let mut compound = simple_to_compound(simple);
+  compound.append(extra).unwrap()
 }

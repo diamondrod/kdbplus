@@ -166,7 +166,7 @@ Use `kdbplus` as a library name in `Cargo.toml` with `"ipc"` feature.
 
 ```toml
 [dependencies]
-kdbplus={version="^0.1", features=["ipc"]}
+kdbplus={version="^0.2", features=["ipc"]}
 ```
 
 ## Rust Wrapper of q/kdb+ C API
@@ -183,7 +183,7 @@ Use `kdbplus` as a library name in `Cargo.toml` with `"api"` feature.
 
 ```toml
 [dependencies]
-kdbplus={version="^0.1", features=["api"]}
+kdbplus={version="^0.2", features=["api"]}
 ```
 
 ### Examples
@@ -280,7 +280,7 @@ use kdbplus::api::native::*;
 
 #[no_mangle]
 pub extern "C" fn create_symbol_list2(_: K) -> K{
-  let mut list=new_simple_list(qtype::SYMBOL_LIST, 0);
+  let mut list=new_list(qtype::SYMBOL_LIST, 0);
   list.push_symbol("Abraham").unwrap();
   list.push_symbol("Isaac").unwrap();
   list.push_symbol("Jacob").unwrap();
@@ -306,17 +306,17 @@ fn no_panick(func: K, args: K) -> K{
 #[no_mangle]
 pub extern "C" fn create_table2(_: K) -> K{
   // Build keys
-  let keys=new_simple_list(qtype::SYMBOL_LIST, 2);
+  let keys=new_list(qtype::SYMBOL_LIST, 2);
   let keys_slice=keys.as_mut_slice::<S>();
   keys_slice[0]=internalize(str_to_S!("time"));
   keys_slice[1]=internalize_n(str_to_S!("temperature_and_humidity"), 11);
 
   // Build values
-  let values=new_simple_list(qtype::COMPOUND_LIST, 2);
-  let time=new_simple_list(qtype::TIMESTAMP_LIST, 3);
+  let values=new_list(qtype::COMPOUND_LIST, 2);
+  let time=new_list(qtype::TIMESTAMP_LIST, 3);
   // 2003.10.10D02:24:19.167018272 2006.05.24D06:16:49.419710368 2008.08.12D23:12:24.018691392
   time.as_mut_slice::<J>().copy_from_slice(&[119067859167018272_i64, 201766609419710368, 271897944018691392]);
-  let temperature=new_simple_list(qtype::FLOAT_LIST, 3);
+  let temperature=new_list(qtype::FLOAT_LIST, 3);
   temperature.as_mut_slice::<F>().copy_from_slice(&[22.1_f64, 24.7, 30.5]);
   values.as_mut_slice::<K>().copy_from_slice(&[time, temperature]);
   
@@ -420,7 +420,7 @@ Planet { name: "earth", population: 7500000000, water: true }
 おいしい！
 おいしい！
 "Collect the clutter of apples!"
-test result: ok. 136 passed; 0 failed
+test result: ok. 137 passed; 0 failed
 q)What are the three largest elements?: `belief`love`hope
 ```
 

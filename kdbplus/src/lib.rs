@@ -178,7 +178,7 @@ pub mod qnull_base{
   /// 
   /// #[no_mangle]
   /// pub extern "C" fn short_borders(_: K) -> K{
-  ///   let shorts=new_simple_list(qtype::SHORT_LIST, 3);
+  ///   let shorts=new_list(qtype::SHORT_LIST, 3);
   ///   let shorts_slice=shorts.as_mut_slice::<H>();
   ///   shorts_slice[0]=qnull_base::H;
   ///   shorts_slice[1]=qinf_base::H;
@@ -201,7 +201,7 @@ pub mod qnull_base{
   /// 
   /// #[no_mangle]
   /// pub extern "C" fn int_borders(_: K) -> K{
-  ///   let ints=new_simple_list(qtype::INT_LIST, 3);
+  ///   let ints=new_list(qtype::INT_LIST, 3);
   ///   let ints_slice=ints.as_mut_slice::<I>();
   ///   ints_slice[0]=qnull_base::I;
   ///   ints_slice[1]=qinf_base::I;
@@ -224,7 +224,7 @@ pub mod qnull_base{
   /// 
   /// #[no_mangle]
   /// pub extern "C" fn long_borders(_: K) -> K{
-  ///   let timestamps=new_simple_list(qtype::TIMESTAMP_LIST, 3);
+  ///   let timestamps=new_list(qtype::TIMESTAMP_LIST, 3);
   ///   let timestamps_slice=timestamps.as_mut_slice::<J>();
   ///   timestamps_slice[0]=qnull_base::J;
   ///   timestamps_slice[1]=qinf_base::J;
@@ -247,7 +247,7 @@ pub mod qnull_base{
   /// 
   /// #[no_mangle]
   /// pub extern "C" fn real_borders(_: K) -> K{
-  ///   let reals=new_simple_list(qtype::REAL_LIST, 3);
+  ///   let reals=new_list(qtype::REAL_LIST, 3);
   ///   let reals_slice=reals.as_mut_slice::<E>();
   ///   reals_slice[0]=qnull_base::E;
   ///   reals_slice[1]=qinf_base::E;
@@ -270,7 +270,7 @@ pub mod qnull_base{
   /// 
   /// #[no_mangle]
   /// pub extern "C" fn float_borders(_: K) -> K{
-  ///   let datetimes=new_simple_list(qtype::DATETIME_LIST, 3);
+  ///   let datetimes=new_list(qtype::DATETIME_LIST, 3);
   ///   let datetimes_slice=datetimes.as_mut_slice::<F>();
   ///   datetimes_slice[0]=qnull_base::F;
   ///   datetimes_slice[1]=qinf_base::F;
@@ -313,7 +313,7 @@ pub mod qnull_base{
   /// 
   /// #[no_mangle]
   /// pub extern "C" fn string_borders(_: K) -> K{
-  ///   let compound=new_simple_list(qtype::COMPOUND_LIST, 2);
+  ///   let compound=new_list(qtype::COMPOUND_LIST, 2);
   ///   let compound_slice=compound.as_mut_slice::<K>();
   ///   compound_slice[0]=new_symbol(qnull_base::S);
   ///   compound_slice[1]=new_string(qnull_base::S);

@@ -26,7 +26,7 @@
 //! 
 //! #[no_mangle]
 //! pub extern "C" fn create_symbol_list2(_: K) -> K{
-//!   let mut list=new_simple_list(qtype::SYMBOL_LIST, 0);
+//!   let mut list=new_list(qtype::SYMBOL_LIST, 0);
 //!   list.push_symbol("Abraham").unwrap();
 //!   list.push_symbol("Isaac").unwrap();
 //!   list.push_symbol("Jacob").unwrap();
@@ -37,7 +37,7 @@
 //! #[no_mangle]
 //! fn no_panick(func: K, args: K) -> K{
 //!   let result=error_to_string(apply(func, args));
-//!   if let Ok(error) = result.error_to_string(){
+//!   if let Ok(error) = result.get_error_string(){
 //!     println!("FYI: {}", error);
 //!     // Decrement reference count of the error object which is no longer used.
 //!     decrement_reference_count(result);
@@ -52,17 +52,17 @@
 //! #[no_mangle]
 //! pub extern "C" fn create_table2(_: K) -> K{
 //!   // Build keys
-//!   let keys=new_simple_list(qtype::SYMBOL_LIST, 2);
+//!   let keys=new_list(qtype::SYMBOL_LIST, 2);
 //!   let keys_slice=keys.as_mut_slice::<S>();
 //!   keys_slice[0]=internalize(str_to_S!("time"));
 //!   keys_slice[1]=internalize_n(str_to_S!("temperature_and_humidity"), 11);
 //! 
 //!   // Build values
-//!   let values=new_simple_list(qtype::COMPOUND_LIST, 2);
-//!   let time=new_simple_list(qtype::TIMESTAMP_LIST, 3);
+//!   let values=new_list(qtype::COMPOUND_LIST, 2);
+//!   let time=new_list(qtype::TIMESTAMP_LIST, 3);
 //!   // 2003.10.10D02:24:19.167018272 2006.05.24D06:16:49.419710368 2008.08.12D23:12:24.018691392
 //!   time.as_mut_slice::<J>().copy_from_slice(&[119067859167018272_i64, 201766609419710368, 271897944018691392]);
-//!   let temperature=new_simple_list(qtype::FLOAT_LIST, 3);
+//!   let temperature=new_list(qtype::FLOAT_LIST, 3);
 //!   temperature.as_mut_slice::<F>().copy_from_slice(&[22.1_f64, 24.7, 30.5]);
 //!   values.as_mut_slice::<K>().copy_from_slice(&[time, temperature]);
 //!   
@@ -266,6 +266,7 @@ pub type K=*mut k0;
 
 //%% KUtility %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
+/// Trait which defines utility methods to manipulate q object.
 pub trait KUtility{
   /// Derefer `K` as a mutable slice of the specified type. The supported types are:
   /// - `G`: Equivalent to C API macro `kG`.
@@ -646,7 +647,7 @@ pub trait KUtility{
   /// 
   /// #[no_mangle]
   /// pub extern "C" fn concat_list2(mut list1: K, list2: K) -> K{
-  ///   if let Err(err) = list1.append(list2){
+  ///   if let Err(err) = list1.append(increment_reference_count(list2)){
   ///     new_error(err)
   ///   }
   ///   else{
@@ -667,9 +668,14 @@ pub trait KUtility{
   /// q)plunder[`a`b`c; `d`e]
   /// `a`b`c`d`e
   /// ```
+  /// # Note
+  /// While native function [`jv`](native/fn.jv.html) does not consume the appended list,
+  ///  this function does for intuitiveness. To append externally provided list (i.e., passed
+  ///  from q process), apply [`increment_reference_count`](fn.increment_reference_count.html)
+  ///  before appending the list.
   fn append(&mut self, list: K)->Result<K, &'static str>;
 
-  /// Add a q object to a q compound list.
+  /// Add a q object to a q compound list while the appended one is consumed. 
   ///  Returns a pointer to the (potentially reallocated) `K` object.
   /// # Example
   /// ```no_run
@@ -678,7 +684,7 @@ pub trait KUtility{
   /// 
   /// #[no_mangle]
   /// pub extern "C" fn create_compound_list(int: K) -> K{
-  ///   let mut list=new_simple_list(qtype::COMPOUND_LIST, 0);
+  ///   let mut list=new_list(qtype::COMPOUND_LIST, 0);
   ///   for i in 0..5{
   ///     list.push(new_long(i)).unwrap();
   ///   }
@@ -697,8 +703,8 @@ pub trait KUtility{
   /// 5i
   /// ```
   /// # Note
-  /// In this example we did not allocate an array as `new_simple_list(qtype::COMPOUND_LIST, 0)` to use `push`.
-  ///  As `new_simple_list` initializes the internal list size `n` with its argument, preallocating memory with `new_simple_list` and
+  /// In this example we did not allocate an array as `new_list(qtype::COMPOUND_LIST, 0)` to use `push`.
+  ///  As `new_list` initializes the internal list size `n` with its argument, preallocating memory with `new_list` and
   ///  then using `push` will crash. If you want to allocate a memory in advance, you can substitute a value
   ///  after converting the q list object into a slice with [`as_mut_slice`](rait.KUtility.html#tymethod.as_mut_slice).
   fn push(&mut self, atom: K)->Result<K, &'static str>;
@@ -711,7 +717,7 @@ pub trait KUtility{
   /// 
   /// #[no_mangle]
   /// pub extern "C" fn create_simple_list2(_: K) -> K{
-  ///   let mut list=new_simple_list(qtype::DATE_LIST, 0);
+  ///   let mut list=new_list(qtype::DATE_LIST, 0);
   ///   for i in 0..5{
   ///     list.push_raw(i).unwrap();
   ///   }
@@ -738,7 +744,7 @@ pub trait KUtility{
   /// 
   /// #[no_mangle]
   /// pub extern "C" fn create_symbol_list2(_: K) -> K{
-  ///   let mut list=new_simple_list(qtype::SYMBOL_LIST, 0);
+  ///   let mut list=new_list(qtype::SYMBOL_LIST, 0);
   ///   list.push_symbol("Abraham").unwrap();
   ///   list.push_symbol("Isaac").unwrap();
   ///   list.push_symbol("Jacob").unwrap();
@@ -754,8 +760,8 @@ pub trait KUtility{
   /// 1b
   /// ```
   /// # Note
-  /// In this example we did not allocate an array as `new_simple_list(qtype::SYMBOL_LIST as I, 0)` to use `push_symbol`.
-  ///  As `new_simple_list` initializes the internal list size `n` with its argument, preallocating memory with `new_simple_list`
+  /// In this example we did not allocate an array as `new_list(qtype::SYMBOL_LIST as I, 0)` to use `push_symbol`.
+  ///  As `new_list` initializes the internal list size `n` with its argument, preallocating memory with `new_list`
   ///  and then using `push_symbol` will crash. If you want to allocate a memory in advance, you can substitute a value
   ///  after converting the q list object into a slice with [`as_mut_slice`](trait.KUtility.html#tymethod.as_mut_slice).
   fn push_symbol(&mut self, symbol: &str)->Result<K, &'static str>;
@@ -1042,7 +1048,10 @@ impl KUtility for K{
   #[inline]
   fn append(&mut self, list: K)->Result<K, &'static str>{
     if unsafe{(**self).qtype} >= 0 && unsafe{(**self).qtype} == unsafe{(*list).qtype}{
-      Ok(unsafe{native::jv(self, list)})
+      let result=Ok(unsafe{native::jv(self, list)});
+      // Free appended list for internally created object.
+      unsafe{native::r0(list)};
+      result
     }
     else{
       Err("not a list or types do not match\0")
@@ -1692,7 +1701,7 @@ pub fn new_time(milliseconds: I) -> K{
 /// # Example
 /// See the example of [`new_dictionary`](fn.new_dictionary.html).
 #[inline]
-pub fn new_simple_list(qtype: i8, length: J) -> K{
+pub fn new_list(qtype: i8, length: J) -> K{
   unsafe{
     native::ktn(qtype as I, length)
   }
@@ -1750,10 +1759,10 @@ pub fn new_string_n(string: &str, length: J) -> K{
 /// 
 /// #[no_mangle]
 /// pub extern "C" fn create_dictionary() -> K{
-///   let keys=new_simple_list(qtype::INT_LIST, 2);
+///   let keys=new_list(qtype::INT_LIST, 2);
 ///   keys.as_mut_slice::<I>()[0..2].copy_from_slice(&[0, 1]);
-///   let values=new_simple_list(qtype::COMPOUND_LIST, 2);
-///   let date_list=new_simple_list(qtype::DATE_LIST, 3);
+///   let values=new_list(qtype::COMPOUND_LIST, 2);
+///   let date_list=new_list(qtype::DATE_LIST, 3);
 ///   // 2000.01.01 2000.01.02 2000.01.03
 ///   date_list.as_mut_slice::<I>()[0..3].copy_from_slice(&[0, 1, 2]);
 ///   let string=new_string("I'm afraid I would crash the application...");
@@ -1782,7 +1791,7 @@ pub fn new_dictionary(keys: K, values: K) -> K{
 /// 
 /// #[no_mangle]
 /// pub extern "C" fn nullify(_: K) -> K{
-///   let nulls=new_simple_list(qtype::COMPOUND_LIST, 3);
+///   let nulls=new_list(qtype::COMPOUND_LIST, 3);
 ///   let null_slice=nulls.as_mut_slice::<K>();
 ///   null_slice[0]=new_null();
 ///   null_slice[1]=new_string("null is not a general null");
@@ -1888,6 +1897,7 @@ pub fn error_to_string(error: K) -> K{
 ///  `qtype::ERROR` (This means false positive of the case `KNULL` is eliminated).
 /// # Examples
 /// ```no_run
+/// use kdbplus::*;
 /// use kdbplus::api::*;
 /// 
 /// fn love_even(arg: K) -> K{
@@ -1979,17 +1989,17 @@ pub fn internalize(string: S) -> S{
 /// #[no_mangle]
 /// pub extern "C" fn create_table2(_: K) -> K{
 ///   // Build keys
-///   let keys=new_simple_list(qtype::SYMBOL_LIST, 2);
+///   let keys=new_list(qtype::SYMBOL_LIST, 2);
 ///   let keys_slice=keys.as_mut_slice::<S>();
 ///   keys_slice[0]=internalize(str_to_S!("time"));
 ///   keys_slice[1]=internalize_n(str_to_S!("temperature_and_humidity"), 11);
 ///   
 ///   // Build values
-///   let values=new_simple_list(qtype::COMPOUND_LIST, 2);
-///   let time=new_simple_list(qtype::TIMESTAMP_LIST, 3);
+///   let values=new_list(qtype::COMPOUND_LIST, 2);
+///   let time=new_list(qtype::TIMESTAMP_LIST, 3);
 ///   // 2003.10.10D02:24:19.167018272 2006.05.24D06:16:49.419710368 2008.08.12D23:12:24.018691392
 ///   time.as_mut_slice::<J>().copy_from_slice(&[119067859167018272_i64, 201766609419710368, 271897944018691392]);
-///   let temperature=new_simple_list(qtype::FLOAT_LIST, 3);
+///   let temperature=new_list(qtype::FLOAT_LIST, 3);
 ///   temperature.as_mut_slice::<F>().copy_from_slice(&[22.1_f64, 24.7, 30.5]);
 ///   values.as_mut_slice::<K>().copy_from_slice(&[time, temperature]);
 ///   
@@ -2024,17 +2034,17 @@ pub fn flip(dictionary: K) -> K{
 /// #[no_mangle]
 /// pub extern "C" fn create_table2(_: K) -> K{
 ///   // Build keys
-///   let keys=new_simple_list(qtype::SYMBOL_LIST, 2);
+///   let keys=new_list(qtype::SYMBOL_LIST, 2);
 ///   let keys_slice=keys.as_mut_slice::<S>();
 ///   keys_slice[0]=internalize(str_to_S!("time"));
 ///   keys_slice[1]=internalize_n(str_to_S!("temperature_and_humidity"), 11);
 ///   
 ///   // Build values
-///   let values=new_simple_list(qtype::COMPOUND_LIST, 2);
-///   let time=new_simple_list(qtype::TIMESTAMP_LIST, 3);
+///   let values=new_list(qtype::COMPOUND_LIST, 2);
+///   let time=new_list(qtype::TIMESTAMP_LIST, 3);
 ///   // 2003.10.10D02:24:19.167018272 2006.05.24D06:16:49.419710368 2008.08.12D23:12:24.018691392
 ///   time.as_mut_slice::<J>().copy_from_slice(&[119067859167018272_i64, 201766609419710368, 271897944018691392]);
-///   let temperature=new_simple_list(qtype::FLOAT_LIST, 3);
+///   let temperature=new_list(qtype::FLOAT_LIST, 3);
 ///   temperature.as_mut_slice::<F>().copy_from_slice(&[22.1_f64, 24.7, 30.5]);
 ///   values.as_mut_slice::<K>().copy_from_slice(&[time, temperature]);
 ///   
@@ -2082,17 +2092,17 @@ pub fn unkey(keyed_table: K) -> K{
 /// #[no_mangle]
 /// pub extern "C" fn create_table2(_: K) -> K{
 ///   // Build keys
-///   let keys=new_simple_list(qtype::SYMBOL_LIST, 2);
+///   let keys=new_list(qtype::SYMBOL_LIST, 2);
 ///   let keys_slice=keys.as_mut_slice::<S>();
 ///   keys_slice[0]=internalize(str_to_S!("time"));
 ///   keys_slice[1]=internalize_n(str_to_S!("temperature_and_humidity"), 11);
 ///   
 ///   // Build values
-///   let values=new_simple_list(qtype::COMPOUND_LIST, 2);
-///   let time=new_simple_list(qtype::TIMESTAMP_LIST, 3);
+///   let values=new_list(qtype::COMPOUND_LIST, 2);
+///   let time=new_list(qtype::TIMESTAMP_LIST, 3);
 ///   // 2003.10.10D02:24:19.167018272 2006.05.24D06:16:49.419710368 2008.08.12D23:12:24.018691392
 ///   time.as_mut_slice::<J>().copy_from_slice(&[119067859167018272_i64, 201766609419710368, 271897944018691392]);
-///   let temperature=new_simple_list(qtype::FLOAT_LIST, 3);
+///   let temperature=new_list(qtype::FLOAT_LIST, 3);
 ///   temperature.as_mut_slice::<F>().copy_from_slice(&[22.1_f64, 24.7, 30.5]);
 ///   values.as_mut_slice::<K>().copy_from_slice(&[time, temperature]);
 ///   
@@ -2251,7 +2261,7 @@ pub fn destroy_socket_if(socket: I, condition: bool){
 ///   // Lock symbol in a worker thread.
 ///   pin_symbol();
 ///   let handle=std::thread::spawn(move ||{
-///     let mut precious=new_simple_list(qtype::SYMBOL_LIST, 3);
+///     let mut precious=new_list(qtype::SYMBOL_LIST, 3);
 ///     let precious_array=precious.as_mut_slice::<S>();
 ///     precious_array[0]=internalize(null_terminated_str_to_S("belief\0"));
 ///     precious_array[1]=internalize(null_terminated_str_to_S("love\0"));
@@ -2363,7 +2373,7 @@ pub fn drop_q_object(obj: K) -> K{
 /// #[no_mangle]
 /// pub extern "C" fn eden(_: K) -> K{
 ///   let earth=Planet::new("earth", 7500_000_000, true);
-///   let mut foreign=new_simple_list(qtype::COMPOUND_LIST, 2);
+///   let mut foreign=new_list(qtype::COMPOUND_LIST, 2);
 ///   let foreign_slice=foreign.as_mut_slice::<K>();
 ///   foreign_slice[0]=drop_q_object as K;
 ///   foreign_slice[1]=Box::into_raw(Box::new(earth)) as K;
@@ -2446,4 +2456,125 @@ pub fn days_to_ymd(days: I) -> I{
   unsafe{
     native::dj(days)
   }
+}
+
+/// Convert a simple list to a compound list. Expected usage is to concatinate a simple list
+///  with a different type of list.
+/// # Example
+/// ```no_run
+/// use kdbplus::*;
+/// use kdbplus::api::*;
+/// 
+/// #[no_mangle]
+/// pub extern "C" fn drift(_: K)->K{
+///   let simple=new_list(qtype::INT_LIST, 2);
+///   simple.as_mut_slice::<I>().copy_from_slice(&[12, 34]);
+///   let extra=new_list(qtype::COMPOUND_LIST, 2);
+///   extra.as_mut_slice::<K>().copy_from_slice(&[new_symbol("vague"), new_int(-3000)]);
+///   let mut compound = simple_to_compound(simple);
+///   compound.append(extra).unwrap()
+/// }
+/// ```
+/// ```q
+/// q)drift: LIBPATH_ (`drift; 1);
+/// q)drift[]
+/// 12i
+/// 34i
+/// `vague
+/// -3000i
+/// ```
+/// # Note
+/// To convert a list provided externally (i.e., passed from a q process), apply
+///  [`increment_reference_count`](fn.increment_reference_count.html) before converting the list.
+pub fn simple_to_compound(simple: K) -> K{
+  let size=simple.len() as usize;
+  let compound=new_list(qtype::COMPOUND_LIST, size as J);
+  let compound_slice=compound.as_mut_slice::<K>();
+  match simple.get_type(){
+    qtype::BOOL_LIST => {
+      let simple_slice=simple.as_mut_slice::<G>();
+      for i in 0..size{
+        compound_slice[i]=new_bool(simple_slice[i] as I);
+      }
+    },
+    qtype::GUID_LIST => {
+      let simple_slice=simple.as_mut_slice::<U>();
+      for i in 0..size{
+        compound_slice[i]=new_guid(simple_slice[i].guid);
+      }
+    },
+    qtype::BYTE_LIST => {
+      let simple_slice=simple.as_mut_slice::<G>();
+      for i in 0..size{
+        compound_slice[i]=new_byte(simple_slice[i] as I);
+      }
+    },
+    qtype::SHORT_LIST => {
+      let simple_slice=simple.as_mut_slice::<H>();
+      for i in 0..size{
+        compound_slice[i]=new_short(simple_slice[i] as I);
+      }
+    },
+    qtype::INT_LIST => {
+      let simple_slice=simple.as_mut_slice::<I>();
+      for i in 0..size{
+        compound_slice[i]=new_int(simple_slice[i]);
+      }
+    },
+    qtype::LONG_LIST => {
+      let simple_slice=simple.as_mut_slice::<J>();
+      for i in 0..size{
+        compound_slice[i]=new_long(simple_slice[i]);
+      }
+    },
+    qtype::REAL_LIST => {
+      let simple_slice=simple.as_mut_slice::<E>();
+      for i in 0..size{
+        compound_slice[i]=new_real(simple_slice[i] as F);
+      }
+    },
+    qtype::FLOAT_LIST => {
+      let simple_slice=simple.as_mut_slice::<F>();
+      for i in 0..size{
+        compound_slice[i]=new_float(simple_slice[i]);
+      }
+    },
+    qtype::STRING => {
+      let simple_slice=simple.as_mut_slice::<G>();
+      for i in 0..size{
+        compound_slice[i]=new_char(simple_slice[i] as char);
+      }
+    },
+    qtype::SYMBOL_LIST => {
+      let simple_slice=simple.as_mut_slice::<S>();
+      for i in 0..size{
+        compound_slice[i]=new_symbol(S_to_str(simple_slice[i]));
+      }
+    },
+    qtype::TIMESTAMP_LIST => {
+      let simple_slice=simple.as_mut_slice::<J>();
+      for i in 0..size{
+        compound_slice[i]=new_timestamp(simple_slice[i]);
+      }
+    },
+    qtype::DATE_LIST => {
+      let simple_slice=simple.as_mut_slice::<I>();
+      for i in 0..size{
+        compound_slice[i]=new_date(simple_slice[i]);
+      }
+    },
+    qtype::TIME_LIST => {
+      let simple_slice=simple.as_mut_slice::<I>();
+      for i in 0..size{
+        compound_slice[i]=new_time(simple_slice[i]);
+      }
+    },
+    _ => {
+      decrement_reference_count(compound);
+      return new_error("not a simple list\0");
+    }
+  }
+  // Free simple list
+  decrement_reference_count(simple);
+  compound
 }
