@@ -114,7 +114,8 @@ pub mod native;
 //                          Global Variables                            //
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 
-/// `K` nullptr. This value is used as void value of a function which returns `K`.
+/// `K` nullptr. This value can be used as void value of a function which is called directly by q process
+///  and returns `K`. This null pointer is interpreted as a general null value (`::`) whose type is `101h`.
 /// # Example
 /// ```
 /// use kdbplus::api::*;
@@ -125,6 +126,10 @@ pub mod native;
 ///   KNULL
 /// }
 /// ```
+/// # Warning
+/// This value must NOT be used as a returned value for functions called by another function
+///  because [`error_to_string`](fn.error_to_string.html) misunderstands the value as an error.
+///  For detail, see its warning section.
 pub const KNULL:K=0 as K;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -1894,7 +1899,7 @@ pub fn error_to_string(error: K) -> K{
 }
 
 /// Judge if a catched object by [`error_to_string`](fn.error_to_string.html) is a genuine error object of type
-///  `qtype::ERROR` (This means false positive of the case `KNULL` is eliminated).
+///  `qtype::ERROR` (This means false positive of the `KNULL` case can be eliminated).
 /// # Examples
 /// ```no_run
 /// use kdbplus::*;
@@ -1945,6 +1950,10 @@ pub fn error_to_string(error: K) -> K{
 /// q)convey[5.5]
 /// `sonomama
 /// ```
+/// # Note
+/// In this example `KNULL` is used as a returned value of the function called by another function to demonstrate
+///  how `is_error` works. However, `KNULL` should not be used in such a way in order to avoid this kind of complexity.
+///  To return a general null for inner functions, use [`new_null`](fn.new_null.html) instead.
 #[inline]
 pub fn is_error(catched: K) -> bool{
   (unsafe{(*catched).qtype} == qtype::ERROR) && (unsafe{(*catched).value.symbol} != std::ptr::null_mut::<C>())

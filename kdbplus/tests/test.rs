@@ -1632,6 +1632,16 @@ async fn compression_test() -> Result<(), Box<dyn std::error::Error>>{
   let _=std::mem::replace(time_column, new_time_vec);
   table_query.push(&original).unwrap();
 
+  // This message is not compressed because the connection is local
+  socket.send_async_message(&table_query).await?;
+
+  res_compare=socket.send_sync_message(&"tab ~ tab2").await?;
+  assert_eq!(res_compare.get_bool()?, true);
+
+  // compressed message (forced) //--------------------/
+
+  // Enforce compression for local connection
+  socket.enforce_compression();
   socket.send_async_message(&table_query).await?;
 
   res_compare=socket.send_sync_message(&"tab ~ tab2").await?;

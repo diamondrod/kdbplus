@@ -7,7 +7,7 @@ use super::{K, qtype};
 
 use std::convert::TryInto;
 use std::path::Path;
-use std::net::IpAddr;
+use std::net::{IpAddr, Ipv4Addr};
 use std::{io, env, str, fs};
 use std::collections::HashMap;
 use io::BufRead;
@@ -154,12 +154,14 @@ pub enum ConnectionMethod{
 /// Feature of query object.
 pub trait Query: Send + Sync{
   /// Serialize into q IPC bytes including a header (encoding, message type, compresssion flag and total message length).
+  ///  If the connection is within the same host, the message is not compressed under any conditions.
   /// # Parameters
   /// - `message_type`: Message type. One of followings:
   ///   - `qmsg_type::asynchronous`
   ///   - `qmsg_type::synchronous`
   ///   - `qmsg_type::response`
-  fn serialize(&self, message_type: u8) -> Vec<u8>;
+  /// - `is_local`: Flag of whether the connection is within the same host.
+  fn serialize(&self, message_type: u8, is_local: bool) -> Vec<u8>;
 }
 
 //%% QStreamInner %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
@@ -173,19 +175,22 @@ trait QStreamInner: Send + Sync{
   /// # Parameters
   /// - `message`: q command to execute on the remote q process.
   /// - `message_type`: Asynchronous or synchronous.
-  async fn send_message(&mut self, message: &dyn Query, message_type: u8) -> io::Result<()>;
+  /// - `is_local`: Flag of whether the connection is within the same host.
+  async fn send_message(&mut self, message: &dyn Query, message_type: u8, is_local: bool) -> io::Result<()>;
   /// Send a message asynchronously.
   /// # Parameters
   /// - `message`: q command in two ways:
   ///   - `&str`: q command in a string form.
   ///   - `K`: Query in a functional form.
-  async fn send_async_message(&mut self, message: &dyn Query) -> io::Result<()>;
+  /// - `is_local`: Flag of whether the connection is within the same host.
+  async fn send_async_message(&mut self, message: &dyn Query, is_local: bool) -> io::Result<()>;
   /// Send a message asynchronously.
   /// # Parameters
   /// - `message`: q command in two ways:
   ///   - `&str`: q command in a string form.
   ///   - `K`: Query in a functional form.
-  async fn send_sync_message(&mut self, message: &dyn Query) -> io::Result<K>;
+  /// - `is_local`: Flag of whether the connection is within the same host.
+  async fn send_sync_message(&mut self, message: &dyn Query, is_local: bool) -> io::Result<K>;
   /// Receive a message from a remote q process. The received message is parsed as `K` and message type is
   ///  stored in the first returned value.
   async fn receive_message(&mut self) ->io::Result<(u8, K)>;
@@ -206,6 +211,10 @@ pub struct QStream{
   /// - `true`: Acceptor
   /// - `false`: Client
   listener: bool,
+  /// Indicator of whether the connection is within the same host.
+  /// - `true`: Connection within the same host.
+  /// - `false`: Connection with outseide.
+  local: bool
 }
 
 //%% MessageHeader %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
@@ -240,7 +249,7 @@ struct MessageHeader{
 
 /// Text query.
 impl Query for &str{
-  fn serialize(&self, message_type: u8) -> Vec<u8>{
+  fn serialize(&self, message_type: u8, _: bool) -> Vec<u8>{
     //  Build header //--------------------------------/
     // Message header + (type indicator of string + header of string type) + string length
     let byte_message=self.as_bytes();
@@ -279,7 +288,7 @@ impl Query for &str{
 
 /// Functional query.
 impl Query for K{
-  fn serialize(&self, message_type: u8) -> Vec<u8>{
+  fn serialize(&self, message_type: u8, is_local: bool) -> Vec<u8>{
     //  Build header //--------------------------------/
     // Message header + encoded data size
     let mut byte_message=self.q_ipc_encode();
@@ -291,8 +300,9 @@ impl Query for K{
       _ => total_length.to_le_bytes()
     };
 
-    // Compression is trigerred when entire message size is more than 2000 bytes.
-    if message_length > 1992{
+    // Compression is trigerred when entire message size is more than 2000 bytes
+    //  and the connection is with outseide.
+    if message_length > 1992 && !is_local{
       // encode, message type, 0x00 for compression, 0x00 for reserved and 0x00000000 for total size
       let mut message=Vec::with_capacity(message_length + 8);
       message.extend_from_slice(&[ENCODING, message_type as u8, 0, 0, 0, 0, 0, 0]);
@@ -328,11 +338,12 @@ impl Query for K{
 impl QStream{
 
   /// General constructor of `QStream`.
-  fn new(stream: Box<dyn QStreamInner>, method: ConnectionMethod, is_listener: bool) -> Self{
+  fn new(stream: Box<dyn QStreamInner>, method: ConnectionMethod, is_listener: bool, is_local: bool) -> Self{
     QStream{
      stream: stream,
      method: method,
-     listener: is_listener 
+     listener: is_listener,
+     local: is_local
     }
   }
 
@@ -381,15 +392,19 @@ impl QStream{
     match method{
       ConnectionMethod::TCP => {
         let stream=connect_tcp(host, port, credential).await?;
-        Ok(QStream::new(Box::new(stream), ConnectionMethod::TCP, false))
+        let is_local = match host{
+          "localhost" | "127.0.0.1" => true,
+          _ => false
+        };
+        Ok(QStream::new(Box::new(stream), ConnectionMethod::TCP, false, is_local))
       },
       ConnectionMethod::TLS => {
         let stream=connect_tls(host, port, credential).await?;
-        Ok(QStream::new(Box::new(stream), ConnectionMethod::TLS, false))
+        Ok(QStream::new(Box::new(stream), ConnectionMethod::TLS, false, false))
       },
       ConnectionMethod::UDS => {
         let stream=connect_uds(port, credential).await?;
-        Ok(QStream::new(Box::new(stream), ConnectionMethod::UDS, false))
+        Ok(QStream::new(Box::new(stream), ConnectionMethod::UDS, false, true))
       }
     }
   }
@@ -453,13 +468,14 @@ impl QStream{
         // Bind to the endpoint.
         let listener = TcpListener::bind(&format!("{}:{}", host, port)).await?;
         // Listen to the endpoint.
-        let (mut socket, _) = listener.accept().await?;
+        let (mut socket, ip_address) = listener.accept().await?;
         // Read untill null bytes and send back capacity.
         while let Err(_) = read_client_input(&mut socket).await{
           // Continue to listen in case of error.
           socket = listener.accept().await?.0;
         }
-        Ok(QStream::new(Box::new(socket), ConnectionMethod::TCP, true))
+        // Check if the connection is local
+        Ok(QStream::new(Box::new(socket), ConnectionMethod::TCP, true, ip_address.ip() == IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1))))
       },
       ConnectionMethod::TLS => {
         // Bind to the endpoint.
@@ -478,7 +494,8 @@ impl QStream{
           socket = listener.accept().await?.0;
           tls_socket=tls_acceptor.accept(socket).await.expect("failed to accept TLS connection");
         }
-        let mut qstream=QStream::new(Box::new(TlsStream::from(tls_socket)), ConnectionMethod::TCP, true);
+        // TLS is always a remote connection
+        let mut qstream=QStream::new(Box::new(TlsStream::from(tls_socket)), ConnectionMethod::TCP, true, false);
         // In order to close the connection from the server side, it needs to tell a client to close the connection.
         // The `kdbplus_close_tls_connection_` will be called from the server at shutdown.
         qstream.send_async_message(&".kdbplus.close_tls_connection_:{[] hclose .z.w;}").await?;
@@ -498,7 +515,8 @@ impl QStream{
           // Continue to listen in case of error.
           socket = listener.accept().await?.0;
         }
-        Ok(QStream::new(Box::new(socket), method, true))
+        // UDS is always a local connection
+        Ok(QStream::new(Box::new(socket), method, true, true))
       }
     }
   }
@@ -523,7 +541,7 @@ impl QStream{
   /// # Example
   /// See the example of [`connect`](#method.connect).
   pub async fn send_message(&mut self, message: &dyn Query, message_type: u8)-> io::Result<()>{
-    self.stream.send_message(message, message_type).await
+    self.stream.send_message(message, message_type, self.local).await
   }
 
   /// Send a message asynchronously.
@@ -534,7 +552,7 @@ impl QStream{
   /// # Example
   /// See the example of [`connect`](#method.connect).
   pub async fn send_async_message(&mut self, message: &dyn Query)-> io::Result<()>{
-    self.stream.send_async_message(message).await
+    self.stream.send_async_message(message, self.local).await
   }
 
   /// Send a message synchronously.
@@ -547,7 +565,7 @@ impl QStream{
   /// # Example
   /// See the example of [`connect`](#method.connect).
   pub async fn send_sync_message(&mut self, message: &dyn Query)-> io::Result<K>{
-    self.stream.send_sync_message(message).await
+    self.stream.send_sync_message(message, self.local).await
   }
 
   /// Receive a message from a remote q process. The received message is parsed as `K` and message type is
@@ -569,6 +587,12 @@ impl QStream{
     }
   }
 
+  /// Enforce compression if the size of a message exceeds 2000 regardless of locality of the connection.
+  ///  This flag is not revertible intentionally.
+  pub fn enforce_compression(&mut self){
+    self.local=false;
+  }
+
 }
 
 //%% QStreamInner %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
@@ -580,23 +604,23 @@ impl QStreamInner for TcpStream{
     AsyncWriteExt::shutdown(self).await
   }
 
-  async fn send_message(&mut self, message: &dyn Query, message_type: u8) -> io::Result<()>{
+  async fn send_message(&mut self, message: &dyn Query, message_type: u8, is_local: bool) -> io::Result<()>{
     // Serialize a message
-    let byte_message=message.serialize(message_type);
+    let byte_message=message.serialize(message_type, is_local);
     // Send the message
     self.write_all(&byte_message).await
   }
 
-  async fn send_async_message(&mut self, message: &dyn Query) -> io::Result<()>{
+  async fn send_async_message(&mut self, message: &dyn Query, is_local: bool) -> io::Result<()>{
     // Serialize a message
-    let byte_message=message.serialize(qmsg_type::asynchronous);
+    let byte_message=message.serialize(qmsg_type::asynchronous, is_local);
     // Send the message
     self.write_all(&byte_message).await
   }
 
-  async fn send_sync_message(&mut self, message: &dyn Query) -> io::Result<K>{
+  async fn send_sync_message(&mut self, message: &dyn Query, is_local: bool) -> io::Result<K>{
     // Serialize a message
-    let byte_message=message.serialize(qmsg_type::synchronous);
+    let byte_message=message.serialize(qmsg_type::synchronous, is_local);
     // Send the message
     self.write_all(&byte_message).await?;
     // Receive a response. If message type is not response it returns an error.
@@ -617,30 +641,31 @@ impl QStreamInner for TlsStream<TcpStream>{
   async fn shutdown(&mut self, is_listener: bool) -> io::Result<()>{
     if is_listener{
       // Closing the handle from the server side by `self.get_mut().shutdown()` crashes due to 'assertion failed: !self.context.is_null()'.
-      self.send_async_message(&".kdbplus.close_tls_connection_[]").await
+      // No reason to compress.
+      self.send_async_message(&".kdbplus.close_tls_connection_[]", false).await
     }
     else{
       self.get_mut().shutdown()
     }
   }
 
-  async fn send_message(&mut self, message: &dyn Query, message_type: u8) -> io::Result<()>{
+  async fn send_message(&mut self, message: &dyn Query, message_type: u8, is_local: bool) -> io::Result<()>{
     // Serialize a message
-    let byte_message=message.serialize(message_type);
+    let byte_message=message.serialize(message_type, is_local);
     // Send the message
     self.write_all(&byte_message).await
   }
 
-  async fn send_async_message(&mut self, message: &dyn Query) -> io::Result<()>{
+  async fn send_async_message(&mut self, message: &dyn Query, is_local: bool) -> io::Result<()>{
     // Serialize a message
-    let byte_message=message.serialize(qmsg_type::asynchronous);
+    let byte_message=message.serialize(qmsg_type::asynchronous, is_local);
     // Send the message
     self.write_all(&byte_message).await
   }
 
-  async fn send_sync_message(&mut self, message: &dyn Query) -> io::Result<K>{
+  async fn send_sync_message(&mut self, message: &dyn Query, is_local: bool) -> io::Result<K>{
     // Serialize a message
-    let byte_message=message.serialize(qmsg_type::synchronous);
+    let byte_message=message.serialize(qmsg_type::synchronous, is_local);
     // Send the message
     self.write_all(&byte_message).await?;
     // Receive a response. If message type is not response it returns an error.
@@ -665,23 +690,23 @@ impl QStreamInner for UnixStream{
     AsyncWriteExt::shutdown(self).await
   }
 
-  async fn send_message(&mut self, message: &dyn Query, message_type: u8) -> io::Result<()>{
+  async fn send_message(&mut self, message: &dyn Query, message_type: u8, is_local: bool) -> io::Result<()>{
     // Serialize a message
-    let byte_message=message.serialize(message_type);
+    let byte_message=message.serialize(message_type, is_local);
     // Send the message
     self.write_all(&byte_message).await
   }
 
-  async fn send_async_message(&mut self, message: &dyn Query) -> io::Result<()>{
+  async fn send_async_message(&mut self, message: &dyn Query, is_local: bool) -> io::Result<()>{
     // Serialize a message
-    let byte_message=message.serialize(qmsg_type::asynchronous);
+    let byte_message=message.serialize(qmsg_type::asynchronous, is_local);
     // Send the message
     self.write_all(&byte_message).await
   }
 
-  async fn send_sync_message(&mut self, message: &dyn Query) -> io::Result<K>{
+  async fn send_sync_message(&mut self, message: &dyn Query, is_local: bool) -> io::Result<K>{
     // Serialize a message
-    let byte_message=message.serialize(qmsg_type::synchronous);
+    let byte_message=message.serialize(qmsg_type::synchronous, is_local);
     // Send the message
     self.write_all(&byte_message).await?;
     // Receive a response. If message type is not response it returns an error.
