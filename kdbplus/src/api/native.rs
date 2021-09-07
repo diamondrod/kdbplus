@@ -603,7 +603,7 @@ extern "C"{
   ///  the q list object into a slice with [`as_mut_slice`](../trait.KUtility.html#tymethod.as_mut_slice).
   pub fn jk(list: *mut K, value: K) -> K;
 
-  /// Add an internalized char array to a symbol list.
+  /// Add an enumerated character array to a symbol list.
   ///  Returns a pointer to the (potentially reallocated) `K` object.
   /// # Example
   /// ```no_run
@@ -639,14 +639,14 @@ extern "C"{
   ///  into a slice with [`as_mut_slice`](../trait.KUtility.html#tymethod.as_mut_slice).
   pub fn js(list: *mut K, symbol: S) -> K;
 
-  /// Intern `n` chars from a char array.
-  ///  Returns an interned char array and should be used to add char array to a symbol vector.
+  /// Enumerate  the first `n` chars from a character array.
+  ///  Returns the same character array as an input and must be used to add character array to a symbol list.
   /// # Example
   /// See the example of [`js`](fn.js.html).
   pub fn sn(string: S, n: I) -> S;
 
-  /// Intern a null-terminated char array.
-  ///  Returns an interned char array and should be used to add char array to a symbol vector.
+  /// Enuemrate a null-terminated character array.
+  ///  Returns the same character array as an input and must be used to add character array to a symbol list.
   /// # Example
   /// See the example of [`js`](fn.js.html).
   pub fn ss(string: S) -> S;

@@ -308,8 +308,8 @@ pub extern "C" fn create_table2(_: K) -> K{
   // Build keys
   let keys=new_list(qtype::SYMBOL_LIST, 2);
   let keys_slice=keys.as_mut_slice::<S>();
-  keys_slice[0]=internalize(str_to_S!("time"));
-  keys_slice[1]=internalize_n(str_to_S!("temperature_and_humidity"), 11);
+  keys_slice[0]=enumerate(str_to_S!("time"));
+  keys_slice[1]=enumerate_n(str_to_S!("temperature_and_humidity"), 11);
 
   // Build values
   let values=new_list(qtype::COMPOUND_LIST, 2);

@@ -2363,6 +2363,27 @@ impl K{
           _ => Err("no such column")
         }
       },
+      qtype::DICTIONARY => {
+        let key_value = self.as_vec::<K>().unwrap();
+        if key_value[0].0.qtype == qtype::TABLE{
+          // Keyed table
+          if let Ok(found_column) = key_value[0].get_column(column.to_string().clone()){
+            // Found in key table
+            Ok(found_column)
+          }
+          else if let Ok(found_column) = key_value[1].get_column(column){
+            // Found in value table
+            Ok(found_column)
+          }
+          else{
+            Err("no such column")
+          }
+        }
+        else{
+          // Not a keyed table
+          Err("not a table")
+        }
+      },
       _ => Err("not a table")
     }
   }
@@ -2393,6 +2414,39 @@ impl K{
           // It is assured that value is a compound list because this is a table
           Some(index) => Ok(&mut dictionary[1].as_mut_vec::<K>().unwrap()[index]),
           _ => Err("no such column")
+        }
+      },
+      qtype::DICTIONARY => {
+        let key_value = self.as_vec::<K>().unwrap();
+        if key_value[0].0.qtype == qtype::TABLE{
+          // Keyed table
+          // Search from key table
+          let mut dictionary=key_value[0].get_dictionary().unwrap().as_vec::<K>().unwrap();
+          if let Some(index) = dictionary[0].as_vec::<S>().unwrap().iter().position(|name| *name==column.to_string()){
+            // It is assured that value is a compound list because this is a table
+            return Ok(
+              &mut self.as_mut_vec::<K>().unwrap()[0]
+                .get_mut_dictionary().unwrap().as_mut_vec::<K>().unwrap()[1]
+                .as_mut_vec::<K>().unwrap()[index]
+            );
+          }
+          // Search from value table
+          dictionary=key_value[1].get_dictionary().unwrap().as_vec::<K>().unwrap();
+          if let Some(index) = dictionary[0].as_vec::<S>().unwrap().iter().position(|name| *name==column.to_string()){
+            // It is assured that value is a compound list because this is a table
+            Ok(
+              &mut self.as_mut_vec::<K>().unwrap()[1]
+                .get_mut_dictionary().unwrap().as_mut_vec::<K>().unwrap()[1]
+                .as_mut_vec::<K>().unwrap()[index]
+            )
+          }
+          else{
+            Err("no such column")
+          }
+        }
+        else{
+          // Not a keyed table
+          Err("not a table")
         }
       },
       _ => Err("not a table")
@@ -4116,6 +4170,11 @@ impl K{
                 // Return the number of rows
                 column.n as usize
               },
+              k0_inner::symbol(column) => {
+                // char column
+                // Return the number of rows
+                column.len()
+              }
               _ => unreachable!()
             }
           },
@@ -4127,6 +4186,9 @@ impl K{
         // Get keys and return its length.
         match &self.as_vec::<K>().unwrap()[0].0.value{
           k0_inner::list(list) => list.n as usize,
+          // Keyed table
+          // Get the number of rows by deligating it to table.len()
+          k0_inner::table(_) => self.as_vec::<K>().unwrap()[0].len(), 
           _ => unreachable!()
         }
       },
@@ -4172,6 +4234,105 @@ impl K{
         }
       },
       // Failed to convert. Return the original argument.
+      _ => Err(self)
+    }
+  }
+
+  /// Convert a table into a keyed table with the first `n` columns ebing keys.
+  ///  In case of error for type mismatch the original object is returned.
+  ///  # Example
+  /// ```
+  /// use kdbplus::qattribute;
+  /// use kdbplus::ipc::*;
+  /// 
+  /// fn main(){
+  ///   let q_dictionary=K::new_dictionary(
+  ///     K::new_symbol_list(vec![String::from("a"), String::from("b"), String::from("c")], qattribute::NONE),
+  ///     K::new_compound_list(vec![
+  ///       K::new_int_list(vec![10, 20, 30], qattribute::NONE),
+  ///       K::new_symbol_list(vec![String::from("honey"), String::from("sugar"), String::from("maple")], qattribute::NONE),
+  ///       K::new_bool_list(vec![false, false, true], qattribute::NONE)
+  ///     ])
+  ///   ).unwrap();
+  /// 
+  ///   let q_table=q_dictionary.flip().unwrap();
+  ///   let q_keyed_table=q_table.enkey(1).unwrap();
+  ///   assert_eq!(format!("{}", q_keyed_table), String::from("(+,`a!,10 20 30i)!(+`b`c!(`honey`sugar`maple;001b))"));
+  /// }
+  /// ```
+  pub fn enkey(self, mut n: usize) -> Result<Self, Self>{
+    match self.0.value{
+      k0_inner::table(mut dictionary) => {
+        let headers_columns=dictionary.as_mut_vec::<K>().unwrap();
+        if headers_columns[0].len() <= n {
+          // Maximum number of keys are #columns - 1
+          n = headers_columns[0].len()-1;
+        }
+        let value_heders = K::new_symbol_list(headers_columns[0].as_mut_vec::<S>().unwrap().split_off(n), qattribute::NONE);
+        let value_columns = K::new_compound_list(headers_columns[1].as_mut_vec::<K>().unwrap().split_off(n));
+        // Build value table
+        let value_table = K::new_dictionary(value_heders, value_columns).unwrap().flip().unwrap();
+        Ok(K::new_dictionary(dictionary.flip().unwrap(), value_table).expect("failed to build keyed table"))
+      },
+      // Not a table. Return the original argument.
+      _ => Err(self)
+    }
+  }
+
+  /// Convert a keyed table into an ordinary table. In case of error for type mismatch
+  ///  the original object is returned.
+  /// # Example
+  /// ```
+  /// use kdbplus::qattribute;
+  /// use kdbplus::ipc::*;
+  /// 
+  /// fn main(){
+  ///   let q_dictionary=K::new_dictionary(
+  ///     K::new_symbol_list(vec![String::from("a"), String::from("b"), String::from("c")], qattribute::NONE),
+  ///     K::new_compound_list(vec![
+  ///       K::new_int_list(vec![10, 20, 30], qattribute::NONE),
+  ///       K::new_symbol_list(vec![String::from("honey"), String::from("sugar"), String::from("maple")], qattribute::NONE),
+  ///       K::new_bool_list(vec![false, false, true], qattribute::NONE)
+  ///     ])
+  ///   ).unwrap();
+  /// 
+  ///   let q_table=q_dictionary.flip().unwrap();  
+  ///   let q_keyed_table=q_table.enkey(1).unwrap();
+  ///   assert_eq!(format!("{}", q_keyed_table), String::from("(+,`a!,10 20 30i)!(+`b`c!(`honey`sugar`maple;001b))"));
+  ///   let revived_table=q_keyed_table.unkey().unwrap();
+  ///   assert_eq!(format!("{}", revived_table), String::from("+`a`b`c!(10 20 30i;`honey`sugar`maple;001b)"));
+  /// }
+  /// ```
+  pub fn unkey(mut self) -> Result<Self, Self>{
+    match self.0.qtype{
+      qtype::DICTIONARY => {
+        // Key table and value table
+        let value_table = self.as_mut_vec::<K>().unwrap().pop().unwrap();
+        let key_table = self.as_mut_vec::<K>().unwrap().pop().unwrap();
+        match (key_table.0.value, value_table.0.value){
+          (k0_inner::table(mut key_dictionary), k0_inner::table(mut value_dictionary)) => {
+            // Key dictionary and value dictionary
+            key_dictionary.as_mut_vec::<K>().unwrap().into_iter()
+              .zip(value_dictionary.as_mut_vec::<K>().unwrap().into_iter())
+              .enumerate()
+              .for_each(|(i, (key, value))|{
+                // Merge key component and value component
+                if i == 0{
+                  // Header
+                  key.as_mut_vec::<S>().unwrap().append(value.as_mut_vec::<S>().unwrap());
+                }
+                else{
+                  // Column
+                  key.as_mut_vec::<K>().unwrap().append(value.as_mut_vec::<K>().unwrap());
+                }
+              });
+            // Flip joint dictionary to table
+            key_dictionary.flip()
+          },
+          _ => unreachable!()
+        }
+      },
+      // Not a keyed table. Return the original argument.
       _ => Err(self)
     }
   }

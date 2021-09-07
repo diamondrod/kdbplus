@@ -679,9 +679,22 @@ fn put_table(table: &K, stream: &mut String, precision: usize){
 
 fn put_dictionary(dictionary: &K, stream: &mut String, precision: usize){
   let dictionary_ = dictionary.as_vec::<K>().unwrap();
+  let is_keyed_table = dictionary_[0].get_type() == qtype::TABLE;
+  if is_keyed_table{
+    stream.push('(');
+  }
   put_q(&dictionary_[0], stream, precision);
+  if is_keyed_table{
+    stream.push(')');
+  }
   stream.push('!');
+  if is_keyed_table{
+    stream.push('(');
+  }
   put_q(&dictionary_[1], stream, precision);
+  if is_keyed_table{
+    stream.push(')');
+  }
 }
 
 fn put_q(object: &K, stream: &mut String, precision: usize){

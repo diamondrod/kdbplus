@@ -935,8 +935,8 @@ pub extern "C" fn propagate(arg: K) -> K{
 pub extern "C" fn create_table2(_: K) -> K{
   let keys=new_list(qtype::SYMBOL_LIST, 2);
   let keys_slice=keys.as_mut_slice::<S>();
-  keys_slice[0]=internalize(str_to_S!("time"));
-  keys_slice[1]=internalize_n(str_to_S!("temperature_and_humidity"), 11);
+  keys_slice[0]=enumerate(str_to_S!("time"));
+  keys_slice[1]=enumerate_n(str_to_S!("temperature_and_humidity"), 11);
   let values=new_list(qtype::COMPOUND_LIST, 2);
   let time=new_list(qtype::TIMESTAMP_LIST, 3);
   // 2003.10.10D02:24:19.167018272 2006.05.24D06:16:49.419710368 2008.08.12D23:12:24.018691392
@@ -1014,9 +1014,9 @@ pub extern "C" fn plumber(_: K) -> K{
   let handle=std::thread::spawn(move ||{
     let mut precious=new_list(qtype::SYMBOL_LIST, 3);
     let precious_array=precious.as_mut_slice::<S>();
-    precious_array[0]=internalize(null_terminated_str_to_S("belief\0"));
-    precious_array[1]=internalize(null_terminated_str_to_S("love\0"));
-    precious_array[2]=internalize(null_terminated_str_to_S("hope\0"));
+    precious_array[0]=enumerate(null_terminated_str_to_S("belief\0"));
+    precious_array[1]=enumerate(null_terminated_str_to_S("love\0"));
+    precious_array[2]=enumerate(null_terminated_str_to_S("hope\0"));
     unsafe{libc::write(PIPE[1], std::mem::transmute::<*mut K, *mut V>(&mut precious), 8)};
   });
   handle.join().unwrap();

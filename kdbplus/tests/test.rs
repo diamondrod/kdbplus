@@ -415,13 +415,18 @@ fn format_test()->Result<(), &'static str>{
   assert_eq!(format!("{}", q_dictionary), String::from("`s#20 30 40i!001b"));
 
   // table
-  let headers=K::new_symbol_list(vec![String::from("fruit"), String::from("price")], qattribute::NONE);
+  let headers=K::new_symbol_list(vec![String::from("fruit"), String::from("price"), String::from("country")], qattribute::NONE);
   let columns=K::new_compound_list(vec![
     K::new_symbol_list(vec![String::from("strawberry"), String::from("orange"), qnull::SYMBOL], qattribute::PARTED),
-    K::new_float_list(vec![2.5, 1.25, 117.8], qattribute::NONE)
+    K::new_float_list(vec![2.5, 1.25, 117.8], qattribute::NONE),
+    K::new_string(String::from("CUJ"), qattribute::NONE)
   ]);
   let q_table=K::new_dictionary(headers, columns).unwrap().flip().unwrap();
-  assert_eq!(format!("{:.3}", q_table), String::from("+`fruit`price!(`p#`strawberry`orange`;2.500 1.250 117.800)"));
+  assert_eq!(format!("{:.3}", q_table), String::from("+`fruit`price`country!(`p#`strawberry`orange`;2.500 1.250 117.800;\"CUJ\")"));
+
+  // keyed table
+  let q_keyed_table=q_table.enkey(1).unwrap();
+  assert_eq!(format!("{:.3}", q_keyed_table), String::from("(+,`fruit!,`p#`strawberry`orange`)!(+`price`country!(2.500 1.250 117.800;\"CUJ\"))"));
 
   // null
   let q_null=K::new_null();
@@ -686,6 +691,15 @@ fn getter_test() -> Result<(), &'static str>{
   };
   assert_eq!(q_table.get_type(), qtype::TABLE);
 
+  // get table column
+  let mut fruit_column = q_table.get_column("fruit").unwrap();
+  assert_eq!(format!("{}", fruit_column), String::from("`p#`strawberry`orange`"));
+
+  // get keyed table column
+  let q_keyed_table = q_table.enkey(1).unwrap();
+  fruit_column = q_keyed_table.get_column("fruit").unwrap();
+  assert_eq!(format!("{}", fruit_column), String::from("`p#`strawberry`orange`"));
+
   Ok(())
 }
 
@@ -874,6 +888,10 @@ fn length_test() -> Result<(), &'static str>{
   // table
   let q_table=q_dictionary.flip().unwrap();
   assert_eq!(q_table.len(), 3);
+
+  // keyed table
+  let q_keyed_table = q_table.enkey(1).unwrap();
+  assert_eq!(q_keyed_table.len(), 3);
 
   // null
   let q_null=K::new_null();

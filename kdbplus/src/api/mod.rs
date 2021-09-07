@@ -54,8 +54,8 @@
 //!   // Build keys
 //!   let keys=new_list(qtype::SYMBOL_LIST, 2);
 //!   let keys_slice=keys.as_mut_slice::<S>();
-//!   keys_slice[0]=internalize(str_to_S!("time"));
-//!   keys_slice[1]=internalize_n(str_to_S!("temperature_and_humidity"), 11);
+//!   keys_slice[0]=enumerate(str_to_S!("time"));
+//!   keys_slice[1]=enumerate_n(str_to_S!("temperature_and_humidity"), 11);
 //! 
 //!   // Build values
 //!   let values=new_list(qtype::COMPOUND_LIST, 2);
@@ -740,7 +740,7 @@ pub trait KUtility{
   /// - For symbol list, use [`push_symbol`](#fn.push_symbol) or [`push_symbol_n`](#fn.push_symbol_n).
   fn push_raw<T>(&mut self, atom: T)->Result<K, &'static str>;
 
-  /// Add an internalized char array to symbol list.
+  /// Add a `str` input to a symbol list while enumerating the character array internally.
   ///  Returns a pointer to the (potentially reallocated) `K` object.
   /// # Example
   /// ```no_run
@@ -771,7 +771,7 @@ pub trait KUtility{
   ///  after converting the q list object into a slice with [`as_mut_slice`](trait.KUtility.html#tymethod.as_mut_slice).
   fn push_symbol(&mut self, symbol: &str)->Result<K, &'static str>;
 
-  /// Add an internalized char array to symbol list.
+  /// Add the first `n` characters of a `str` input to a symbol list while enumerating the character array internally.
   ///  Returns a pointer to the (potentially reallocated) `K` object.
   /// # Example
   /// See the example of [`push_symbol`](#fn.push_symbol).
@@ -1961,23 +1961,35 @@ pub fn is_error(catched: K) -> bool{
 
 //%% Symbol %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
-/// Intern `n` chars from a char array.
-///  Returns an interned char array and should be used to add char array to a symbol vector.
+/// Extract the first `n` chars from a character array and enumerate it internally.
+///  This function must be used to add a character array as a symbol value to a symbol list.
+///  The returned value is the same character array as the input.
 /// # Example
 /// See the example of [`flip`](fn.flip.html).
+/// # Note
+/// The reason why this function must be used is to enumerate the character array before handling
+///  it as a q symbol type value. q/kdb+ is enumerating all symbol values to optimize comparison
+///  or memory usage. On the other hand [`new_symbol`] does the enumeration internally and
+///  therefore it does not need this function.
 #[inline]
-pub fn internalize_n(string: S, n: I) -> S{
+pub fn enumerate_n(string: S, n: I) -> S{
   unsafe{
     native::sn(string, n)
   }
 }
 
-/// Intern a null-terminated char array.
-///  Returns an interned char array and should be used to add char array to a symbol vector.
+/// Enumerate a null-terminated character array internally. This function must be used
+///  to add a character array as a symbol value to a symbol list. The returned value is
+///  the same character array as the input.
 /// # Example
 /// See the example of [`flip`](fn.flip.html).
+/// # Note
+/// The reason why this function must be used is to enumerate the character array before handling
+///  it as a q symbol type value. q/kdb+ is enumerating all symbol values to optimize comparison
+///  or memory usage. On the other hand [`new_symbol`] does the enumeration internally and
+///  therefore it does not need this function.
 #[inline]
-pub fn internalize(string: S) -> S{
+pub fn enumerate(string: S) -> S{
   unsafe{
     native::ss(string)
   }
@@ -2000,8 +2012,8 @@ pub fn internalize(string: S) -> S{
 ///   // Build keys
 ///   let keys=new_list(qtype::SYMBOL_LIST, 2);
 ///   let keys_slice=keys.as_mut_slice::<S>();
-///   keys_slice[0]=internalize(str_to_S!("time"));
-///   keys_slice[1]=internalize_n(str_to_S!("temperature_and_humidity"), 11);
+///   keys_slice[0]=enumerate(str_to_S!("time"));
+///   keys_slice[1]=enumerate_n(str_to_S!("temperature_and_humidity"), 11);
 ///   
 ///   // Build values
 ///   let values=new_list(qtype::COMPOUND_LIST, 2);
@@ -2045,8 +2057,8 @@ pub fn flip(dictionary: K) -> K{
 ///   // Build keys
 ///   let keys=new_list(qtype::SYMBOL_LIST, 2);
 ///   let keys_slice=keys.as_mut_slice::<S>();
-///   keys_slice[0]=internalize(str_to_S!("time"));
-///   keys_slice[1]=internalize_n(str_to_S!("temperature_and_humidity"), 11);
+///   keys_slice[0]=enumerate(str_to_S!("time"));
+///   keys_slice[1]=enumerate_n(str_to_S!("temperature_and_humidity"), 11);
 ///   
 ///   // Build values
 ///   let values=new_list(qtype::COMPOUND_LIST, 2);
@@ -2103,8 +2115,8 @@ pub fn unkey(keyed_table: K) -> K{
 ///   // Build keys
 ///   let keys=new_list(qtype::SYMBOL_LIST, 2);
 ///   let keys_slice=keys.as_mut_slice::<S>();
-///   keys_slice[0]=internalize(str_to_S!("time"));
-///   keys_slice[1]=internalize_n(str_to_S!("temperature_and_humidity"), 11);
+///   keys_slice[0]=enumerate(str_to_S!("time"));
+///   keys_slice[1]=enumerate_n(str_to_S!("temperature_and_humidity"), 11);
 ///   
 ///   // Build values
 ///   let values=new_list(qtype::COMPOUND_LIST, 2);
@@ -2272,9 +2284,9 @@ pub fn destroy_socket_if(socket: I, condition: bool){
 ///   let handle=std::thread::spawn(move ||{
 ///     let mut precious=new_list(qtype::SYMBOL_LIST, 3);
 ///     let precious_array=precious.as_mut_slice::<S>();
-///     precious_array[0]=internalize(null_terminated_str_to_S("belief\0"));
-///     precious_array[1]=internalize(null_terminated_str_to_S("love\0"));
-///     precious_array[2]=internalize(null_terminated_str_to_S("hope\0"));
+///     precious_array[0]=enumerate(null_terminated_str_to_S("belief\0"));
+///     precious_array[1]=enumerate(null_terminated_str_to_S("love\0"));
+///     precious_array[2]=enumerate(null_terminated_str_to_S("hope\0"));
 ///     unsafe{libc::write(PIPE[1], std::mem::transmute::<*mut K, *mut V>(&mut precious), 8)};
 ///   });
 ///   handle.join().unwrap();
@@ -2305,8 +2317,10 @@ pub fn apply(func: K, args: K) -> K{
   unsafe{native::dot(func, args)}
 }
 
-/// Lock a location of internalized symbol in remote threads.
-///  Returns the previously set value.
+/// Enable the remote threads to refer to the sym list in the main thread so that enumeration
+///  of remotely created symbol values reain valid in the main thread after joining the
+///  remote threads. This function must be used before starting any other threads if the
+///  threads create symbol values. The previously set value is returned.
 /// # Example
 /// See the example of [`register_callback`](fn.register_callback.html).
 #[inline]
@@ -2316,7 +2330,8 @@ pub fn pin_symbol() -> I{
   }
 }
 
-/// Unlock a location of internalized symbol in remote threads. 
+/// Unlock the symbol list in the main thread. This function should be called after joining
+///  threads.
 /// # Example
 /// See the example of [`register_callback`](fn.register_callback.html).
 #[inline]
