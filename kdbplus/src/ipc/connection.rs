@@ -152,6 +152,7 @@ pub enum ConnectionMethod{
 //%% Query %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 /// Feature of query object.
+#[async_trait]
 pub trait Query: Send + Sync{
   /// Serialize into q IPC bytes including a header (encoding, message type, compresssion flag and total message length).
   ///  If the connection is within the same host, the message is not compressed under any conditions.
@@ -161,7 +162,7 @@ pub trait Query: Send + Sync{
   ///   - `qmsg_type::synchronous`
   ///   - `qmsg_type::response`
   /// - `is_local`: Flag of whether the connection is within the same host.
-  fn serialize(&self, message_type: u8, is_local: bool) -> Vec<u8>;
+  async fn serialize(&self, message_type: u8, is_local: bool) -> Vec<u8>;
 }
 
 //%% QStreamInner %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
@@ -248,8 +249,9 @@ struct MessageHeader{
 //%% Query %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 /// Text query.
+#[async_trait]
 impl Query for &str{
-  fn serialize(&self, message_type: u8, _: bool) -> Vec<u8>{
+  async fn serialize(&self, message_type: u8, _: bool) -> Vec<u8>{
     //  Build header //--------------------------------/
     // Message header + (type indicator of string + header of string type) + string length
     let byte_message=self.as_bytes();
@@ -287,8 +289,9 @@ impl Query for &str{
 }
 
 /// Functional query.
+#[async_trait]
 impl Query for K{
-  fn serialize(&self, message_type: u8, is_local: bool) -> Vec<u8>{
+  async fn serialize(&self, message_type: u8, is_local: bool) -> Vec<u8>{
     //  Build header //--------------------------------/
     // Message header + encoded data size
     let mut byte_message=self.q_ipc_encode();
@@ -308,7 +311,7 @@ impl Query for K{
       message.extend_from_slice(&[ENCODING, message_type as u8, 0, 0, 0, 0, 0, 0]);
       message.append(&mut byte_message);
       // Try to encode entire message.
-      match compress(message){
+      match compress(message).await{
         (true, compressed) => {
           // Message was compressed
           return compressed;
@@ -606,21 +609,21 @@ impl QStreamInner for TcpStream{
 
   async fn send_message(&mut self, message: &dyn Query, message_type: u8, is_local: bool) -> io::Result<()>{
     // Serialize a message
-    let byte_message=message.serialize(message_type, is_local);
+    let byte_message=message.serialize(message_type, is_local).await;
     // Send the message
     self.write_all(&byte_message).await
   }
 
   async fn send_async_message(&mut self, message: &dyn Query, is_local: bool) -> io::Result<()>{
     // Serialize a message
-    let byte_message=message.serialize(qmsg_type::asynchronous, is_local);
+    let byte_message=message.serialize(qmsg_type::asynchronous, is_local).await;
     // Send the message
     self.write_all(&byte_message).await
   }
 
   async fn send_sync_message(&mut self, message: &dyn Query, is_local: bool) -> io::Result<K>{
     // Serialize a message
-    let byte_message=message.serialize(qmsg_type::synchronous, is_local);
+    let byte_message=message.serialize(qmsg_type::synchronous, is_local).await;
     // Send the message
     self.write_all(&byte_message).await?;
     // Receive a response. If message type is not response it returns an error.
@@ -651,21 +654,21 @@ impl QStreamInner for TlsStream<TcpStream>{
 
   async fn send_message(&mut self, message: &dyn Query, message_type: u8, is_local: bool) -> io::Result<()>{
     // Serialize a message
-    let byte_message=message.serialize(message_type, is_local);
+    let byte_message=message.serialize(message_type, is_local).await;
     // Send the message
     self.write_all(&byte_message).await
   }
 
   async fn send_async_message(&mut self, message: &dyn Query, is_local: bool) -> io::Result<()>{
     // Serialize a message
-    let byte_message=message.serialize(qmsg_type::asynchronous, is_local);
+    let byte_message=message.serialize(qmsg_type::asynchronous, is_local).await;
     // Send the message
     self.write_all(&byte_message).await
   }
 
   async fn send_sync_message(&mut self, message: &dyn Query, is_local: bool) -> io::Result<K>{
     // Serialize a message
-    let byte_message=message.serialize(qmsg_type::synchronous, is_local);
+    let byte_message=message.serialize(qmsg_type::synchronous, is_local).await;
     // Send the message
     self.write_all(&byte_message).await?;
     // Receive a response. If message type is not response it returns an error.
@@ -692,21 +695,21 @@ impl QStreamInner for UnixStream{
 
   async fn send_message(&mut self, message: &dyn Query, message_type: u8, is_local: bool) -> io::Result<()>{
     // Serialize a message
-    let byte_message=message.serialize(message_type, is_local);
+    let byte_message=message.serialize(message_type, is_local).await;
     // Send the message
     self.write_all(&byte_message).await
   }
 
   async fn send_async_message(&mut self, message: &dyn Query, is_local: bool) -> io::Result<()>{
     // Serialize a message
-    let byte_message=message.serialize(qmsg_type::asynchronous, is_local);
+    let byte_message=message.serialize(qmsg_type::asynchronous, is_local).await;
     // Send the message
     self.write_all(&byte_message).await
   }
 
   async fn send_sync_message(&mut self, message: &dyn Query, is_local: bool) -> io::Result<K>{
     // Serialize a message
-    let byte_message=message.serialize(qmsg_type::synchronous, is_local);
+    let byte_message=message.serialize(qmsg_type::synchronous, is_local).await;
     // Send the message
     self.write_all(&byte_message).await?;
     // Receive a response. If message type is not response it returns an error.
@@ -992,10 +995,10 @@ async fn receive_message<S>(socket: &mut S) -> io::Result<(u8, K)> where S: Unpi
 
   // Decompress if necessary
   if header.compressed == 0x01{
-    body = decompress(body, header.encoding);
+    body = decompress(body, header.encoding).await;
   }
 
-  Ok((header.message_type, K::q_ipc_decode(&body, header.encoding)))
+  Ok((header.message_type, K::q_ipc_decode(&body, header.encoding).await))
 
 }
 
@@ -1005,7 +1008,7 @@ async fn receive_message<S>(socket: &mut S) -> io::Result<(u8, K)> where S: Unpi
 /// # Parameter
 /// - `raw`: Serialized message.
 /// - `encode`: `0` if Big Endian; `1` if Little Endian.
-fn compress(raw: Vec<u8>) -> (bool, Vec<u8>){
+async fn compress(raw: Vec<u8>) -> (bool, Vec<u8>){
   
   let mut i = 0_u8;
   let mut f = 0_u8;
@@ -1110,7 +1113,7 @@ fn compress(raw: Vec<u8>) -> (bool, Vec<u8>){
 /// - `encoding`: 
 ///   - `0`: Big Endian
 ///   - `1`: Little Endian.
-fn decompress(compressed: Vec<u8>, encoding: u8) -> Vec<u8>{
+async fn decompress(compressed: Vec<u8>, encoding: u8) -> Vec<u8>{
 
   let mut n=0;
   let mut r: usize;

@@ -3,6 +3,7 @@
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 
 use std::convert::TryInto;
+use async_recursion::async_recursion;
 use super::*;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -61,7 +62,7 @@ macro_rules! build_element {
 /// Read given bytes with a given cursor and build a basic type list of the specified type.
 macro_rules! build_list {
   ($bytes:expr, $cursor:expr, $encode:expr, $qtype:expr, i16) => {
-    {
+    async {
       let (attribute, size, cursor)=get_attribute_and_size($bytes, $cursor, $encode);
       let list=match $encode{
         0 => $bytes[cursor..cursor+2*size].chunks(2).map(|element| i16::from_be_bytes(element.try_into().unwrap())).collect::<Vec<H>>(),
@@ -72,7 +73,7 @@ macro_rules! build_list {
     }
   };
   ($bytes:expr, $cursor:expr, $encode:expr, $qtype:expr, i32) => {
-    {
+    async {
       let (attribute, size, cursor)=get_attribute_and_size($bytes, $cursor, $encode);
       let list=match $encode{
         0 => $bytes[cursor..cursor+4*size].chunks(4).map(|element| i32::from_be_bytes(element.try_into().unwrap())).collect::<Vec<I>>(),
@@ -83,7 +84,7 @@ macro_rules! build_list {
     }
   };
   ($bytes:expr, $cursor:expr, $encode:expr, $qtype:expr, i64) => {
-    {
+    async {
       let (attribute, size, cursor)=get_attribute_and_size($bytes, $cursor, $encode);
       let list=match $encode{
         0 => $bytes[cursor..cursor+8*size].chunks(8).map(|element| i64::from_be_bytes(element.try_into().unwrap())).collect::<Vec<J>>(),
@@ -94,7 +95,7 @@ macro_rules! build_list {
     }
   };
   ($bytes:expr, $cursor:expr, $encode:expr, $qtype:expr, f32) => {
-    {
+    async {
       let (attribute, size, cursor)=get_attribute_and_size($bytes, $cursor, $encode);
       let list=match $encode{
         0 => $bytes[cursor..cursor+4*size].chunks(4).map(|element| f32::from_be_bytes(element.try_into().unwrap())).collect::<Vec<E>>(),
@@ -105,7 +106,7 @@ macro_rules! build_list {
     }
   };
   ($bytes:expr, $cursor:expr, $encode:expr, $qtype:expr, f64) => {
-    {
+    async {
       let (attribute, size, cursor)=get_attribute_and_size($bytes, $cursor, $encode);
       let list=match $encode{
         0 => $bytes[cursor..cursor+8*size].chunks(8).map(|element| f64::from_be_bytes(element.try_into().unwrap())).collect::<Vec<F>>(),
@@ -125,8 +126,8 @@ macro_rules! build_list {
 
 impl K{
   /// Deserialize bytes to q object in a manner of q function `-9!`.
-  pub(crate) fn q_ipc_decode(bytes: &Vec<u8>, encode: u8) -> Self{
-    deserialize_bytes(bytes, 0, encode).0
+  pub(crate) async fn q_ipc_decode(bytes: &Vec<u8>, encode: u8) -> Self{
+    deserialize_bytes(bytes, 0, encode).await.0
   }
 }
 
@@ -134,7 +135,8 @@ impl K{
 //                          Private Functions                           //
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 
-fn deserialize_bytes(bytes: &Vec<u8>, cursor: usize, encode: u8) -> (K, usize){
+#[async_recursion]
+async fn deserialize_bytes(bytes: &Vec<u8>, cursor: usize, encode: u8) -> (K, usize){
   match bytes[cursor] as i8{
     qtype::BOOL_ATOM => deserialize_bool(bytes, cursor+1, encode),
     qtype::GUID_ATOM => deserialize_guid(bytes, cursor+1, encode),
@@ -154,27 +156,27 @@ fn deserialize_bytes(bytes: &Vec<u8>, cursor: usize, encode: u8) -> (K, usize){
     qtype::MINUTE_ATOM => build_element!(bytes, cursor+1, encode, qtype::MINUTE_ATOM, i32),
     qtype::SECOND_ATOM => build_element!(bytes, cursor+1, encode, qtype::SECOND_ATOM, i32),
     qtype::TIME_ATOM => build_element!(bytes, cursor+1, encode, qtype::TIME_ATOM, i32),
-    qtype::COMPOUND_LIST => deserialize_compound_list(bytes, cursor+1, encode),
+    qtype::COMPOUND_LIST => deserialize_compound_list(bytes, cursor+1, encode).await,
     qtype::BOOL_LIST => deserialize_bool_list(bytes, cursor+1, encode),
-    qtype::GUID_LIST => deserialize_guid_list(bytes, cursor+1, encode),
+    qtype::GUID_LIST => deserialize_guid_list(bytes, cursor+1, encode).await,
     qtype::BYTE_LIST => deserialize_byte_list(bytes, cursor+1, encode),
-    qtype::SHORT_LIST => build_list!(bytes, cursor+1, encode, qtype::SHORT_LIST, i16),
-    qtype::INT_LIST => build_list!(bytes, cursor+1, encode, qtype::INT_LIST, i32),
-    qtype::LONG_LIST => build_list!(bytes, cursor+1, encode, qtype::LONG_LIST, i64),
-    qtype::REAL_LIST => build_list!(bytes, cursor+1, encode, qtype::REAL_LIST, f32),
-    qtype::FLOAT_LIST => build_list!(bytes, cursor+1, encode, qtype::FLOAT_LIST, f64),
+    qtype::SHORT_LIST => build_list!(bytes, cursor+1, encode, qtype::SHORT_LIST, i16).await,
+    qtype::INT_LIST => build_list!(bytes, cursor+1, encode, qtype::INT_LIST, i32).await,
+    qtype::LONG_LIST => build_list!(bytes, cursor+1, encode, qtype::LONG_LIST, i64).await,
+    qtype::REAL_LIST => build_list!(bytes, cursor+1, encode, qtype::REAL_LIST, f32).await,
+    qtype::FLOAT_LIST => build_list!(bytes, cursor+1, encode, qtype::FLOAT_LIST, f64).await,
     qtype::STRING => deserialize_string(bytes, cursor+1, encode),
-    qtype::SYMBOL_LIST => deserialize_symbol_list(bytes, cursor+1, encode),
-    qtype::TIMESTAMP_LIST => build_list!(bytes, cursor+1, encode, qtype::TIMESTAMP_LIST, i64),
-    qtype::MONTH_LIST => build_list!(bytes, cursor+1, encode, qtype::MONTH_LIST, i32),
-    qtype::DATE_LIST => build_list!(bytes, cursor+1, encode, qtype::DATE_LIST, i32),
-    qtype::DATETIME_LIST => build_list!(bytes, cursor+1, encode, qtype::DATETIME_LIST, f64),
-    qtype::TIMESPAN_LIST => build_list!(bytes, cursor+1, encode, qtype::TIMESPAN_LIST, i64),
-    qtype::MINUTE_LIST => build_list!(bytes, cursor+1, encode, qtype::MINUTE_LIST, i32),
-    qtype::SECOND_LIST => build_list!(bytes, cursor+1, encode, qtype::SECOND_LIST, i32),
-    qtype::TIME_LIST => build_list!(bytes, cursor+1, encode, qtype::TIME_LIST, i32),
-    qtype::TABLE => deserialize_table(bytes, cursor+1, encode),
-    qtype::DICTIONARY | qtype::SORTED_DICTIONARY => deserialize_dictionary(bytes, cursor+1, encode),
+    qtype::SYMBOL_LIST => deserialize_symbol_list(bytes, cursor+1, encode).await,
+    qtype::TIMESTAMP_LIST => build_list!(bytes, cursor+1, encode, qtype::TIMESTAMP_LIST, i64).await,
+    qtype::MONTH_LIST => build_list!(bytes, cursor+1, encode, qtype::MONTH_LIST, i32).await,
+    qtype::DATE_LIST => build_list!(bytes, cursor+1, encode, qtype::DATE_LIST, i32).await,
+    qtype::DATETIME_LIST => build_list!(bytes, cursor+1, encode, qtype::DATETIME_LIST, f64).await,
+    qtype::TIMESPAN_LIST => build_list!(bytes, cursor+1, encode, qtype::TIMESPAN_LIST, i64).await,
+    qtype::MINUTE_LIST => build_list!(bytes, cursor+1, encode, qtype::MINUTE_LIST, i32).await,
+    qtype::SECOND_LIST => build_list!(bytes, cursor+1, encode, qtype::SECOND_LIST, i32).await,
+    qtype::TIME_LIST => build_list!(bytes, cursor+1, encode, qtype::TIME_LIST, i32).await,
+    qtype::TABLE => deserialize_table(bytes, cursor+1, encode).await,
+    qtype::DICTIONARY | qtype::SORTED_DICTIONARY => deserialize_dictionary(bytes, cursor+1, encode).await,
     qtype::NULL => deserialize_null(bytes, cursor+1, encode),
     qtype::ERROR => deserialize_error(bytes, cursor+1, encode),
     _ => unreachable!()
@@ -218,7 +220,7 @@ fn deserialize_bool_list(bytes: &Vec<u8>, cursor: usize, encode: u8) -> (K, usiz
   (K::new(qtype::BOOL_LIST, attribute, k0_inner::list(k0_list::new(list))), cursor+size)
 }
 
-fn deserialize_guid_list(bytes: &Vec<u8>, cursor: usize, encode: u8) -> (K, usize){
+async fn deserialize_guid_list(bytes: &Vec<u8>, cursor: usize, encode: u8) -> (K, usize){
   let (attribute, size, cursor)=get_attribute_and_size(bytes, cursor, encode);
   let list=bytes[cursor..cursor+16*size].chunks(16).map(|guid| guid.try_into().unwrap()).collect::<Vec<U>>();
   (K::new_guid_list(list, attribute), cursor+16*size)
@@ -235,7 +237,7 @@ fn deserialize_string(bytes: &Vec<u8>, cursor: usize, encode: u8) -> (K, usize){
   (K::new_string(String::from_utf8(bytes[cursor..cursor+size].to_vec()).unwrap(), attribute), cursor+size)
 }
 
-fn deserialize_symbol_list(bytes: &Vec<u8>, cursor: usize, encode: u8) -> (K, usize){
+async fn deserialize_symbol_list(bytes: &Vec<u8>, cursor: usize, encode: u8) -> (K, usize){
   let (attribute, size, mut cursor)=get_attribute_and_size(bytes, cursor, encode);
   let mut list=Vec::<String>::new();
   for _ in 0..size{
@@ -246,31 +248,31 @@ fn deserialize_symbol_list(bytes: &Vec<u8>, cursor: usize, encode: u8) -> (K, us
   (K::new_symbol_list(list, attribute), cursor)
 }
 
-fn deserialize_compound_list(bytes: &Vec<u8>, cursor: usize, encode: u8) -> (K, usize){
+async fn deserialize_compound_list(bytes: &Vec<u8>, cursor: usize, encode: u8) -> (K, usize){
   let (_, size, cursor)=get_attribute_and_size(bytes, cursor, encode);
   let mut list=Vec::<K>::new();
   let mut cursor_=cursor;
   for _ in 0..size{
-    let (element, cursor) = deserialize_bytes(bytes, cursor_, encode);
+    let (element, cursor) = deserialize_bytes(bytes, cursor_, encode).await;
     list.push(element);
     cursor_=cursor;
   }
   (K::new_compound_list(list), cursor_)
 }
 
-fn deserialize_table(bytes: &Vec<u8>, cursor: usize, encode: u8) -> (K, usize){
+async fn deserialize_table(bytes: &Vec<u8>, cursor: usize, encode: u8) -> (K, usize){
   // Skip table attribute 0x00, dictionary indicator 99 and symbol list indicator 11
-  let (headers, cursor)=deserialize_symbol_list(bytes, cursor+3, encode);
+  let (headers, cursor)=deserialize_symbol_list(bytes, cursor+3, encode).await;
   // Skip compound list indicator 0
-  let (columns, cursor)=deserialize_compound_list(bytes, cursor+1, encode);
+  let (columns, cursor)=deserialize_compound_list(bytes, cursor+1, encode).await;
   // Trust kdb+. Should not fail.
   let dictionary=K::new_dictionary(headers, columns).expect("failed to build a dictionary");
   (K::new(qtype::TABLE, qattribute::NONE, k0_inner::table(dictionary)), cursor)
 }
 
-fn deserialize_dictionary(bytes: &Vec<u8>, cursor: usize, encode: u8) -> (K, usize){
-  let (keys, cursor)=deserialize_bytes(bytes, cursor, encode);
-  let (values, cursor)=deserialize_bytes(bytes, cursor, encode);
+async fn deserialize_dictionary(bytes: &Vec<u8>, cursor: usize, encode: u8) -> (K, usize){
+  let (keys, cursor)=deserialize_bytes(bytes, cursor, encode).await;
+  let (values, cursor)=deserialize_bytes(bytes, cursor, encode).await;
   (K::new_dictionary(keys, values).expect("failed to build a dictionary"), cursor)
 }
 
