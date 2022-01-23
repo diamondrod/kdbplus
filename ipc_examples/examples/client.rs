@@ -1,9 +1,8 @@
 use kdbplus::qattribute;
 use kdbplus::ipc::*;
-use std::io;
 
 #[tokio::main(flavor = "multi_thread", worker_threads = 2)]
-async fn main()->io::Result<()>{
+async fn main() -> Result<()>{
 
   // Connect to qprocess running on localhost:5000 via UDS
   let mut socket=QStream::connect(ConnectionMethod::UDS, "", 5000_u16, "ideal:person").await?;

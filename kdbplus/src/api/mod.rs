@@ -91,17 +91,17 @@
 //! 2008.08.12D23:12:24.018691392 30.5  
 //! ```
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 //                              Settings                                //
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 //                            Load Libraries                            //
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 
 use std::str;
 use std::ffi::CStr;
@@ -110,9 +110,9 @@ use std::os::raw::{c_char, c_double, c_float, c_int, c_longlong, c_short, c_scha
 use super::qtype;
 pub mod native;
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 //                          Global Variables                            //
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 
 /// `K` nullptr. This value can be used as void value of a function which is called directly by q process
 ///  and returns `K`. This null pointer is interpreted as a general null value (`::`) whose type is `101h`.
@@ -132,9 +132,9 @@ pub mod native;
 ///  For detail, see its warning section.
 pub const KNULL:K=0 as K;
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 //                                Macros                                //
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 
 //%% Utility %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
@@ -164,9 +164,9 @@ macro_rules! str_to_S {
   };
 }
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 //                               Structs                                //
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 
 //%% Alias %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
@@ -265,9 +265,9 @@ pub struct k0{
 /// Struct representing q object.
 pub type K=*mut k0;
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 //                               Structs                                //
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 
 //%% KUtility %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
@@ -887,11 +887,11 @@ pub trait KUtility{
   fn q_ipc_decode(&self) -> Result<K, &'static str>;
 }
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-//                            Implementation                            //
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
+// >> Implementation
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 
-//%% U %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% U %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 impl U{
   /// Create 16-byte GUID object.
@@ -900,7 +900,7 @@ impl U{
   }
 }
 
-//%% K %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% K %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 unsafe impl Send for k0_inner{}
 unsafe impl Send for k0{}
@@ -1192,11 +1192,11 @@ impl k0{
   }
 }
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-//                              Utility                                 //
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
+// >> Utility
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 
-//%% Utility %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% Utility %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 /// Convert `S` to `&str`. This function is intended to convert symbol type (null-terminated char-array) to `str`.
 /// # Extern
@@ -1284,11 +1284,11 @@ pub fn null_terminated_str_to_const_S(string: &str) -> const_S {
   string.as_bytes().as_ptr() as const_S
 }
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-//                              Re-export                               //
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
+// >> Re-export
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 
-//%% Constructor %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% Constructor %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 /// Constructor of q bool object. Relabeling of `kb`.
 /// # Example
@@ -1959,7 +1959,7 @@ pub fn is_error(catched: K) -> bool{
   (unsafe{(*catched).qtype} == qtype::ERROR) && (unsafe{(*catched).value.symbol} != std::ptr::null_mut::<C>())
 }
 
-//%% Symbol %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% Symbol %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 /// Extract the first `n` chars from a character array and enumerate it internally.
 ///  This function must be used to add a character array as a symbol value to a symbol list.
@@ -1995,7 +1995,7 @@ pub fn enumerate(string: S) -> S{
   }
 }
 
-//%% Table %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% Table %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 /// Constructor of q table object from a q dictionary object.
 /// # Note
@@ -2152,7 +2152,7 @@ pub fn enkey(table: K, n: J) -> K{
   }
 }
 
-//%% Reference Count %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% Reference Count %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 /// Decrement reference count of the q object. The decrement must be done when `k` function gets an error
 ///  object whose type is `qtype::ERROR` and when you created an object but do not intend to return it to
@@ -2225,7 +2225,7 @@ pub fn increment_reference_count(qobject: K) -> K{
   unsafe{native::r1(qobject)}
 }
 
-//%% Callback %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% Callback %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 /// Remove callback from the associated kdb+ socket and call `kclose`.
 ///  Return null if the socket is invalid or not the one which had been registered by `sd1`.
@@ -2307,7 +2307,7 @@ pub fn register_callback(socket: I, function: extern fn(I) -> K) -> K{
   }
 }
 
-//%% Miscellaneous %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% Miscellaneous %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 /// Apply a function to q list object `.[func; args]`.
 /// # Example

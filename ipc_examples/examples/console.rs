@@ -3,7 +3,7 @@ use std::io;
 use std::io::Write;
 
 #[tokio::main(flavor = "multi_thread", worker_threads = 2)]
-async fn main()->io::Result<()>{
+async fn main() -> Result<()>{
   let mut socket = QStream::connect(ConnectionMethod::UDS, "", 5000_u16, "kdb:fastest").await?;
   let mut query = String::new();
   let version = socket.send_sync_message(&".z.K").await?;

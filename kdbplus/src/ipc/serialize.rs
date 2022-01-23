@@ -1,14 +1,14 @@
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-//                            Load Libraries                            //
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
+// >> Load Libraries
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 
 use super::*;
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-//                             Global Variable                          //
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
+// >> Global Variable
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 
-// %% System encoding %%//vvvvvvvvvvvvccvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+// %% System encoding %%//vvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 /// Endian of OS used to serialize `K` object.
 /// - 0: Big Endian
@@ -22,11 +22,11 @@ pub const ENCODING: u8=0;
 #[cfg(target_endian = "little")]
 pub const ENCODING: u8=1;
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-//                            Implementation                            //
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
+// >> Implementation
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 
-//%% K %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% K %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 impl K{
   /// Serialize q object to bytes in a manner of q function `-8!` without the IPC message
@@ -38,9 +38,9 @@ impl K{
   }
 }
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-//                          Private Functions                           //
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
+// >> Private Functions
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 
 fn serialize_q(obj: &K, stream: &mut Vec<u8>){
   match obj.0.qtype{

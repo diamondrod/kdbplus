@@ -86,10 +86,9 @@
 //! ```rust
 //! use kdbplus::qattribute;
 //! use kdbplus::ipc::*;
-//! use std::io;
 //! 
 //! #[tokio::main(flavor = "multi_thread", worker_threads = 2)]
-//! async fn main()->io::Result<()>{
+//! async fn main()-> Result<()>{
 //! 
 //!   // Connect to qprocess running on localhost:5000 via UDS
 //!   let mut socket=QStream::connect(ConnectionMethod::UDS, "", 5000_u16, "ideal:person").await?;
@@ -133,7 +132,7 @@
 //! use kdbplus::ipc::*;
 //! 
 //! #[tokio::main]
-//! async fn main() -> io::Result<()>{
+//! async fn main() -> Result<()>{
 //! 
 //!   // Start listenening over TCP at the port 7000 with authentication enabled.
 //!   let mut socket_tcp=QStream::accept(ConnectionMethod::TCP, "127.0.0.1", 7000).await?;
@@ -154,29 +153,39 @@
 //! q)h:hopen `::7000:reluctant:slowday
 //! ```
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-//                              Settings                                //
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
+// >> Settings
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-//                            Load Libraries                            //
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
+// >> Load Libraries
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
+
+pub mod error;
 
 use std::fmt;
 use std::any::Any;
+use std::result::Result as StdResult;
 use chrono::prelude::*;
 use chrono::Duration;
 use super::{qtype, qattribute, qnull_base, qinf_base, qninf_base};
+use error::Error;
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-//                           Global Variables                           //
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
+// >> Structs
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 
-//%% kdb+ Offset %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+pub type Result<T> = StdResult<T, Error>;
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
+// >> Global Variables
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
+
+//%% kdb+ Offset %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 /// 1 day in nano second.
 pub const ONE_DAY_NANOS: i64=86400000000000;
@@ -193,7 +202,7 @@ pub const KDB_DAY_OFFSET: i32 = 10957;
 /// 2000.01.01 (kdb+ epoch) - 1970.01.01 in nanosecond.
 pub const KDB_TIMESTAMP_OFFSET: i64=946684800000000000;
 
-//%% Null & Infinity %%vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% Null & Infinity %%vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 pub mod qnull{
   //! This module provides a list of q null values set on Rust process and used for IPC. The motivation
@@ -313,7 +322,7 @@ pub mod qnull{
   /// ```
   /// # Note
   /// The range of timestamp in Rust is wider than in q.
-  pub const TIMESTAMP: Lazy<DateTime<Utc>>=Lazy::new(|| Utc.ymd(1707, 9, 22).and_hms_nano(0, 12, 43, 145224192));
+  pub const TIMESTAMP: Lazy<DateTime<Utc>> = Lazy::new(|| Utc.ymd(1707, 9, 22).and_hms_nano(0, 12, 43, 145224192));
 
   /// Null value of month (`0Nm`).
   /// # Example
@@ -759,11 +768,11 @@ pub mod qninf{
 
  }
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-//                               Structs                                //
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
+// >>  Structs
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 
-//%% Alias %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% Alias %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 /// q type denoting symbol and string.
 pub type S = String;
@@ -784,7 +793,7 @@ pub type F = f64;
 /// q type denoting GUID.
 pub type U = [G; 16];
 
-//%% AsAny %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% AsAny %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 /// Feature of q list object to be cast to concrete type internally.
 pub(crate) trait AsAny{
@@ -794,14 +803,14 @@ pub(crate) trait AsAny{
   fn as_any_mut(&mut self) -> &mut dyn Any;
 }
 
-//%% Klone %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% Klone %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 /// Trait to clone `k0_list`.
 pub(crate) trait Klone{
   fn clone_box(&self) -> Box<dyn k0_list_inner>;
 }
 
-//%% k0_list_inner %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% k0_list_inner %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 /// Feature of q list.
 pub(crate) trait k0_list_inner: Klone + fmt::Debug + AsAny + Send + Sync + 'static{
@@ -809,7 +818,7 @@ pub(crate) trait k0_list_inner: Klone + fmt::Debug + AsAny + Send + Sync + 'stat
   fn len(&self) -> usize;
 }
 
-//%% k0_list %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% k0_list %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 /// Underlying list value of q object.
 /// # Note
@@ -825,7 +834,7 @@ pub(crate) struct k0_list{
   G0: Box<dyn k0_list_inner>
 }
 
-//%% k0_inner %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% k0_inner %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 /// Underlying atom value of q object.
 /// # Note
@@ -859,7 +868,7 @@ pub(crate) enum k0_inner{
   null(())
 }
 
-//%% k0 %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% k0 %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 /// Underlying struct of q object.
 #[derive(Clone, Debug)]
@@ -872,17 +881,17 @@ pub(crate) struct k0{
   value: k0_inner
 }
 
-//%% K %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% K %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 /// Struct representing q object.
 #[derive(Clone, Debug)]
 pub struct K(pub(crate) Box<k0>);
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-//                            Implementation                            //
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
+// >> Implementation
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 
-//%% AsAny %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% AsAny %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 impl AsAny for Vec<G>{
   fn as_any(&self) -> &dyn Any{
@@ -974,7 +983,7 @@ impl AsAny for Vec<K>{
   }
 }
 
-//%% Klone %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% Klone %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 impl<T> Klone for T where T: k0_list_inner + Clone{
   fn clone_box(&self) -> Box<dyn k0_list_inner>{
@@ -982,7 +991,7 @@ impl<T> Klone for T where T: k0_list_inner + Clone{
   }
 }
 
-//%% k0_list_inner %%vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% k0_list_inner %%vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 impl k0_list_inner for Vec<G>{
   fn len(&self) -> usize{
@@ -1044,7 +1053,7 @@ impl k0_list_inner for Vec<K>{
   }
 }
 
-//%% k0_list %%vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% k0_list %%vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 impl k0_list{
   pub(crate) fn new<T>(array: T) -> Self where T: k0_list_inner{
@@ -1065,7 +1074,7 @@ impl Clone for k0_list{
   }
 }
 
-//%% K %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% K %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 impl K{
 
@@ -1689,9 +1698,9 @@ impl K{
   /// # Note
   /// This constructor can return an error object whose type is `qtype::ERROR`. In that case the error message can be
   ///  retrieved by [`get_symbol`](#fn.get_symbol).
-  pub fn new_dictionary(keys: K, values: K) -> Result<Self, &'static str>{
+  pub fn new_dictionary(keys: K, values: K) -> Result<Self>{
     if keys.len() != values.len(){
-      Err("lengths of keys and values do not match")
+      Err(Error::length_mismatch(keys.len(), values.len()))
     }
     else{
       let qtype=if keys.0.attribute == qattribute::SORTED{
@@ -1744,7 +1753,7 @@ impl K{
   ///   assert_eq!(q_bool.get_bool(), Ok(true));
   /// }
   /// ```
-  pub fn get_bool(&self) -> Result<bool, &'static str>{
+  pub fn get_bool(&self) -> Result<bool>{
     match self.0.qtype{
       qtype::BOOL_ATOM => {
         match self.0.value{
@@ -1752,7 +1761,7 @@ impl K{
           _ => unreachable!()
         }
       },
-      _ => Err("not a bool")
+      _ => Err(Error::invalid_cast(self.0.qtype, qtype::BOOL_ATOM))
     }
   }
 
@@ -1766,7 +1775,7 @@ impl K{
   ///   assert_eq!(q_guid.get_guid(), Ok([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]));
   /// }
   /// ```
-  pub fn get_guid(&self) -> Result<[u8; 16], &'static str>{
+  pub fn get_guid(&self) -> Result<[u8; 16]>{
     match self.0.qtype{
       qtype::GUID_ATOM => {
         match self.0.value{
@@ -1774,11 +1783,14 @@ impl K{
           _ => unreachable!()
         }
       },
-      _ => Err("not a GUID")
+      _ => Err(Error::invalid_cast(self.0.qtype, qtype::GUID_ATOM))
     }
   }
 
-  /// Get underlying `u8` value.
+  /// Get underlying `u8` value. Compatible types are:
+  /// - bool
+  /// - byte
+  /// - char
   /// # Example
   /// ```
   /// use kdbplus::ipc::*;
@@ -1788,7 +1800,7 @@ impl K{
   ///   assert_eq!(q_byte.get_byte(), Ok(0x77));
   /// }
   /// ```
-  pub fn get_byte(&self) -> Result<u8, &'static str>{
+  pub fn get_byte(&self) -> Result<u8>{
     match self.0.qtype{
       qtype::BOOL_ATOM | qtype::BYTE_ATOM | qtype::CHAR => {
         match self.0.value{
@@ -1796,7 +1808,7 @@ impl K{
           _ => unreachable!()
         }
       },
-      _ => Err("not a byte compatible")
+      _ => Err(Error::invalid_cast(self.0.qtype, qtype::BYTE_ATOM))
     }
   }
 
@@ -1810,7 +1822,7 @@ impl K{
   ///   assert_eq!(q_short.get_short(), Ok(-12));
   /// }
   /// ```
-  pub fn get_short(&self) -> Result<i16, &'static str>{
+  pub fn get_short(&self) -> Result<i16>{
     match self.0.qtype{
       qtype::SHORT_ATOM => {
         match self.0.value{
@@ -1818,11 +1830,17 @@ impl K{
           _ => unreachable!()
         }
       },
-      _ => Err("not a short")
+      _ => Err(Error::invalid_cast(self.0.qtype, qtype::SHORT_ATOM))
     }
   }
 
-  /// Get underlying `i32` value.
+  /// Get underlying `i32` value. Compatible types are:
+  /// - int
+  /// - month
+  /// - date
+  /// - minute
+  /// - second
+  /// - time
   /// # Example
   /// ```
   /// use kdbplus::ipc::*;
@@ -1832,7 +1850,7 @@ impl K{
   ///   assert_eq!(q_int.get_int(), Ok(144000));
   /// }
   /// ```
-  pub fn get_int(&self) -> Result<i32, &'static str>{
+  pub fn get_int(&self) -> Result<i32>{
     match self.0.qtype{
       qtype::INT_ATOM | qtype::MONTH_ATOM | qtype::DATE_ATOM | qtype::MINUTE_ATOM | qtype::SECOND_ATOM | qtype::TIME_ATOM => {
         match self.0.value{
@@ -1840,11 +1858,14 @@ impl K{
           _ => unreachable!()
         }
       },
-      _ => Err("not an int compatible")
+      _ => Err(Error::invalid_cast(self.0.qtype, qtype::INT_ATOM))
     }
   }
 
-  /// Get underlying `i64` value.
+  /// Get underlying `i64` value. Compatible types are:
+  /// - long
+  /// - timestamp
+  /// - timespan
   /// # Example
   /// ```
   /// use kdbplus::ipc::*;
@@ -1854,7 +1875,7 @@ impl K{
   ///   assert_eq!(q_long.get_long(), Ok(86400000000000));
   /// }
   /// ```
-  pub fn get_long(&self) -> Result<i64, &'static str>{
+  pub fn get_long(&self) -> Result<i64>{
     match self.0.qtype{
       qtype::LONG_ATOM | qtype::TIMESTAMP_ATOM | qtype::TIMESPAN_ATOM => {
         match self.0.value{
@@ -1862,7 +1883,7 @@ impl K{
           _ => unreachable!()
         }
       },
-      _ => Err("not a long compatible")
+      _ => Err(Error::invalid_cast(self.0.qtype, qtype::LONG_ATOM))
     }
   }
 
@@ -1876,7 +1897,7 @@ impl K{
   ///   assert_eq!(q_real.get_real(), Ok(0.25));
   /// }
   /// ```
-  pub fn get_real(&self) -> Result<f32, &'static str>{
+  pub fn get_real(&self) -> Result<f32>{
     match self.0.qtype{
       qtype::REAL_ATOM => {
         match self.0.value{
@@ -1884,11 +1905,13 @@ impl K{
           _ => unreachable!()
         }
       },
-      _ => Err("not a real")
+      _ => Err(Error::invalid_cast(self.0.qtype, qtype::REAL_ATOM))
     }
   }
 
-  /// Get underlying `i32` value.
+  /// Get underlying `i32` value. Compatible types are:
+  /// - float
+  /// - datetime
   /// # Example
   /// ```
   /// use kdbplus::ipc::*;
@@ -1898,7 +1921,7 @@ impl K{
   ///   assert_eq!(q_float.get_float(), Ok(1000.23456));
   /// }
   /// ```
-  pub fn get_float(&self) -> Result<f64, &'static str>{
+  pub fn get_float(&self) -> Result<f64>{
     match self.0.qtype{
       qtype::FLOAT_ATOM | qtype::DATETIME_ATOM => {
         match self.0.value{
@@ -1906,7 +1929,7 @@ impl K{
           _ => unreachable!()
         }
       },
-      _ => Err("not a float compatible")
+      _ => Err(Error::invalid_cast(self.0.qtype, qtype::FLOAT_ATOM))
     }
   }
 
@@ -1920,7 +1943,7 @@ impl K{
   ///   assert_eq!(q_char.get_char(), Ok('C'));
   /// }
   /// ```
-  pub fn get_char(&self) -> Result<char, &'static str>{
+  pub fn get_char(&self) -> Result<char>{
     match self.0.qtype{
       qtype::CHAR => {
         match self.0.value{
@@ -1928,7 +1951,7 @@ impl K{
           _ => unreachable!()
         }
       },
-      _ => Err("not a char")
+      _ => Err(Error::invalid_cast(self.0.qtype, qtype::CHAR))
     }
   }
 
@@ -1942,7 +1965,7 @@ impl K{
   ///   assert_eq!(q_symbol.get_symbol(), Ok("Rust"));
   /// }
   /// ```
-  pub fn get_symbol(&self) -> Result<&str, &'static str>{
+  pub fn get_symbol(&self) -> Result<&str>{
     match self.0.qtype{
       qtype::SYMBOL_ATOM => {
         match &self.0.value{
@@ -1950,7 +1973,7 @@ impl K{
           _ => unreachable!()
         }
       },
-      _ => Err("neither a symbol nor an error")
+      _ => Err(Error::invalid_cast(self.0.qtype, qtype::SYMBOL_ATOM))
     }
   }
 
@@ -1965,7 +1988,7 @@ impl K{
   ///   assert_eq!(q_timestamp.get_timestamp(), Ok(Utc.ymd(2001, 9, 15).and_hms_nano(4, 2, 30, 37204)));
   /// }
   /// ```
-  pub fn get_timestamp(&self) -> Result<DateTime<Utc>, &'static str>{
+  pub fn get_timestamp(&self) -> Result<DateTime<Utc>>{
     match self.0.qtype{
       qtype::TIMESTAMP_ATOM => {
         match self.0.value{
@@ -1973,7 +1996,7 @@ impl K{
           _ => unreachable!()
         }
       },
-      _ => Err("not a timestamp")
+      _ => Err(Error::invalid_cast(self.0.qtype, qtype::TIMESTAMP_ATOM))
     }
   }
 
@@ -1988,7 +2011,7 @@ impl K{
   ///   assert_eq!(q_month.get_month(), Ok(Utc.ymd(2007, 8, 1)));
   /// }
   /// ```
-  pub fn get_month(&self) -> Result<Date<Utc>, &'static str>{
+  pub fn get_month(&self) -> Result<Date<Utc>>{
     match self.0.qtype{
       qtype::MONTH_ATOM => {
         match self.0.value{
@@ -1996,11 +2019,11 @@ impl K{
           _ => unreachable!()
         }
       },
-      _ => Err("not a month")
+      _ => Err(Error::invalid_cast(self.0.qtype, qtype::MONTH_ATOM))
     }
   }
 
-  /// Get underlying date value as `DateTime<Utc>`.
+  /// Get underlying date value as `Date<Utc>`.
   /// # Example
   /// ```
   /// use kdbplus::ipc::*;
@@ -2011,7 +2034,7 @@ impl K{
   ///   assert_eq!(q_date.get_date(), Ok(Utc.ymd(2000, 5, 10)));
   /// }
   /// ```
-  pub fn get_date(&self) -> Result<Date<Utc>, &'static str>{
+  pub fn get_date(&self) -> Result<Date<Utc>>{
     match self.0.qtype{
       qtype::DATE_ATOM => {
         match self.0.value{
@@ -2019,7 +2042,7 @@ impl K{
           _ => unreachable!()
         }
       },
-      _ => Err("not a date")
+      _ => Err(Error::invalid_cast(self.0.qtype, qtype::DATE_ATOM))
     }
   }
 
@@ -2034,7 +2057,7 @@ impl K{
   ///   assert_eq!(q_datetime.get_datetime(), Ok(Utc.ymd(2011, 4, 7).and_hms_milli(19, 5, 41, 385)));
   /// }
   /// ```
-  pub fn get_datetime(&self) -> Result<DateTime<Utc>, &'static str>{
+  pub fn get_datetime(&self) -> Result<DateTime<Utc>>{
     match self.0.qtype{
       qtype::DATETIME_ATOM => {
         match self.0.value{
@@ -2042,7 +2065,7 @@ impl K{
           _ => unreachable!()
         }
       },
-      _ => Err("not a datetime")
+      _ => Err(Error::invalid_cast(self.0.qtype, qtype::DATETIME_ATOM))
     }
   }
 
@@ -2057,7 +2080,7 @@ impl K{
   ///   assert_eq!(q_timespan.get_timespan(), Ok(Duration::nanoseconds(131400000000000)));
   /// }
   /// ```
-  pub fn get_timespan(&self) -> Result<Duration, &'static str>{
+  pub fn get_timespan(&self) -> Result<Duration>{
     match self.0.qtype{
       qtype::TIMESPAN_ATOM => {
         match self.0.value{
@@ -2065,7 +2088,7 @@ impl K{
           _ => unreachable!()
         }
       },
-      _ => Err("not a timespan")
+      _ => Err(Error::invalid_cast(self.0.qtype, qtype::TIMESPAN_ATOM))
     }
   }
 
@@ -2080,7 +2103,7 @@ impl K{
   ///   assert_eq!(q_minute.get_minute(), Ok(Duration::minutes(30)));
   /// }
   /// ```
-  pub fn get_minute(&self) -> Result<Duration, &'static str>{
+  pub fn get_minute(&self) -> Result<Duration>{
     match self.0.qtype{
       qtype::MINUTE_ATOM => {
         match self.0.value{
@@ -2088,7 +2111,7 @@ impl K{
           _ => unreachable!()
         }
       },
-      _ => Err("not a minute")
+      _ => Err(Error::invalid_cast(self.0.qtype, qtype::MINUTE_ATOM))
     }
   }
 
@@ -2103,7 +2126,7 @@ impl K{
   ///   assert_eq!(q_second.get_second(), Ok(Duration::seconds(30)));
   /// }
   /// ```
-  pub fn get_second(&self) -> Result<Duration, &'static str>{
+  pub fn get_second(&self) -> Result<Duration>{
     match self.0.qtype{
       qtype::SECOND_ATOM => {
         match self.0.value{
@@ -2111,7 +2134,7 @@ impl K{
           _ => unreachable!()
         }
       },
-      _ => Err("not a second")
+      _ => Err(Error::invalid_cast(self.0.qtype, qtype::SECOND_ATOM))
     }
   }
 
@@ -2126,7 +2149,7 @@ impl K{
   ///   assert_eq!(q_time.get_time(), Ok(Duration::milliseconds(3000)));
   /// }
   /// ```
-  pub fn get_time(&self) -> Result<Duration, &'static str>{
+  pub fn get_time(&self) -> Result<Duration>{
     match self.0.qtype{
       qtype::TIME_ATOM => {
         match self.0.value{
@@ -2134,11 +2157,11 @@ impl K{
           _ => unreachable!()
         }
       },
-      _ => Err("not a time")
+      _ => Err(Error::invalid_cast(self.0.qtype, qtype::TIME_ATOM))
     }
   }
 
-  /// Get underlying immutable dictionary (flipped table) value as `K`.
+  /// Get underlying immutable dictionary (flipped table) of table type as `K`.
   /// # Example
   /// ```
   /// use kdbplus::qattribute;
@@ -2155,7 +2178,7 @@ impl K{
   ///   assert_eq!(format!("{}", q_table.get_dictionary().unwrap()), String::from("`fruit`price!(`p#`strawberry`orange`;2.5 1.25 117.8)"));
   /// }
   /// ```
-  pub fn get_dictionary(&self) -> Result<&K, &'static str>{
+  pub fn get_dictionary(&self) -> Result<&K>{
     match self.0.qtype{
       qtype::TABLE => {
         match &self.0.value{
@@ -2163,11 +2186,11 @@ impl K{
           _ => unreachable!()
         }
       },
-      _ => Err("not a table")
+      _ => Err(Error::invalid_cast(self.0.qtype, qtype::TABLE))
     }
   }
 
-  /// Get underlying mutable dictionary (flipped table) value as `K`.
+  /// Get underlying mutable dictionary (flipped table) of table type as `K`.
   /// # Example
   /// ```
   /// use kdbplus::qattribute;
@@ -2190,7 +2213,7 @@ impl K{
   ///   assert_eq!(format!("{}", q_table), String::from("+`fruit`price`color!(`p#`strawberry`orange`;2.5 1.25 117.8;\"RO\")"));
   /// }
   /// ```
-  pub fn get_mut_dictionary(&mut self) -> Result<&mut K, &'static str>{
+  pub fn get_mut_dictionary(&mut self) -> Result<&mut K>{
     match self.0.qtype{
       qtype::TABLE => {
         match &mut self.0.value{
@@ -2198,7 +2221,7 @@ impl K{
           _ => unreachable!()
         }
       },
-      _ => Err("not a table")
+      _ => Err(Error::invalid_cast(self.0.qtype, qtype::TABLE))
     }
   }
 
@@ -2206,17 +2229,16 @@ impl K{
   /// # Example
   /// ```
   /// use kdbplus::ipc::*;
-  /// use std::io;
   /// 
   /// #[tokio::main]
-  /// async fn main() -> io::Result<()>{
+  /// async fn main() -> Result<()>{
   ///   let mut socket=QStream::connect(ConnectionMethod::TCP, "localhost", 5000, "kdbuser:pass").await.expect("Failed to connect");
   ///   let result=socket.send_sync_message(&"1+`a").await?;
   ///   assert_eq!(result.get_error_string(), Ok("type"));
   ///   Ok(())
   /// }
   /// ```
-  pub fn get_error_string(&self) -> Result<&str, &'static str>{
+  pub fn get_error_string(&self) -> Result<&str>{
     match self.0.qtype{
       qtype::ERROR => {
         match &self.0.value{
@@ -2224,7 +2246,7 @@ impl K{
           _ => unreachable!()
         }
       },
-      _ => Err("not an error")
+      _ => Err(Error::invalid_cast(self.0.qtype, qtype::ERROR))
     }
   }
 
@@ -2239,7 +2261,7 @@ impl K{
   ///   assert_eq!(string.as_string().unwrap(), "something");
   /// }
   /// ```
-  pub fn as_string(&self) -> Result<&str, &'static str>{
+  pub fn as_string(&self) -> Result<&str>{
     match self.0.qtype{
       qtype::STRING => {
         match &self.0.value{
@@ -2247,7 +2269,7 @@ impl K{
           _ => unreachable!()
         }
       },
-      _ => Err("not a string")
+      _ => Err(Error::invalid_cast(self.0.qtype, qtype::STRING))
     }
   }
 
@@ -2263,7 +2285,7 @@ impl K{
   ///   assert_eq!(format!("{}", string), String::from("\"something!\""));
   /// }
   /// ```
-  pub fn as_mut_string(&mut self) -> Result<&mut String, &'static str>{
+  pub fn as_mut_string(&mut self) -> Result<&mut String>{
     match self.0.qtype{
       qtype::STRING => {
         match &mut self.0.value{
@@ -2271,7 +2293,7 @@ impl K{
           _ => unreachable!()
         }
       },
-      _ => Err("not a string")
+      _ => Err(Error::invalid_cast(self.0.qtype, qtype::STRING))
     }
   }
   
@@ -2288,7 +2310,7 @@ impl K{
   ///   assert_eq!(format!("{}", timestamp_list), String::from("2018.02.18D04:00:00.000000100 2019.12.03D04:05:10.000003456 2021.08.13D15:40:39.000046395"));
   /// }
   /// ```
-  pub fn as_mut_vec<T>(&mut self) -> Result<&mut Vec<T>, &'static str> where T: 'static{
+  pub fn as_mut_vec<T>(&mut self) -> Result<&mut Vec<T>> where T: 'static{
     match self.0.qtype {
       qtype::COMPOUND_LIST | qtype::BOOL_LIST | qtype::GUID_LIST | qtype::BYTE_LIST | qtype::SHORT_LIST | qtype::INT_LIST | qtype::LONG_LIST | qtype::REAL_LIST | qtype::FLOAT_LIST |
       qtype::SYMBOL_LIST | qtype::TIMESTAMP_LIST | qtype::MONTH_LIST | qtype::DATE_LIST | qtype::DATETIME_LIST | qtype::TIMESPAN_LIST | qtype::MINUTE_LIST | qtype::SECOND_LIST |
@@ -2297,13 +2319,13 @@ impl K{
           k0_inner::list(list) => {
             match list.G0.as_any_mut().downcast_mut::<Vec<T>>(){
               Some(vector) => Ok(vector),
-              _ => Err("failed to cast to specified type")
+              _ => Err(Error::invalid_cast_list(self.0.qtype))
             }
           },
           _ => unreachable!()
         }
       },
-      _ => Err("not a list type")
+      _ => Err(Error::invalid_cast_list(self.0.qtype))
     }
   }
 
@@ -2318,7 +2340,7 @@ impl K{
   ///   assert_eq!(*bool_list.as_vec::<G>().unwrap(), vec![1_u8, 0]);
   /// }
   /// ```
-  pub fn as_vec<T>(&self) -> Result<&Vec<T>, &'static str> where T: 'static{
+  pub fn as_vec<T>(&self) -> Result<&Vec<T>> where T: 'static{
     match self.0.qtype {
       qtype::COMPOUND_LIST | qtype::BOOL_LIST | qtype::GUID_LIST | qtype::BYTE_LIST | qtype::SHORT_LIST | qtype::INT_LIST | qtype::LONG_LIST | qtype::REAL_LIST | qtype::FLOAT_LIST |
       qtype::SYMBOL_LIST | qtype::TIMESTAMP_LIST | qtype::MONTH_LIST | qtype::DATE_LIST | qtype::DATETIME_LIST | qtype::TIMESPAN_LIST | qtype::MINUTE_LIST | qtype::SECOND_LIST |
@@ -2327,13 +2349,13 @@ impl K{
           k0_inner::list(list) => {
             match list.G0.as_any().downcast_ref::<Vec<T>>(){
               Some(vector) => Ok(vector),
-              _ => Err("failed to cast to specified type")
+              _ => Err(Error::invalid_cast_list(self.0.qtype))
             }
           },
           _ => unreachable!()
         }
       },
-      _ => Err("not a list type")
+      _ => Err(Error::invalid_cast_list(self.0.qtype))
     }
   }
 
@@ -2353,38 +2375,38 @@ impl K{
   ///   println!("syms: {}", syms);
   /// }
   /// ```
-  pub fn get_column<T>(&self, column: T) -> Result<&K, &'static str> where T: ToString{
+  pub fn get_column<T>(&self, column: T) -> Result<&K> where T: ToString{
     match self.0.qtype{
       qtype::TABLE => {
         let dictionary=self.get_dictionary().unwrap().as_vec::<K>().unwrap();
         match dictionary[0].as_vec::<S>().unwrap().iter().position(|name| *name==column.to_string()){
           // It is assured that value is a compound list because this is a table
           Some(index) => Ok(&dictionary[1].as_vec::<K>().unwrap()[index]),
-          _ => Err("no such column")
+          _ => Err(Error::no_such_column(column.to_string()))
         }
       },
       qtype::DICTIONARY => {
         let key_value = self.as_vec::<K>().unwrap();
         if key_value[0].0.qtype == qtype::TABLE{
           // Keyed table
-          if let Ok(found_column) = key_value[0].get_column(column.to_string().clone()){
+          if let Ok(found_column) = key_value[0].get_column(column.to_string()){
             // Found in key table
             Ok(found_column)
           }
-          else if let Ok(found_column) = key_value[1].get_column(column){
+          else if let Ok(found_column) = key_value[1].get_column(column.to_string()){
             // Found in value table
             Ok(found_column)
           }
           else{
-            Err("no such column")
+            Err(Error::no_such_column(column.to_string()))
           }
         }
         else{
           // Not a keyed table
-          Err("not a table")
+          Err(Error::invalid_operation("get_column", self.0.qtype, None))
         }
       },
-      _ => Err("not a table")
+      _ => Err(Error::invalid_operation("get_column", self.0.qtype, None))
     }
   }
 
@@ -2406,14 +2428,14 @@ impl K{
   ///   println!("table: {}", table);
   /// }
   /// ```
-  pub fn get_mut_column<T>(&mut self, column: T) -> Result<&mut K, &'static str> where T: ToString{
+  pub fn get_mut_column<T>(&mut self, column: T) -> Result<&mut K> where T: ToString{
     match self.0.qtype{
       qtype::TABLE => {
         let dictionary=self.get_mut_dictionary().unwrap().as_mut_vec::<K>().unwrap();
         match dictionary[0].as_vec::<S>().unwrap().iter().position(|name| *name==column.to_string()){
           // It is assured that value is a compound list because this is a table
           Some(index) => Ok(&mut dictionary[1].as_mut_vec::<K>().unwrap()[index]),
-          _ => Err("no such column")
+          _ => Err(Error::no_such_column(column.to_string()))
         }
       },
       qtype::DICTIONARY => {
@@ -2441,15 +2463,15 @@ impl K{
             )
           }
           else{
-            Err("no such column")
+            Err(Error::no_such_column(column.to_string()))
           }
         }
         else{
           // Not a keyed table
-          Err("not a table")
+          Err(Error::invalid_operation("get_mut_column", self.0.qtype, None))
         }
       },
-      _ => Err("not a table")
+      _ => Err(Error::invalid_operation("get_mut_column", self.0.qtype, None))
     }
   }
 
@@ -2549,7 +2571,7 @@ impl K{
   ///   assert_eq!(format!("{}", string_list), String::from("(\"string\";0b)"));
   /// }
   /// ```
-  pub fn push(&mut self, element: &dyn Any) -> Result<(), &'static str>{
+  pub fn push(&mut self, element: &dyn Any) -> Result<()>{
     match self.0.qtype{
       qtype::BOOL_LIST => {
         if let Some(boolean) = element.downcast_ref::<bool>(){
@@ -2557,7 +2579,7 @@ impl K{
           Ok(self.as_mut_vec::<G>().unwrap().push(*boolean as u8))
         }
         else{
-          Err("failed to push an element. expected type: bool")
+          Err(Error::insert_wrong_element(false, qtype::BOOL_LIST, "bool"))
         }
       },
       qtype::GUID_LIST => {
@@ -2566,7 +2588,7 @@ impl K{
           Ok(self.as_mut_vec::<U>().unwrap().push(*guid))
         }
         else{
-          Err("failed to push an element. expected type: [u8; 16]")
+          Err(Error::insert_wrong_element(false, qtype::GUID_LIST, "[u8; 16]"))
         }
       },
       qtype::BYTE_LIST => {
@@ -2575,7 +2597,7 @@ impl K{
           Ok(self.as_mut_vec::<G>().unwrap().push(*byte))
         }
         else{
-          Err("failed to push an element. expected type: u8")
+          Err(Error::insert_wrong_element(false, qtype::BYTE_LIST, "u8"))
         }
       },
       qtype::SHORT_LIST => {
@@ -2584,7 +2606,7 @@ impl K{
           Ok(self.as_mut_vec::<H>().unwrap().push(*short))
         }
         else{
-          Err("failed to push an element. expected type: i16")
+          Err(Error::insert_wrong_element(false, qtype::SHORT_LIST, "i16"))
         }
       },
       qtype::INT_LIST => {
@@ -2593,7 +2615,7 @@ impl K{
           Ok(self.as_mut_vec::<I>().unwrap().push(*int))
         }
         else{
-          Err("failed to push an element. expected type: i32")
+          Err(Error::insert_wrong_element(false, qtype::INT_LIST, "[u8; 16]"))
         }
       },
       qtype::LONG_LIST => {
@@ -2602,7 +2624,7 @@ impl K{
           Ok(self.as_mut_vec::<J>().unwrap().push(*long))
         }
         else{
-          Err("failed to push an element. expected type: i64")
+          Err(Error::insert_wrong_element(false, qtype::LONG_LIST, "i64"))
         }
       },
       qtype::REAL_LIST => {
@@ -2611,7 +2633,7 @@ impl K{
           Ok(self.as_mut_vec::<E>().unwrap().push(*real))
         }
         else{
-          Err("failed to push an element. expected type: f32")
+          Err(Error::insert_wrong_element(false, qtype::FLOAT_LIST, "f32"))
         }
       },
       qtype::FLOAT_LIST => {
@@ -2620,7 +2642,7 @@ impl K{
           Ok(self.as_mut_vec::<F>().unwrap().push(*float))
         }
         else{
-          Err("failed to push an element. expected type: f64")
+          Err(Error::insert_wrong_element(false, qtype::FLOAT_LIST, "f64"))
         }
       },
       qtype::STRING => {
@@ -2628,7 +2650,7 @@ impl K{
           Ok(self.as_mut_string().unwrap().push(*ch))
         }
         else{
-          Err("failed to push an element. expected type: char")
+          Err(Error::insert_wrong_element(false, qtype::STRING, "char"))
         }
       },
       qtype::SYMBOL_LIST => {
@@ -2637,7 +2659,7 @@ impl K{
           Ok(self.as_mut_vec::<S>().unwrap().push(symbol.clone()))
         }
         else{
-          Err("failed to push an element. expected type: String")
+          Err(Error::insert_wrong_element(false, qtype::SYMBOL_LIST, "String"))
         }
       },
       qtype::TIMESTAMP_LIST => {
@@ -2646,7 +2668,7 @@ impl K{
           Ok(self.as_mut_vec::<J>().unwrap().push(datetime_to_q_timestamp(*timestamp)))
         }
         else{
-          Err("failed to push an element. expected type: DateTime<Utc>")
+          Err(Error::insert_wrong_element(false, qtype::TIMESTAMP_LIST, "DateTime<Utc>"))
         }
       },
       qtype::MONTH_LIST => {
@@ -2655,7 +2677,7 @@ impl K{
           Ok(self.as_mut_vec::<I>().unwrap().push(date_to_q_month(*month)))
         }
         else{
-          Err("failed to push an element. expected type: Date<Utc>")
+          Err(Error::insert_wrong_element(false, qtype::MONTH_LIST, "Date<Utc>"))
         }
       },
       qtype::DATE_LIST => {
@@ -2664,7 +2686,7 @@ impl K{
           Ok(self.as_mut_vec::<I>().unwrap().push(date_to_q_date(*date)))
         }
         else{
-          Err("failed to push an element. expected type: Datte<Utc>")
+          Err(Error::insert_wrong_element(false, qtype::DATE_LIST, "Date<Utc>"))
         }
       },
       qtype::DATETIME_LIST => {
@@ -2673,7 +2695,7 @@ impl K{
           Ok(self.as_mut_vec::<F>().unwrap().push(datetime_to_q_datetime(*datetime)))
         }
         else{
-          Err("failed to push an element. expected type: DateTime<Utc>")
+          Err(Error::insert_wrong_element(false, qtype::DATETIME_LIST, "DateTime<Utc>"))
         }
       },
       qtype::TIMESPAN_LIST => {
@@ -2682,7 +2704,7 @@ impl K{
           Ok(self.as_mut_vec::<J>().unwrap().push(timespan.num_nanoseconds().expect("duration overflow")))
         }
         else{
-          Err("failed to push an element. expected type: Duration")
+          Err(Error::insert_wrong_element(false, qtype::TIMESPAN_LIST, "Duration"))
         }
       },
       qtype::MINUTE_LIST => {
@@ -2691,7 +2713,7 @@ impl K{
           Ok(self.as_mut_vec::<I>().unwrap().push(minute.num_minutes() as i32))
         }
         else{
-          Err("failed to push an element. expected type: Duration")
+          Err(Error::insert_wrong_element(false, qtype::MINUTE_LIST, "Duration"))
         }
       },
       qtype::SECOND_LIST => {
@@ -2700,7 +2722,7 @@ impl K{
           Ok(self.as_mut_vec::<I>().unwrap().push(second.num_seconds() as i32))
         }
         else{
-          Err("failed to push an element. expected type: Duration")
+          Err(Error::insert_wrong_element(false, qtype::SECOND_LIST, "Duration"))
         }
       },
       qtype::TIME_LIST => {
@@ -2709,7 +2731,7 @@ impl K{
           Ok(self.as_mut_vec::<I>().unwrap().push(time.num_milliseconds() as i32))
         }
         else{
-          Err("failed to push an element. expected type: Duration")
+          Err(Error::insert_wrong_element(false, qtype::TIME_LIST, "Duration"))
         }
       },
       qtype::COMPOUND_LIST => {
@@ -2718,10 +2740,10 @@ impl K{
           Ok(self.as_mut_vec::<K>().unwrap().push(k.clone()))
         }
         else{
-          Err("failed to push an element. expected type: K")
+          Err(Error::insert_wrong_element(false, qtype::COMPOUND_LIST, "K"))
         }
       },
-      _ => Err("this object cannot push an element")
+      _ => Err(Error::invalid_operation("push", self.0.qtype, None))
     }
   }
 
@@ -2747,9 +2769,9 @@ impl K{
   ///   assert_eq!(*q_minute_list.as_vec::<I>().unwrap(), vec![12, 1024]);
   /// }
   /// ```
-  pub fn insert(&mut self, index: usize, element: &dyn Any) -> Result<(), &'static str>{
+  pub fn insert(&mut self, index: usize, element: &dyn Any) -> Result<()>{
     if index > self.len(){
-      Err("index out of bounds")
+      Err(Error::index_out_of_bounds(self.len(), index))
     }
     else{
       match self.0.qtype{
@@ -2759,7 +2781,7 @@ impl K{
             Ok(self.as_mut_vec::<G>().unwrap().insert(index, *boolean as u8))
           }
           else{
-            Err("failed to push an element. expected type: bool")
+            Err(Error::insert_wrong_element(true, qtype::BOOL_LIST, "bool"))
           }
         },
         qtype::GUID_LIST => {
@@ -2768,7 +2790,7 @@ impl K{
             Ok(self.as_mut_vec::<U>().unwrap().insert(index, *guid))
           }
           else{
-            Err("failed to push an element. expected type: [u8; 16]")
+            Err(Error::insert_wrong_element(true, qtype::GUID_LIST, "[u8; 16]"))
           }
         },
         qtype::BYTE_LIST => {
@@ -2777,7 +2799,7 @@ impl K{
             Ok(self.as_mut_vec::<G>().unwrap().insert(index, *byte))
           }
           else{
-            Err("failed to push an element. expected type: u8")
+            Err(Error::insert_wrong_element(true, qtype::BYTE_LIST, "u8"))
           }
         },
         qtype::SHORT_LIST => {
@@ -2786,7 +2808,7 @@ impl K{
             Ok(self.as_mut_vec::<H>().unwrap().insert(index, *short))
           }
           else{
-            Err("failed to push an element. expected type: i16")
+            Err(Error::insert_wrong_element(false, qtype::SHORT_LIST, "i16"))
           }
         },
         qtype::INT_LIST => {
@@ -2795,7 +2817,7 @@ impl K{
             Ok(self.as_mut_vec::<I>().unwrap().insert(index, *int))
           }
           else{
-            Err("failed to push an element. expected type: i32")
+            Err(Error::insert_wrong_element(false, qtype::INT_LIST, "i32"))
           }
         },
         qtype::LONG_LIST => {
@@ -2804,7 +2826,7 @@ impl K{
             Ok(self.as_mut_vec::<J>().unwrap().insert(index, *long))
           }
           else{
-            Err("failed to push an element. expected type: i64")
+            Err(Error::insert_wrong_element(false, qtype::LONG_LIST, "i64"))
           }
         },
         qtype::REAL_LIST => {
@@ -2813,7 +2835,7 @@ impl K{
             Ok(self.as_mut_vec::<E>().unwrap().insert(index, *real))
           }
           else{
-            Err("failed to push an element. expected type: f32")
+            Err(Error::insert_wrong_element(false, qtype::REAL_LIST, "f32"))
           }
         },
         qtype::FLOAT_LIST => {
@@ -2822,7 +2844,7 @@ impl K{
             Ok(self.as_mut_vec::<F>().unwrap().insert(index, *float))
           }
           else{
-            Err("failed to push an element. expected type: f64")
+            Err(Error::insert_wrong_element(false, qtype::FLOAT_LIST, "f64"))
           }
         },
         qtype::STRING => {
@@ -2830,7 +2852,7 @@ impl K{
             Ok(self.as_mut_string().unwrap().insert(index, *ch))
           }
           else{
-            Err("failed to push an element. expected type: char")
+            Err(Error::insert_wrong_element(false, qtype::STRING, "char"))
           }
         },
         qtype::SYMBOL_LIST => {
@@ -2839,7 +2861,7 @@ impl K{
             Ok(self.as_mut_vec::<S>().unwrap().insert(index, symbol.clone()))
           }
           else{
-            Err("failed to push an element. expected type: String")
+            Err(Error::insert_wrong_element(false, qtype::SYMBOL_LIST, "String"))
           }
         },
         qtype::TIMESTAMP_LIST => {
@@ -2848,7 +2870,7 @@ impl K{
             Ok(self.as_mut_vec::<J>().unwrap().insert(index, datetime_to_q_timestamp(*timestamp)))
           }
           else{
-            Err("failed to push an element. expected type: DateTime<Utc>")
+            Err(Error::insert_wrong_element(false, qtype::TIMESTAMP_LIST, "DateTime<Utc>"))
           }
         },
         qtype::MONTH_LIST => {
@@ -2857,7 +2879,7 @@ impl K{
             Ok(self.as_mut_vec::<I>().unwrap().insert(index, date_to_q_month(*month)))
           }
           else{
-            Err("failed to push an element. expected type: Date<Utc>")
+            Err(Error::insert_wrong_element(false, qtype::MONTH_LIST, "Date<Utc>"))
           }
         },
         qtype::DATE_LIST => {
@@ -2866,7 +2888,7 @@ impl K{
             Ok(self.as_mut_vec::<I>().unwrap().insert(index, date_to_q_date(*date)))
           }
           else{
-            Err("failed to push an element. expected type: Datte<Utc>")
+            Err(Error::insert_wrong_element(false, qtype::DATE_LIST, "Date<Utc>"))
           }
         },
         qtype::DATETIME_LIST => {
@@ -2875,7 +2897,7 @@ impl K{
             Ok(self.as_mut_vec::<F>().unwrap().insert(index, datetime_to_q_datetime(*datetime)))
           }
           else{
-            Err("failed to push an element. expected type: DateTime<Utc>")
+            Err(Error::insert_wrong_element(false, qtype::DATETIME_LIST, "DateTime<Utc>"))
           }
         },
         qtype::TIMESPAN_LIST => {
@@ -2884,7 +2906,7 @@ impl K{
             Ok(self.as_mut_vec::<J>().unwrap().insert(index, timespan.num_nanoseconds().expect("duration overflow")))
           }
           else{
-            Err("failed to push an element. expected type: Duration")
+            Err(Error::insert_wrong_element(false, qtype::TIMESPAN_LIST, "Duration"))
           }
         },
         qtype::MINUTE_LIST => {
@@ -2893,7 +2915,7 @@ impl K{
             Ok(self.as_mut_vec::<I>().unwrap().insert(index, minute.num_minutes() as i32))
           }
           else{
-            Err("failed to push an element. expected type: Duration")
+            Err(Error::insert_wrong_element(false, qtype::MINUTE_LIST, "Duration"))
           }
         },
         qtype::SECOND_LIST => {
@@ -2902,7 +2924,7 @@ impl K{
             Ok(self.as_mut_vec::<I>().unwrap().insert(index, second.num_seconds() as i32))
           }
           else{
-            Err("failed to push an element. expected type: Duration")
+            Err(Error::insert_wrong_element(false, qtype::SECOND_LIST, "Duration"))
           }
         },
         qtype::TIME_LIST => {
@@ -2911,7 +2933,7 @@ impl K{
             Ok(self.as_mut_vec::<I>().unwrap().insert(index, time.num_milliseconds() as i32))
           }
           else{
-            Err("failed to push an element. expected type: Duration")
+            Err(Error::insert_wrong_element(false, qtype::TIME_LIST, "Duration"))
           }
         },
         qtype::COMPOUND_LIST => {
@@ -2920,10 +2942,10 @@ impl K{
             Ok(self.as_mut_vec::<K>().unwrap().insert(index, k.clone()))
           }
           else{
-            Err("failed to push an element. expected type: K")
+            Err(Error::insert_wrong_element(false, qtype::COMPOUND_LIST, "K"))
           }
         },
-        _ => Err("this object cannot push an element")
+        _ => Err(Error::invalid_operation("insert", self.0.qtype, None))
       }
     }
   }
@@ -2940,10 +2962,10 @@ impl K{
   ///   assert_eq!(tail, true);
   /// }
   /// ```
-  pub fn pop_bool(&mut self) -> Result<bool, &'static str>{
+  pub fn pop_bool(&mut self) -> Result<bool>{
     if self.len() == 0{
       // 0 length
-      Err("no element in this object")
+      Err(Error::pop_from_empty_list())
     }
     else{
       match self.0.qtype{
@@ -2951,7 +2973,7 @@ impl K{
           self.decrement();
           Ok(self.as_mut_vec::<G>().unwrap().pop().unwrap()!=0)
         },
-        _ => Err("not a bool list")
+        _ => Err(Error::invalid_operation("pop_bool", self.0.qtype, Some(qtype::BOOL_LIST)))
       }
     }
   }
@@ -2968,10 +2990,10 @@ impl K{
   ///   assert_eq!(tail, [0_u8,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]);
   /// }
   /// ```
-  pub fn pop_guid(&mut self) -> Result<[u8; 16], &'static str>{
+  pub fn pop_guid(&mut self) -> Result<[u8; 16]>{
     if self.len() == 0{
       // 0 length
-      Err("no element in this object")
+      Err(Error::pop_from_empty_list())
     }
     else{
       match self.0.qtype{
@@ -2979,7 +3001,7 @@ impl K{
           self.decrement();
           Ok(self.as_mut_vec::<U>().unwrap().pop().unwrap())
         },
-        _ => Err("not a GUID list")
+        _ => Err(Error::invalid_operation("pop_guid", self.0.qtype, Some(qtype::GUID_LIST)))
       }
     }
   }
@@ -2996,10 +3018,10 @@ impl K{
   ///   assert_eq!(tail, 0xae_u8);
   /// }
   /// ```
-  pub fn pop_byte(&mut self) -> Result<u8, &'static str>{
+  pub fn pop_byte(&mut self) -> Result<u8>{
     if self.len() == 0{
       // 0 length
-      Err("no element in this object")
+      Err(Error::pop_from_empty_list())
     }
     else{
       match self.0.qtype{
@@ -3007,7 +3029,7 @@ impl K{
           self.decrement();
           Ok(self.as_mut_vec::<G>().unwrap().pop().unwrap())
         },
-        _ => Err("not a byte list")
+        _ => Err(Error::invalid_operation("pop_byte", self.0.qtype, Some(qtype::BYTE_LIST)))
       }
     }
   }
@@ -3024,10 +3046,10 @@ impl K{
   ///   assert_eq!(tail, 50_i16);
   /// }
   /// ```
-  pub fn pop_short(&mut self) -> Result<i16, &'static str>{
+  pub fn pop_short(&mut self) -> Result<i16>{
     if self.len() == 0{
       // 0 length
-      Err("no element in this object")
+      Err(Error::pop_from_empty_list())
     }
     else{
       match self.0.qtype{
@@ -3035,7 +3057,7 @@ impl K{
           self.decrement();
           Ok(self.as_mut_vec::<H>().unwrap().pop().unwrap())
         },
-        _ => Err("not a short list")
+        _ => Err(Error::invalid_operation("pop_short", self.0.qtype, Some(qtype::SHORT_LIST)))
       }
     }
   }
@@ -3052,10 +3074,10 @@ impl K{
   ///   assert_eq!(tail, 888);
   /// }
   /// ```
-  pub fn pop_int(&mut self) -> Result<i32, &'static str>{
+  pub fn pop_int(&mut self) -> Result<i32>{
     if self.len() == 0{
       // 0 length
-      Err("no element in this object")
+      Err(Error::pop_from_empty_list())
     }
     else{
       match self.0.qtype{
@@ -3063,7 +3085,7 @@ impl K{
           self.decrement();
           Ok(self.as_mut_vec::<I>().unwrap().pop().unwrap())
         },
-        _ => Err("not an int list")
+        _ => Err(Error::invalid_operation("pop_int", self.0.qtype, Some(qtype::INT_LIST)))
       }
     }
   }
@@ -3080,10 +3102,10 @@ impl K{
   ///   assert_eq!(tail, 13800000000_i64);
   /// }
   /// ```
-  pub fn pop_long(&mut self) -> Result<i64, &'static str>{
+  pub fn pop_long(&mut self) -> Result<i64>{
     if self.len() == 0{
       // 0 length
-      Err("no element in this object")
+      Err(Error::pop_from_empty_list())
     }
     else{
       match self.0.qtype{
@@ -3091,7 +3113,7 @@ impl K{
           self.decrement();
           Ok(self.as_mut_vec::<J>().unwrap().pop().unwrap())
         },
-        _ => Err("not a long list")
+        _ => Err(Error::invalid_operation("pop_long", self.0.qtype, Some(qtype::LONG_LIST)))
       }
     }
   }
@@ -3108,10 +3130,10 @@ impl K{
   ///   assert_eq!(tail, -0.1_f32);
   /// }
   /// ```
-  pub fn pop_real(&mut self) -> Result<f32, &'static str>{
+  pub fn pop_real(&mut self) -> Result<f32>{
     if self.len() == 0{
       // 0 length
-      Err("no element in this object")
+      Err(Error::pop_from_empty_list())
     }
     else{
       match self.0.qtype{
@@ -3119,7 +3141,7 @@ impl K{
           self.decrement();
           Ok(self.as_mut_vec::<E>().unwrap().pop().unwrap())
         },
-        _ => Err("not a real list")
+        _ => Err(Error::invalid_operation("pop_real", self.0.qtype, Some(qtype::REAL_LIST)))
       }
     }
   }
@@ -3136,10 +3158,10 @@ impl K{
   ///   assert_eq!(tail, 1001.3);
   /// }
   /// ```
-  pub fn pop_float(&mut self) -> Result<f64, &'static str>{
+  pub fn pop_float(&mut self) -> Result<f64>{
     if self.len() == 0{
       // 0 length
-      Err("no element in this object")
+      Err(Error::pop_from_empty_list())
     }
     else{
       match self.0.qtype{
@@ -3147,7 +3169,7 @@ impl K{
           self.decrement();
           Ok(self.as_mut_vec::<F>().unwrap().pop().unwrap())
         },
-        _ => Err("not a float list")
+        _ => Err(Error::invalid_operation("pop_float", self.0.qtype, Some(qtype::FLOAT_LIST)))
       }
     }
   }
@@ -3164,15 +3186,15 @@ impl K{
   ///   assert_eq!(tail, 'y');
   /// }
   /// ```
-  pub fn pop_char(&mut self) -> Result<char, &'static str>{
+  pub fn pop_char(&mut self) -> Result<char>{
     if self.len() == 0{
       // 0 length
-      Err("no element in this object")
+      Err(Error::pop_from_empty_list())
     }
     else{
       match self.0.qtype{
         qtype::STRING => Ok(self.as_mut_string().unwrap().pop().unwrap()),
-        _ => Err("not a string")
+        _ => Err(Error::invalid_operation("pop_char", self.0.qtype, Some(qtype::STRING)))
       }
     }
   }
@@ -3189,10 +3211,10 @@ impl K{
   ///   assert_eq!(tail, String::from("hazel"));
   /// }
   /// ```
-  pub fn pop_symbol(&mut self) -> Result<String, &'static str>{
+  pub fn pop_symbol(&mut self) -> Result<String>{
     if self.len() == 0{
       // 0 length
-      Err("no element in this object")
+      Err(Error::pop_from_empty_list())
     }
     else{
       match self.0.qtype{
@@ -3200,7 +3222,7 @@ impl K{
           self.decrement();
           Ok(self.as_mut_vec::<S>().unwrap().pop().unwrap())
         },
-        _ => Err("not a symbol list")
+        _ => Err(Error::invalid_operation("pop_symbol", self.0.qtype, Some(qtype::SYMBOL_LIST)))
       }
     }
   }
@@ -3218,10 +3240,10 @@ impl K{
   ///   assert_eq!(tail, Utc.ymd(2019, 8, 9).and_hms_nano(16, 28, 2, 468276775));
   /// }
   /// ```
-  pub fn pop_timestamp(&mut self) -> Result<DateTime<Utc>, &'static str>{
+  pub fn pop_timestamp(&mut self) -> Result<DateTime<Utc>>{
     if self.len() == 0{
       // 0 length
-      Err("no element in this object")
+      Err(Error::pop_from_empty_list())
     }
     else{
       match self.0.qtype{
@@ -3229,7 +3251,7 @@ impl K{
           self.decrement();
           Ok(q_timestamp_to_datetime(self.as_mut_vec::<J>().unwrap().pop().unwrap()))
         },
-        _ => Err("not a timestamp list")
+        _ => Err(Error::invalid_operation("pop_timestamp", self.0.qtype, Some(qtype::TIMESTAMP_LIST)))
       }
     }
   }
@@ -3247,10 +3269,10 @@ impl K{
   ///   assert_eq!(tail, Utc.ymd(2004, 8, 1));
   /// }
   /// ```
-  pub fn pop_month(&mut self) -> Result<Date<Utc>, &'static str>{
+  pub fn pop_month(&mut self) -> Result<Date<Utc>>{
     if self.len() == 0{
       // 0 length
-      Err("no element in this object")
+      Err(Error::pop_from_empty_list())
     }
     else{
       match self.0.qtype{
@@ -3258,7 +3280,7 @@ impl K{
           self.decrement();
           Ok(q_month_to_date(self.as_mut_vec::<I>().unwrap().pop().unwrap()))
         },
-        _ => Err("not a month list")
+        _ => Err(Error::invalid_operation("pop_month", self.0.qtype, Some(qtype::MONTH_LIST)))
       }
     }
   }
@@ -3276,10 +3298,10 @@ impl K{
   ///   assert_eq!(tail, Utc.ymd(2014, 6, 4));
   /// }
   /// ```
-  pub fn pop_date(&mut self) -> Result<Date<Utc>, &'static str>{
+  pub fn pop_date(&mut self) -> Result<Date<Utc>>{
     if self.len() == 0{
       // 0 length
-      Err("no element in this object")
+      Err(Error::pop_from_empty_list())
     }
     else{
       match self.0.qtype{
@@ -3287,7 +3309,7 @@ impl K{
           self.decrement();
           Ok(q_date_to_date(self.as_mut_vec::<I>().unwrap().pop().unwrap()))
         },
-        _ => Err("not a date list")
+        _ => Err(Error::invalid_operation("pop_date", self.0.qtype, Some(qtype::DATE_LIST)))
       }
     }
   }
@@ -3305,10 +3327,10 @@ impl K{
   ///   assert_eq!(tail, Utc.ymd(2003, 12, 9).and_hms_milli(19, 58, 30, 326));
   /// }
   /// ```
-  pub fn pop_datetime(&mut self) -> Result<DateTime<Utc>, &'static str>{
+  pub fn pop_datetime(&mut self) -> Result<DateTime<Utc>>{
     if self.len() == 0{
       // 0 length
-      Err("no element in this object")
+      Err(Error::pop_from_empty_list())
     }
     else{
       match self.0.qtype{
@@ -3316,7 +3338,7 @@ impl K{
           self.decrement();
           Ok(q_datetime_to_datetime(self.as_mut_vec::<F>().unwrap().pop().unwrap()))
         },
-        _ => Err("not a datetime list")
+        _ => Err(Error::invalid_operation("pop_datetime", self.0.qtype, Some(qtype::DATETIME_LIST)))
       }
     }
   }
@@ -3334,10 +3356,10 @@ impl K{
   ///   assert_eq!(tail, Duration::nanoseconds(219849398328832));
   /// }
   /// ```
-  pub fn pop_timespan(&mut self) -> Result<Duration, &'static str>{
+  pub fn pop_timespan(&mut self) -> Result<Duration>{
     if self.len() == 0{
       // 0 length
-      Err("no element in this object")
+      Err(Error::pop_from_empty_list())
     }
     else{
       match self.0.qtype{
@@ -3345,7 +3367,7 @@ impl K{
           self.decrement();
           Ok(Duration::nanoseconds(self.as_mut_vec::<J>().unwrap().pop().unwrap()))
         },
-        _ => Err("not a timespan list")
+        _ => Err(Error::invalid_operation("pop_timespan", self.0.qtype, Some(qtype::TIMESPAN_LIST)))
       }
     }
   }
@@ -3363,10 +3385,10 @@ impl K{
   ///   assert_eq!(tail, Duration::minutes(-503));
   /// }
   /// ```
-  pub fn pop_minute(&mut self) -> Result<Duration, &'static str>{
+  pub fn pop_minute(&mut self) -> Result<Duration>{
     if self.len() == 0{
       // 0 length
-      Err("no element in this object")
+      Err(Error::pop_from_empty_list())
     }
     else{
       match self.0.qtype{
@@ -3374,7 +3396,7 @@ impl K{
           self.decrement();
           Ok(Duration::minutes(self.as_mut_vec::<I>().unwrap().pop().unwrap() as i64))
         },
-        _ => Err("not a minute list")
+        _ => Err(Error::invalid_operation("pop_minute", self.0.qtype, Some(qtype::MINUTE_LIST)))
       }
     }
   }
@@ -3392,10 +3414,10 @@ impl K{
   ///   assert_eq!(tail, Duration::seconds(73984));
   /// }
   /// ```
-  pub fn pop_second(&mut self) -> Result<Duration, &'static str>{
+  pub fn pop_second(&mut self) -> Result<Duration>{
     if self.len() == 0{
       // 0 length
-      Err("no element in this object")
+      Err(Error::pop_from_empty_list())
     }
     else{
       match self.0.qtype{
@@ -3403,7 +3425,7 @@ impl K{
           self.decrement();
           Ok(Duration::seconds(self.as_mut_vec::<I>().unwrap().pop().unwrap() as i64))
         },
-        _ => Err("not a second list")
+        _ => Err(Error::invalid_operation("pop_second", self.0.qtype, Some(qtype::SECOND_LIST)))
       }
     }
   }
@@ -3421,10 +3443,10 @@ impl K{
   ///   assert_eq!(tail, Duration::milliseconds(-23587934));
   /// }
   /// ```
-  pub fn pop_time(&mut self) -> Result<Duration, &'static str>{
+  pub fn pop_time(&mut self) -> Result<Duration>{
     if self.len() == 0{
       // 0 length
-      Err("no element in this object")
+      Err(Error::pop_from_empty_list())
     }
     else{
       match self.0.qtype{
@@ -3432,7 +3454,7 @@ impl K{
           self.decrement();
           Ok(Duration::milliseconds(self.as_mut_vec::<I>().unwrap().pop().unwrap() as i64))
         },
-        _ => Err("not a time list")
+        _ => Err(Error::invalid_operation("pop_time", self.0.qtype, Some(qtype::TIME_LIST)))
       }
     }
   }
@@ -3459,11 +3481,11 @@ impl K{
   ///   assert_eq!(format!("{}", tail), String::from("2018.04.10D15:47:39.758934332 2008.12.04D14:12:07.548932080"));
   /// }
   /// ```
-  pub fn pop(&mut self) -> Result<K, &'static str>{
+  pub fn pop(&mut self) -> Result<K>{
     
     if self.len() == 0{
       // 0 length
-      Err("no element in this object")
+      Err(Error::pop_from_empty_list())
     }
     else{
       match self.0.qtype{
@@ -3540,7 +3562,7 @@ impl K{
           self.decrement();
           Ok(self.as_mut_vec::<K>().unwrap().pop().unwrap())
         },
-        _ => Err("this object cannot pop an element")
+        _ => Err(Error::invalid_operation("pop", self.0.qtype, None))
       }
     } 
   }
@@ -3557,15 +3579,15 @@ impl K{
   ///   assert_eq!(tail, false);
   /// }
   /// ```
-  pub fn remove_bool(&mut self, index: usize) -> Result<bool, &'static str>{
+  pub fn remove_bool(&mut self, index: usize) -> Result<bool>{
     if index >= self.len(){
       // 0 length
-      Err("index out of bounds")
+      Err(Error::index_out_of_bounds(self.len(), index))
     }
     else{
       match self.0.qtype{
         qtype::BOOL_LIST => Ok(self.as_mut_vec::<G>().unwrap().remove(index)!=0),
-        _ => Err("not a bool list")
+        _ => Err(Error::invalid_operation("remove_bool", self.0.qtype, Some(qtype::BOOL_LIST)))
       }
     }
   }
@@ -3582,15 +3604,15 @@ impl K{
   ///   assert_eq!(tail, [1_u8,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]);
   /// }
   /// ```
-  pub fn remove_guid(&mut self, index: usize) -> Result<[u8;16], &'static str>{
+  pub fn remove_guid(&mut self, index: usize) -> Result<[u8;16]>{
     if index >= self.len(){
       // 0 length
-      Err("index out of bounds")
+      Err(Error::index_out_of_bounds(self.len(), index))
     }
     else{
       match self.0.qtype{
         qtype::GUID_LIST => Ok(self.as_mut_vec::<U>().unwrap().remove(index)),
-        _ => Err("not a GUID list")
+        _ => Err(Error::invalid_operation("remove_guid", self.0.qtype, Some(qtype::GUID_LIST)))
       }
     }
   }
@@ -3607,15 +3629,15 @@ impl K{
   ///   assert_eq!(tail, 0x99_u8);
   /// }
   /// ```
-  pub fn remove_byte(&mut self, index: usize) -> Result<u8, &'static str>{
+  pub fn remove_byte(&mut self, index: usize) -> Result<u8>{
     if index >= self.len(){
       // 0 length
-      Err("index out of bounds")
+      Err(Error::index_out_of_bounds(self.len(), index))
     }
     else{
       match self.0.qtype{
         qtype::BYTE_LIST => Ok(self.as_mut_vec::<G>().unwrap().remove(index)),
-        _ => Err("not a byte list")
+        _ => Err(Error::invalid_operation("remove_byte", self.0.qtype, Some(qtype::BYTE_LIST)))
       }
     }
   }
@@ -3632,15 +3654,15 @@ impl K{
   ///   assert_eq!(tail, 12_i16);
   /// }
   /// ```
-  pub fn remove_short(&mut self, index: usize) -> Result<i16, &'static str>{
+  pub fn remove_short(&mut self, index: usize) -> Result<i16>{
     if index >= self.len(){
       // 0 length
-      Err("index out of bounds")
+      Err(Error::index_out_of_bounds(self.len(), index))
     }
     else{
       match self.0.qtype{
         qtype::SHORT_LIST => Ok(self.as_mut_vec::<H>().unwrap().remove(index)),
-        _ => Err("not a short list")
+        _ => Err(Error::invalid_operation("remove_short", self.0.qtype, Some(qtype::SHORT_LIST)))
       }
     }
   }
@@ -3657,15 +3679,15 @@ impl K{
   ///   assert_eq!(tail, -1);
   /// }
   /// ```
-  pub fn remove_int(&mut self, index: usize) -> Result<i32, &'static str>{
+  pub fn remove_int(&mut self, index: usize) -> Result<i32>{
     if index >= self.len(){
       // 0 length
-      Err("index out of bounds")
+      Err(Error::index_out_of_bounds(self.len(), index))
     }
     else{
       match self.0.qtype{
         qtype::INT_LIST => Ok(self.as_mut_vec::<I>().unwrap().remove(index)),
-        _ => Err("not an int list")
+        _ => Err(Error::invalid_operation("remove_int", self.0.qtype, Some(qtype::INT_LIST)))
       }
     }
   }
@@ -3682,15 +3704,15 @@ impl K{
   ///   assert_eq!(tail, -86400_i64);
   /// }
   /// ```
-  pub fn remove_long(&mut self, index: usize) -> Result<i64, &'static str>{
+  pub fn remove_long(&mut self, index: usize) -> Result<i64>{
     if index >= self.len(){
       // 0 length
-      Err("index out of bounds")
+      Err(Error::index_out_of_bounds(self.len(), index))
     }
     else{
       match self.0.qtype{
         qtype::LONG_LIST => Ok(self.as_mut_vec::<J>().unwrap().remove(index)),
-        _ => Err("not a long list")
+        _ => Err(Error::invalid_operation("remove_long", self.0.qtype, Some(qtype::LONG_LIST)))
       }
     }
   }
@@ -3707,15 +3729,15 @@ impl K{
   ///   assert_eq!(tail, -0.1_f32);
   /// }
   /// ```
-  pub fn remove_real(&mut self, index: usize) -> Result<f32, &'static str>{
+  pub fn remove_real(&mut self, index: usize) -> Result<f32>{
     if index >= self.len(){
       // 0 length
-      Err("index out of bounds")
+      Err(Error::index_out_of_bounds(self.len(), index))
     }
     else{
       match self.0.qtype{
         qtype::REAL_LIST => Ok(self.as_mut_vec::<E>().unwrap().remove(index)),
-        _ => Err("not a real list")
+        _ => Err(Error::invalid_operation("remove_real", self.0.qtype, Some(qtype::REAL_LIST)))
       }
     }
   }
@@ -3732,15 +3754,15 @@ impl K{
   ///   assert_eq!(tail, 5634.7666);
   /// }
   /// ```
-  pub fn remove_float(&mut self, index: usize) -> Result<f64, &'static str>{
+  pub fn remove_float(&mut self, index: usize) -> Result<f64>{
     if index >= self.len(){
       // 0 length
-      Err("index out of bounds")
+      Err(Error::index_out_of_bounds(self.len(), index))
     }
     else{
       match self.0.qtype{
         qtype::FLOAT_LIST => Ok(self.as_mut_vec::<F>().unwrap().remove(index)),
-        _ => Err("not a float list")
+        _ => Err(Error::invalid_operation("remove_float", self.0.qtype, Some(qtype::FLOAT_LIST)))
       }
     }
   }
@@ -3757,15 +3779,15 @@ impl K{
   ///   assert_eq!(tail, 'e');
   /// }
   /// ```
-  pub fn remove_char(&mut self, index: usize) -> Result<char, &'static str>{
+  pub fn remove_char(&mut self, index: usize) -> Result<char>{
     if index >= self.len(){
       // 0 length
-      Err("index out of bounds")
+      Err(Error::index_out_of_bounds(self.len(), index))
     }
     else{
       match self.0.qtype{
         qtype::STRING => Ok(self.as_mut_string().unwrap().remove(index)),
-        _ => Err("not a string")
+        _ => Err(Error::invalid_operation("remove_char", self.0.qtype, Some(qtype::STRING)))
       }
     }
   }
@@ -3782,15 +3804,15 @@ impl K{
   ///   assert_eq!(tail, String::from("hazel"));
   /// }
   /// ```
-  pub fn remove_symbol(&mut self, index: usize) -> Result<String, &'static str>{
+  pub fn remove_symbol(&mut self, index: usize) -> Result<String>{
     if index >= self.len(){
       // 0 length
-      Err("index out of bounds")
+      Err(Error::index_out_of_bounds(self.len(), index))
     }
     else{
       match self.0.qtype{
         qtype::SYMBOL_LIST => Ok(self.as_mut_vec::<S>().unwrap().remove(index)),
-        _ => Err("not a symbol list")
+        _ => Err(Error::invalid_operation("remove_symbol", self.0.qtype, Some(qtype::SYMBOL_LIST)))
       }
     }
   }
@@ -3808,15 +3830,15 @@ impl K{
   ///   assert_eq!(tail, Utc.ymd(2019, 8, 9).and_hms_nano(16, 28, 2, 468276775));
   /// }
   /// ```
-  pub fn remove_timestamp(&mut self, index: usize) -> Result<DateTime<Utc>, &'static str>{
+  pub fn remove_timestamp(&mut self, index: usize) -> Result<DateTime<Utc>>{
     if index >= self.len(){
       // 0 length
-      Err("index out of bounds")
+      Err(Error::index_out_of_bounds(self.len(), index))
     }
     else{
       match self.0.qtype{
         qtype::TIMESTAMP_LIST => Ok(q_timestamp_to_datetime(self.as_mut_vec::<J>().unwrap().remove(index))),
-        _ => Err("not a timestamp list")
+        _ => Err(Error::invalid_operation("remove_timestamp", self.0.qtype, Some(qtype::TIMESTAMP_LIST)))
       }
     }
   }
@@ -3834,15 +3856,15 @@ impl K{
   ///   assert_eq!(tail, Utc.ymd(2011, 5, 1));
   /// }
   /// ```
-  pub fn remove_month(&mut self, index: usize) -> Result<Date<Utc>, &'static str>{
+  pub fn remove_month(&mut self, index: usize) -> Result<Date<Utc>>{
     if index >= self.len(){
       // 0 length
-      Err("index out of bounds")
+      Err(Error::index_out_of_bounds(self.len(), index))
     }
     else{
       match self.0.qtype{
         qtype::MONTH_LIST => Ok(q_month_to_date(self.as_mut_vec::<I>().unwrap().remove(index))),
-        _ => Err("not a month list")
+        _ => Err(Error::invalid_operation("remove_month", self.0.qtype, Some(qtype::MONTH_LIST)))
       }
     }
   }
@@ -3860,15 +3882,15 @@ impl K{
   ///   assert_eq!(tail, Utc.ymd(2004, 8, 1));
   /// }
   /// ```
-  pub fn remove_date(&mut self, index: usize) -> Result<Date<Utc>, &'static str>{
+  pub fn remove_date(&mut self, index: usize) -> Result<Date<Utc>>{
     if index >= self.len(){
       // 0 length
-      Err("index out of bounds")
+      Err(Error::index_out_of_bounds(self.len(), index))
     }
     else{
       match self.0.qtype{
         qtype::DATE_LIST => Ok(q_date_to_date(self.as_mut_vec::<I>().unwrap().remove(index))),
-        _ => Err("not a date list")
+        _ => Err(Error::invalid_operation("remove_date", self.0.qtype, Some(qtype::DATE_LIST)))
       }
     }
   }
@@ -3886,15 +3908,15 @@ impl K{
   ///   assert_eq!(tail, Utc.ymd(2003, 12, 9).and_hms_milli(19, 58, 30, 326));
   /// }
   /// ```
-  pub fn remove_datetime(&mut self, index: usize) -> Result<DateTime<Utc>, &'static str>{
+  pub fn remove_datetime(&mut self, index: usize) -> Result<DateTime<Utc>>{
     if index >= self.len(){
       // 0 length
-      Err("index out of bounds")
+      Err(Error::index_out_of_bounds(self.len(), index))
     }
     else{
       match self.0.qtype{
         qtype::DATETIME_LIST => Ok(q_datetime_to_datetime(self.as_mut_vec::<F>().unwrap().remove(index))),
-        _ => Err("not a datetime list")
+        _ => Err(Error::invalid_operation("remove_datetime", self.0.qtype, Some(qtype::DATETIME_LIST)))
       }
     }
   }
@@ -3912,15 +3934,15 @@ impl K{
   ///   assert_eq!(tail, Duration::nanoseconds(6782392639932));
   /// }
   /// ```
-  pub fn remove_timespan(&mut self, index: usize) -> Result<Duration, &'static str>{
+  pub fn remove_timespan(&mut self, index: usize) -> Result<Duration>{
     if index >= self.len(){
       // 0 length
-      Err("index out of bounds")
+      Err(Error::index_out_of_bounds(self.len(), index))
     }
     else{
       match self.0.qtype{
         qtype::TIMESPAN_LIST => Ok(Duration::nanoseconds(self.as_mut_vec::<J>().unwrap().remove(index))),
-        _ => Err("not a timespan list")
+        _ => Err(Error::invalid_operation("remove_timespan", self.0.qtype, Some(qtype::TIMESPAN_LIST)))
       }
     }
   }
@@ -3938,15 +3960,15 @@ impl K{
   ///   assert_eq!(tail, Duration::minutes(-503));
   /// }
   /// ```
-  pub fn remove_minute(&mut self, index: usize) -> Result<Duration, &'static str>{
+  pub fn remove_minute(&mut self, index: usize) -> Result<Duration>{
     if index >= self.len(){
       // 0 length
-      Err("index out of bounds")
+      Err(Error::index_out_of_bounds(self.len(), index))
     }
     else{
       match self.0.qtype{
         qtype::MINUTE_LIST => Ok(Duration::minutes(self.as_mut_vec::<I>().unwrap().remove(index) as i64)),
-        _ => Err("not a minute list")
+        _ => Err(Error::invalid_operation("remove_minute", self.0.qtype, Some(qtype::MINUTE_LIST)))
       }
     }
   }
@@ -3964,15 +3986,15 @@ impl K{
   ///   assert_eq!(tail, Duration::seconds(-32467));
   /// }
   /// ```
-  pub fn remove_second(&mut self, index: usize) -> Result<Duration, &'static str>{
+  pub fn remove_second(&mut self, index: usize) -> Result<Duration>{
     if index >= self.len(){
       // 0 length
-      Err("index out of bounds")
+      Err(Error::index_out_of_bounds(self.len(), index))
     }
     else{
       match self.0.qtype{
         qtype::SECOND_LIST => Ok(Duration::seconds(self.as_mut_vec::<I>().unwrap().remove(index) as i64)),
-        _ => Err("not a second list")
+        _ => Err(Error::invalid_operation("remove_second", self.0.qtype, Some(qtype::SECOND_LIST)))
       }
     }
   }
@@ -3990,15 +4012,15 @@ impl K{
   ///   assert_eq!(tail, Duration::milliseconds(278958528));
   /// }
   /// ```
-  pub fn remove_time(&mut self, index: usize) -> Result<Duration, &'static str>{
+  pub fn remove_time(&mut self, index: usize) -> Result<Duration>{
     if index >= self.len(){
       // 0 length
-      Err("index out of bounds")
+      Err(Error::index_out_of_bounds(self.len(), index))
     }
     else{
       match self.0.qtype{
         qtype::TIME_LIST => Ok(Duration::milliseconds(self.as_mut_vec::<I>().unwrap().remove(index) as i64)),
-        _ => Err("not a time list")
+        _ => Err(Error::invalid_operation("remove_time", self.0.qtype, Some(qtype::TIME_LIST)))
       }
     }
   }
@@ -4025,10 +4047,10 @@ impl K{
   ///   assert_eq!(format!("{}", tail), String::from("`u#10000324 -43890"));
   /// }
   /// ```
-  pub fn remove(&mut self, index: usize) -> Result<K, &'static str>{
+  pub fn remove(&mut self, index: usize) -> Result<K>{
     if index >= self.len(){
       // 0 length
-      Err("index out of bounds")
+      Err(Error::index_out_of_bounds(self.len(), index))
     }
     else{
       match self.0.qtype{
@@ -4051,7 +4073,7 @@ impl K{
         qtype::SECOND_LIST => Ok(K::new_second(Duration::seconds(self.as_mut_vec::<I>().unwrap().remove(index) as i64))),
         qtype::TIME_LIST => Ok(K::new_time(Duration::milliseconds(self.as_mut_vec::<I>().unwrap().remove(index) as i64))),
         qtype::COMPOUND_LIST => Ok(self.as_mut_vec::<K>().unwrap().remove(index)),
-        _ => Err("this object cannot remove an element")
+        _ => Err(Error::invalid_operation("remove", self.0.qtype, None))
       }
     }
   } 
@@ -4072,7 +4094,7 @@ impl K{
   ///   assert_eq!(format!("{}", q_dictionary), String::from("0 1 2 3i!2000.01.09 2001.04.10 2015.03.16 2020.08.09"));
   /// }
   /// ```
-  pub fn push_pair(&mut self, key: &dyn Any, value: &dyn Any) -> Result<(), &'static str>{
+  pub fn push_pair(&mut self, key: &dyn Any, value: &dyn Any) -> Result<()>{
     match self.0.qtype{
       qtype::DICTIONARY => {
         let dictionary=self.as_mut_vec::<K>().unwrap();
@@ -4088,7 +4110,7 @@ impl K{
           Err(error) => Err(error)
         }
       },
-      _ => Err("not a dictionary")
+      _ => Err(Error::invalid_operation("push_pair", self.0.qtype, Some(qtype::DICTIONARY)))
     }
   }
 
@@ -4108,7 +4130,7 @@ impl K{
   ///   assert_eq!(format!("{}", q_dictionary), String::from("0 1i!2000.01.09 2001.04.10"));
   /// }
   /// ```
-  pub fn pop_pair(&mut self) -> Result<(K, K), &'static str>{
+  pub fn pop_pair(&mut self) -> Result<(K, K)>{
     match self.0.qtype{
       qtype::DICTIONARY => {
         let dictionary=self.as_mut_vec::<K>().unwrap();
@@ -4117,10 +4139,10 @@ impl K{
         }
         else{
           // Dictionary type assures the result is one of failure for both key and value, or success for both key and value.
-          Err("no element in this object")
+          Err(Error::pop_from_empty_list())
         }
       },
-      _ => Err("not a dictionary")
+      _ => Err(Error::invalid_operation("pop_pair", self.0.qtype, Some(qtype::DICTIONARY)))
     }
   }
 
@@ -4222,7 +4244,7 @@ impl K{
   ///   assert_eq!(format!("{}", q_table), String::from("+`a`b`c!(10 20 30i;`honey`sugar`maple;001b)"));
   /// }
   /// ```
-  pub fn flip(self) -> Result<Self, Self>{
+  pub fn flip(self) -> Result<Self>{
     match self.0.qtype{
       qtype::DICTIONARY | qtype::SORTED_DICTIONARY => {
         let keys_values=(&self).as_vec::<K>().unwrap();
@@ -4230,16 +4252,17 @@ impl K{
           Ok(K::new(qtype::TABLE, qattribute::NONE, k0_inner::table(self)))
         }
         else{
-          Err(self)
+          Err(Error::object(self))
         }
       },
       // Failed to convert. Return the original argument.
-      _ => Err(self)
+      _ => Err(Error::object(self))
     }
   }
 
   /// Convert a table into a keyed table with the first `n` columns ebing keys.
-  ///  In case of error for type mismatch the original object is returned.
+  ///  In case of error for type mismatch the original object is returned. The
+  ///  returned object is wrapped in error enum and can be retrieved by [``into_inner](error.into_inner).
   ///  # Example
   /// ```
   /// use kdbplus::qattribute;
@@ -4260,7 +4283,7 @@ impl K{
   ///   assert_eq!(format!("{}", q_keyed_table), String::from("(+,`a!,10 20 30i)!(+`b`c!(`honey`sugar`maple;001b))"));
   /// }
   /// ```
-  pub fn enkey(self, mut n: usize) -> Result<Self, Self>{
+  pub fn enkey(self, mut n: usize) -> Result<Self>{
     match self.0.value{
       k0_inner::table(mut dictionary) => {
         let headers_columns=dictionary.as_mut_vec::<K>().unwrap();
@@ -4275,7 +4298,7 @@ impl K{
         Ok(K::new_dictionary(dictionary.flip().unwrap(), value_table).expect("failed to build keyed table"))
       },
       // Not a table. Return the original argument.
-      _ => Err(self)
+      _ => Err(Error::object(self))
     }
   }
 
@@ -4303,7 +4326,7 @@ impl K{
   ///   assert_eq!(format!("{}", revived_table), String::from("+`a`b`c!(10 20 30i;`honey`sugar`maple;001b)"));
   /// }
   /// ```
-  pub fn unkey(mut self) -> Result<Self, Self>{
+  pub fn unkey(mut self) -> Result<Self>{
     match self.0.qtype{
       qtype::DICTIONARY => {
         // Key table and value table
@@ -4333,17 +4356,17 @@ impl K{
         }
       },
       // Not a keyed table. Return the original argument.
-      _ => Err(self)
+      _ => Err(Error::object(self))
     }
   }
 
 }
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-//                          Private Functions                           //
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
+// >> Private Functions
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 
-//%% Constructors //%%vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% Constructors //%%vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 /// Convert `DateTime<Utc>` into `i64`. The returned value is an elapsed time in nanoseconds since `2000.01.01D00:00:00`.
 fn datetime_to_q_timestamp(timestamp: DateTime<Utc>)->i64{
@@ -4546,14 +4569,9 @@ pub(crate) fn q_time_to_duration(millis: i32) -> Duration{
   Duration::milliseconds(millis as i64)
 }
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-//                           Public Functions                           //
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-
-
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-//                            Load Modules                              //
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
+// >> Load Modules
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 
 mod format;
 mod serialize;

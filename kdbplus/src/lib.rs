@@ -15,9 +15,9 @@
 //! 
 //! You can find detail descriptions of each feature under corresponding module page.
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-//                          Global Variables                            //
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
+// >> Global Variables
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 
 pub mod qtype{
   //! This module provides a list of q types. The motivation to contain them in a module is to 
@@ -396,9 +396,9 @@ pub mod qninf_base{
   pub const F: c_double=c_double::NEG_INFINITY;
 }
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-//                           Export Modules                             //
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
+// >> Export Modules
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 
 #[cfg(feature = "api")]
 pub mod api;

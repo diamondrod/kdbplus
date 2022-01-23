@@ -1,10 +1,10 @@
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-//                            Load Libraries                            //
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
+// >> Load Libraries
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 
 use super::serialize::ENCODING;
 use super::{K, qtype};
-
+use super::Result;
 use std::convert::TryInto;
 use std::path::Path;
 use std::net::{IpAddr, Ipv4Addr};
@@ -17,16 +17,16 @@ use tokio::io::{AsyncReadExt, AsyncWriteExt, BufReader};
 use tokio::net::{TcpStream, TcpListener};
 use tokio_native_tls::native_tls::{TlsConnector as TlsConnectorInner, TlsAcceptor as TlsAcceptorInner, Identity};
 use tokio_native_tls::{TlsStream, TlsConnector, TlsAcceptor};
-use sha1::Sha1;
+use sha1_smol::Sha1;
 use once_cell::sync::Lazy;
 #[cfg(unix)]
 use tokio::net::{UnixStream, UnixListener};
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-//                           Global Variable                            //
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
+// >> Global Variable
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 
-//%% QStream %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% QStream %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 pub mod qmsg_type{
   //! This module provides a list of q message type used for IPC.
@@ -35,7 +35,6 @@ pub mod qmsg_type{
   //! 
   //! # Example
   //! ```no_run
-  //! use std::io;
   //! use kdbplus::ipc::*;
   //! 
   //! // Print `K` object.
@@ -49,7 +48,7 @@ pub mod qmsg_type{
   //! }
   //! 
   //! #[tokio::main]
-  //! async fn main() -> io::Result<()>{
+  //! async fn main() -> Result<()>{
   //! 
   //!   // Connect to qprocess running on localhost:5000 via TCP
   //!   let mut socket=QStream::connect(ConnectionMethod::TCP, "localhost", 5000_u16, "ideal:person").await?;
@@ -107,7 +106,7 @@ pub mod qmsg_type{
   pub const response:u8 = 2;
 }
 
-//%% QStream Acceptor %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% QStream Acceptor %%//vvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 /// Map from user name to password hashed with SHA1.
 const ACCOUNTS:Lazy<HashMap<String, String>>=Lazy::new(||{
@@ -135,11 +134,11 @@ const ACCOUNTS:Lazy<HashMap<String, String>>=Lazy::new(||{
   map
 });
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-//                               Structs                                //
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
+// >> Structs
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 
-//%% ConnectionMethod %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% ConnectionMethod %%//vvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 /// Connection method to q/kdb+.
 pub enum ConnectionMethod{
@@ -149,7 +148,7 @@ pub enum ConnectionMethod{
   UDS = 2
 }
 
-//%% Query %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% Query %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 /// Feature of query object.
 #[async_trait]
@@ -165,39 +164,39 @@ pub trait Query: Send + Sync{
   async fn serialize(&self, message_type: u8, is_local: bool) -> Vec<u8>;
 }
 
-//%% QStreamInner %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% QStreamInner %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 /// Features which streams communicating with q must have.
 #[async_trait]
 trait QStreamInner: Send + Sync{
   /// Shutdown underlying stream.
-  async fn shutdown(&mut self, is_server: bool) -> io::Result<()>;
+  async fn shutdown(&mut self, is_server: bool) -> Result<()>;
   /// Send a message with a specified message type without waiting for a response.
   /// # Parameters
   /// - `message`: q command to execute on the remote q process.
   /// - `message_type`: Asynchronous or synchronous.
   /// - `is_local`: Flag of whether the connection is within the same host.
-  async fn send_message(&mut self, message: &dyn Query, message_type: u8, is_local: bool) -> io::Result<()>;
+  async fn send_message(&mut self, message: &dyn Query, message_type: u8, is_local: bool) -> Result<()>;
   /// Send a message asynchronously.
   /// # Parameters
   /// - `message`: q command in two ways:
   ///   - `&str`: q command in a string form.
   ///   - `K`: Query in a functional form.
   /// - `is_local`: Flag of whether the connection is within the same host.
-  async fn send_async_message(&mut self, message: &dyn Query, is_local: bool) -> io::Result<()>;
+  async fn send_async_message(&mut self, message: &dyn Query, is_local: bool) -> Result<()>;
   /// Send a message asynchronously.
   /// # Parameters
   /// - `message`: q command in two ways:
   ///   - `&str`: q command in a string form.
   ///   - `K`: Query in a functional form.
   /// - `is_local`: Flag of whether the connection is within the same host.
-  async fn send_sync_message(&mut self, message: &dyn Query, is_local: bool) -> io::Result<K>;
+  async fn send_sync_message(&mut self, message: &dyn Query, is_local: bool) -> Result<K>;
   /// Receive a message from a remote q process. The received message is parsed as `K` and message type is
   ///  stored in the first returned value.
-  async fn receive_message(&mut self) ->io::Result<(u8, K)>;
+  async fn receive_message(&mut self) -> Result<(u8, K)>;
 }
 
-//%% QStream %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% QStream %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 /// Stream to communicate with q/kdb+.
 pub struct QStream{
@@ -218,7 +217,7 @@ pub struct QStream{
   local: bool
 }
 
-//%% MessageHeader %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% MessageHeader %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 /// Header of q IPC data frame.
 #[derive(Clone, Copy, Debug)]
@@ -237,16 +236,16 @@ struct MessageHeader{
   /// - 1: Compressed
   compressed: u8,
   /// Reserved byte.
-  unused: u8,
+  _unused: u8,
   /// Total length of the uncompressed message.
   length: u32
 }
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-//                            Implementation                            //
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
+// >> Implementation
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 
-//%% Query %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% Query %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 /// Text query.
 #[async_trait]
@@ -336,7 +335,7 @@ impl Query for K{
   }
 }
 
-//%% QStream %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% QStream %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 impl QStream{
 
@@ -363,10 +362,9 @@ impl QStream{
   /// ```
   /// use kdbplus::qattribute;
   /// use kdbplus::ipc::*;
-  /// use std::io;
   ///
   /// #[tokio::main(flavor = "multi_thread", worker_threads = 2)]
-  /// async fn main()->io::Result<()>{
+  /// async fn main()-> Result<()>{
   ///   let mut socket=QStream::connect(ConnectionMethod::UDS, "", 5000_u16, "ideal:person").await?;
   ///   println!("Connection type: {}", socket.get_connection_type());
   /// 
@@ -391,7 +389,7 @@ impl QStream{
   ///   Ok(())
   /// }
   /// ```
-  pub async fn connect(method: ConnectionMethod, host: &str, port: u16, credential: &str) -> io::Result<Self>{
+  pub async fn connect(method: ConnectionMethod, host: &str, port: u16, credential: &str) -> Result<Self>{
     match method{
       ConnectionMethod::TCP => {
         let stream=connect_tcp(host, port, credential).await?;
@@ -422,11 +420,10 @@ impl QStream{
   /// - port: Listening port.
   /// # Example
   /// ```no_run
-  /// use std::io;
   /// use kdbplus::ipc::*;
   ///  
   /// #[tokio::main]
-  /// async fn main() -> io::Result<()>{
+  /// async fn main() -> Result<()>{
   /// 
   ///   // Start listenening over UDS at the port 7000 with authentication enabled.
   ///   while let Ok(mut socket) = QStream::accept(ConnectionMethod::UDS, "", 7000).await{
@@ -464,7 +461,7 @@ impl QStream{
   /// - TLS acceptor sets `.kdbplus.close_tls_connection_` on q clien via an asynchronous message. This function is necessary to close
   ///  the socket from the server side without crashing server side application.
   /// - TLS acceptor and UDS acceptor use specific environmental variables to work. See the [Environmental Variable](../ipc/index.html#environmentl-variables) section for details.
-  pub async fn accept(method: ConnectionMethod, host: &str, port: u16) -> io::Result<Self>{
+  pub async fn accept(method: ConnectionMethod, host: &str, port: u16) -> Result<Self>{
     
     match method{
       ConnectionMethod::TCP => {
@@ -527,7 +524,7 @@ impl QStream{
   /// Shutdown the socket for a q process.
   /// # Example
   /// See the example of [`connect`](#method.connect).
-  pub async fn shutdown(mut self)-> io::Result<()>{
+  pub async fn shutdown(mut self)-> Result<()>{
     self.stream.shutdown(self.listener).await
   }
 
@@ -543,7 +540,7 @@ impl QStream{
   /// - `message_type`: Asynchronous or synchronous.
   /// # Example
   /// See the example of [`connect`](#method.connect).
-  pub async fn send_message(&mut self, message: &dyn Query, message_type: u8)-> io::Result<()>{
+  pub async fn send_message(&mut self, message: &dyn Query, message_type: u8)-> Result<()>{
     self.stream.send_message(message, message_type, self.local).await
   }
 
@@ -554,7 +551,7 @@ impl QStream{
   ///   - `K`: Query in a functional form.
   /// # Example
   /// See the example of [`connect`](#method.connect).
-  pub async fn send_async_message(&mut self, message: &dyn Query)-> io::Result<()>{
+  pub async fn send_async_message(&mut self, message: &dyn Query)-> Result<()>{
     self.stream.send_async_message(message, self.local).await
   }
 
@@ -567,7 +564,7 @@ impl QStream{
   ///   - `K`: Query in a functional form.
   /// # Example
   /// See the example of [`connect`](#method.connect).
-  pub async fn send_sync_message(&mut self, message: &dyn Query)-> io::Result<K>{
+  pub async fn send_sync_message(&mut self, message: &dyn Query)-> Result<K>{
     self.stream.send_sync_message(message, self.local).await
   }
 
@@ -575,7 +572,7 @@ impl QStream{
   ///  stored in the first returned value.
   /// # Example
   /// See the example of [`accept`](#method.accept).
-  pub async fn receive_message(&mut self) -> io::Result<(u8, K)>{
+  pub async fn receive_message(&mut self) -> Result<(u8, K)>{
     self.stream.receive_message().await
   }
 
@@ -598,30 +595,33 @@ impl QStream{
 
 }
 
-//%% QStreamInner %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% QStreamInner %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 #[async_trait]
 impl QStreamInner for TcpStream{
 
-  async fn shutdown(&mut self, _: bool) -> io::Result<()>{
-    AsyncWriteExt::shutdown(self).await
+  async fn shutdown(&mut self, _: bool) -> Result<()>{
+    AsyncWriteExt::shutdown(self).await?;
+    Ok(())
   }
 
-  async fn send_message(&mut self, message: &dyn Query, message_type: u8, is_local: bool) -> io::Result<()>{
+  async fn send_message(&mut self, message: &dyn Query, message_type: u8, is_local: bool) -> Result<()>{
     // Serialize a message
     let byte_message=message.serialize(message_type, is_local).await;
     // Send the message
-    self.write_all(&byte_message).await
+    self.write_all(&byte_message).await?;
+    Ok(())
   }
 
-  async fn send_async_message(&mut self, message: &dyn Query, is_local: bool) -> io::Result<()>{
+  async fn send_async_message(&mut self, message: &dyn Query, is_local: bool) -> Result<()>{
     // Serialize a message
     let byte_message=message.serialize(qmsg_type::asynchronous, is_local).await;
     // Send the message
-    self.write_all(&byte_message).await
+    self.write_all(&byte_message).await?;
+    Ok(())
   }
 
-  async fn send_sync_message(&mut self, message: &dyn Query, is_local: bool) -> io::Result<K>{
+  async fn send_sync_message(&mut self, message: &dyn Query, is_local: bool) -> Result<K>{
     // Serialize a message
     let byte_message=message.serialize(qmsg_type::synchronous, is_local).await;
     // Send the message
@@ -630,43 +630,46 @@ impl QStreamInner for TcpStream{
     match receive_message(self).await{
       Ok((qmsg_type::response, response)) => Ok(response),
       Err(error) => Err(error),
-      Ok((_ , message)) => Err(io::Error::new(io::ErrorKind::InvalidData, format!("expected a response: {}", message)))
+      Ok((_ , message)) => Err(io::Error::new(io::ErrorKind::InvalidData, format!("expected a response: {}", message)).into())
     }
   }
 
-  async fn receive_message(&mut self) -> io::Result<(u8, K)>{
+  async fn receive_message(&mut self) -> Result<(u8, K)>{
     receive_message(self).await
   }
 }
 
 #[async_trait]
 impl QStreamInner for TlsStream<TcpStream>{
-  async fn shutdown(&mut self, is_listener: bool) -> io::Result<()>{
+  async fn shutdown(&mut self, is_listener: bool) -> Result<()>{
     if is_listener{
       // Closing the handle from the server side by `self.get_mut().shutdown()` crashes due to 'assertion failed: !self.context.is_null()'.
       // No reason to compress.
-      self.send_async_message(&".kdbplus.close_tls_connection_[]", false).await
+      self.send_async_message(&".kdbplus.close_tls_connection_[]", false).await.into()
     }
     else{
-      self.get_mut().shutdown()
+      self.get_mut().shutdown()?;
+      Ok(())
     }
   }
 
-  async fn send_message(&mut self, message: &dyn Query, message_type: u8, is_local: bool) -> io::Result<()>{
+  async fn send_message(&mut self, message: &dyn Query, message_type: u8, is_local: bool) -> Result<()>{
     // Serialize a message
     let byte_message=message.serialize(message_type, is_local).await;
     // Send the message
-    self.write_all(&byte_message).await
+    self.write_all(&byte_message).await?;
+    Ok(())
   }
 
-  async fn send_async_message(&mut self, message: &dyn Query, is_local: bool) -> io::Result<()>{
+  async fn send_async_message(&mut self, message: &dyn Query, is_local: bool) -> Result<()>{
     // Serialize a message
     let byte_message=message.serialize(qmsg_type::asynchronous, is_local).await;
     // Send the message
-    self.write_all(&byte_message).await
+    self.write_all(&byte_message).await?;
+    Ok(())
   }
 
-  async fn send_sync_message(&mut self, message: &dyn Query, is_local: bool) -> io::Result<K>{
+  async fn send_sync_message(&mut self, message: &dyn Query, is_local: bool) -> Result<K>{
     // Serialize a message
     let byte_message=message.serialize(qmsg_type::synchronous, is_local).await;
     // Send the message
@@ -675,11 +678,11 @@ impl QStreamInner for TlsStream<TcpStream>{
     match receive_message(self).await{
       Ok((qmsg_type::response, response)) => Ok(response),
       Err(error) => Err(error),
-      Ok((_ , message)) => Err(io::Error::new(io::ErrorKind::InvalidData, format!("expected a response: {}", message)))
+      Ok((_ , message)) => Err(io::Error::new(io::ErrorKind::InvalidData, format!("expected a response: {}", message)).into())
     }
   }
 
-  async fn receive_message(&mut self) -> io::Result<(u8, K)>{
+  async fn receive_message(&mut self) -> Result<(u8, K)>{
     receive_message(self).await
   }
 
@@ -689,25 +692,28 @@ impl QStreamInner for TlsStream<TcpStream>{
 impl QStreamInner for UnixStream{
   /// Close a handle to a q process which is connected with Unix Domain Socket.
   ///  Socket file is removed.
-  async fn shutdown(&mut self, _: bool) -> io::Result<()>{
-    AsyncWriteExt::shutdown(self).await
+  async fn shutdown(&mut self, _: bool) -> Result<()>{
+    AsyncWriteExt::shutdown(self).await?;
+    Ok(())
   }
 
-  async fn send_message(&mut self, message: &dyn Query, message_type: u8, is_local: bool) -> io::Result<()>{
+  async fn send_message(&mut self, message: &dyn Query, message_type: u8, is_local: bool) -> Result<()>{
     // Serialize a message
     let byte_message=message.serialize(message_type, is_local).await;
     // Send the message
-    self.write_all(&byte_message).await
+    self.write_all(&byte_message).await?;
+    Ok(())
   }
 
-  async fn send_async_message(&mut self, message: &dyn Query, is_local: bool) -> io::Result<()>{
+  async fn send_async_message(&mut self, message: &dyn Query, is_local: bool) -> Result<()>{
     // Serialize a message
     let byte_message=message.serialize(qmsg_type::asynchronous, is_local).await;
     // Send the message
-    self.write_all(&byte_message).await
+    self.write_all(&byte_message).await?;
+    Ok(())
   }
 
-  async fn send_sync_message(&mut self, message: &dyn Query, is_local: bool) -> io::Result<K>{
+  async fn send_sync_message(&mut self, message: &dyn Query, is_local: bool) -> Result<K>{
     // Serialize a message
     let byte_message=message.serialize(qmsg_type::synchronous, is_local).await;
     // Send the message
@@ -716,16 +722,16 @@ impl QStreamInner for UnixStream{
     match receive_message(self).await{
       Ok((qmsg_type::response, response)) => Ok(response),
       Err(error) => Err(error),
-      Ok((_ , message)) => Err(io::Error::new(io::ErrorKind::InvalidData, format!("expected a response: {}", message)))
+      Ok((_ , message)) => Err(io::Error::new(io::ErrorKind::InvalidData, format!("expected a response: {}", message)).into())
     }
   }
 
-  async fn receive_message(&mut self) -> io::Result<(u8, K)>{
+  async fn receive_message(&mut self) -> Result<(u8, K)>{
     receive_message(self).await
   }
 }
 
-//%% MessageHeader %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% MessageHeader %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 impl MessageHeader{
 
@@ -735,7 +741,7 @@ impl MessageHeader{
       encoding: encoding,
       message_type: message_type,
       compressed: compressed,
-      unused: 0,
+      _unused: 0,
       length: length
     }
   }
@@ -760,11 +766,11 @@ impl MessageHeader{
   }
 }
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-//                          Private Functions                           //
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
+// >> Private Functions
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 
-//%% QStream Connector %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% QStream Connector %%//vvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 /// Inner function of `connect_tcp` and `connect_tls` to establish a TCP connection with the sepcified
 ///  endpoint. The hostname is resolved to an IP address with a system DNS resolver or parsed directly
@@ -775,7 +781,7 @@ impl MessageHeader{
 /// # Parameters
 /// - `host`: Hostname or IP address of the target q/kdb+ process.
 /// - `port`: Port of the target q process
-async fn connect_tcp_impl(host: &str, port: u16) -> io::Result<TcpStream>{
+async fn connect_tcp_impl(host: &str, port: u16) -> Result<TcpStream>{
   // DNS system resolver (should not fail)
   let resolver=TokioAsyncResolver::tokio_from_system_conf().expect("failed to create a resolver");
 
@@ -803,11 +809,11 @@ async fn connect_tcp_impl(host: &str, port: u16) -> io::Result<TcpStream>{
     }
   }
   // All addresses failed.
-  Err(io::Error::new(io::ErrorKind::ConnectionRefused, "failed to connect"))
+  Err(io::Error::new(io::ErrorKind::ConnectionRefused, "failed to connect").into())
 }
 
 /// Send a credential and receive a common capacity.
-async fn handshake<S>(socket: &mut S, credential_: &str, method_bytes: &str) -> io::Result<()> where S: Unpin + AsyncWriteExt + AsyncReadExt{
+async fn handshake<S>(socket: &mut S, credential_: &str, method_bytes: &str) -> Result<()> where S: Unpin + AsyncWriteExt + AsyncReadExt{
   // Send credential
   let credential=credential_.to_string()+method_bytes;
   socket.write_all(credential.as_bytes()).await?;
@@ -816,7 +822,7 @@ async fn handshake<S>(socket: &mut S, credential_: &str, method_bytes: &str) -> 
   let mut cap= [0u8;1];
   if let Err(_)=socket.read_exact(&mut cap).await{
     // Connection is closed in case of authentication failure
-    Err(io::Error::new(io::ErrorKind::ConnectionAborted, "authentication failure"))
+    Err(io::Error::new(io::ErrorKind::ConnectionAborted, "authentication failure").into())
   }
   else{
     Ok(())
@@ -828,7 +834,7 @@ async fn handshake<S>(socket: &mut S, credential_: &str, method_bytes: &str) -> 
 /// - `host`: Hostname or IP address of the target q process.
 /// - `port`: Port of the target q process.
 /// - `credential`: Credential in the form of `username:password` to connect to the target q process.
-async fn connect_tcp(host: &str, port: u16, credential: &str) -> io::Result<TcpStream>{
+async fn connect_tcp(host: &str, port: u16, credential: &str) -> Result<TcpStream>{
   // Connect via TCP
   let mut socket=connect_tcp_impl(host, port).await?;
   // Handshake
@@ -841,7 +847,7 @@ async fn connect_tcp(host: &str, port: u16, credential: &str) -> io::Result<TcpS
 /// - `host`: Hostname or IP address of the target q process.
 /// - `port`: Port of the target q process.
 /// - `credential`: Credential in the form of `username:password` to connect to the target q process.
-async fn connect_tls(host: &str, port: u16, credential: &str) -> io::Result<TlsStream<TcpStream>>{
+async fn connect_tls(host: &str, port: u16, credential: &str) -> Result<TlsStream<TcpStream>>{
   // Connect via TCP
   let socket_=connect_tcp_impl(host, port).await?;
   // Use TLS
@@ -853,7 +859,7 @@ async fn connect_tls(host: &str, port: u16, credential: &str) -> io::Result<TlsS
 }
 
 /// Build a path of a socket file.
-fn create_sockfile_path(port: u16) -> io::Result<String>{
+fn create_sockfile_path(port: u16) -> Result<String>{
   // Create file path
   let udspath=match env::var("QUDSPATH"){
     Ok(dir) => format!("{}/kx.{}", dir, port),
@@ -868,8 +874,7 @@ fn create_sockfile_path(port: u16) -> io::Result<String>{
 /// - `port`: Port of the target q process.
 /// - `credential`: Credential in the form of `username:password` to connect to the target q process.
 #[cfg(unix)]
-//async fn connect_uds(port: u16, credential: &str) -> io::Result<UnixStream>{
-async fn connect_uds(port: u16, credential: &str) -> io::Result<UnixStream>{
+async fn connect_uds(port: u16, credential: &str) -> Result<UnixStream>{
 
   // Create a file path.
   let uds_path=create_sockfile_path(port)?;
@@ -883,11 +888,11 @@ async fn connect_uds(port: u16, credential: &str) -> io::Result<UnixStream>{
   Ok(socket)
 }
 
-//%% QStream Acceptor %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% QStream Acceptor %%//vvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 /// Read username, password, capacity and null byte from q client at the connection and does authentication.
 ///  Close the handle if the authentication fails.
-async fn read_client_input<S>(socket: &mut S) -> io::Result<()> where S: Unpin + AsyncWriteExt + AsyncReadExt{
+async fn read_client_input<S>(socket: &mut S) -> Result<()> where S: Unpin + AsyncWriteExt + AsyncReadExt{
   // Buffer to read inputs.
   let mut client_input=[0u8; 32];
   // credential will be built from small fractions of bytes.
@@ -918,14 +923,14 @@ async fn read_client_input<S>(socket: &mut S) -> io::Result<()> where S: Unpin +
               // Authentication failure.
               // Close connection.
               socket.shutdown().await?;
-              return Err(io::Error::new(io::ErrorKind::InvalidData, "authentication failed"));
+              return Err(io::Error::new(io::ErrorKind::InvalidData, "authentication failed").into());
             }
           }
           else{
             // Authentication failure.
             // Close connection.
             socket.shutdown().await?;
-            return Err(io::Error::new(io::ErrorKind::InvalidData, "authentication failed"));
+            return Err(io::Error::new(io::ErrorKind::InvalidData, "authentication failed").into());
           }
         }
         else{
@@ -934,14 +939,14 @@ async fn read_client_input<S>(socket: &mut S) -> io::Result<()> where S: Unpin +
         }
       },
       Err(error) => {
-        return Err(error);
+        return Err(error.into());
       }
     }
   }
 }
 
 /// Check if server key exists and return teh contents.
-async fn build_identity_from_cert() -> io::Result<Identity>{
+async fn build_identity_from_cert() -> Result<Identity>{
   // Check if server key exists.
   if let Ok(path) = env::var("KDBPLUS_TLS_KEY_FILE"){
     if let Ok(password) = env::var("KDBPLUS_TLS_KEY_FILE_SECRET"){
@@ -955,30 +960,30 @@ async fn build_identity_from_cert() -> io::Result<Identity>{
         return Ok(identity);
       }
       else{
-        return Err(io::Error::new(io::ErrorKind::InvalidData, "authentication failed"));
+        return Err(io::Error::new(io::ErrorKind::InvalidData, "authentication failed").into());
       }
     }
     else{
-      return Err(io::Error::new(io::ErrorKind::NotFound, "KDBPLUS_TLS_KEY_FILE_SECRET is not set"));
+      return Err(io::Error::new(io::ErrorKind::NotFound, "KDBPLUS_TLS_KEY_FILE_SECRET is not set").into());
     }
   }
   else{
-    return Err(io::Error::new(io::ErrorKind::NotFound, "KDBPLUS_TLS_KEY_FILE is not set"));
+    return Err(io::Error::new(io::ErrorKind::NotFound, "KDBPLUS_TLS_KEY_FILE is not set").into());
   }
 }
 
-//%% QStream Query %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+//%% QStream Query %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 /// Receive a message from q process with decompression if necessary. The received message is parsed as `K` and message type is
 ///  stored in the first returned value.
 /// # Parameters
 /// - `socket`: Socket to communicate with a q process. Either of `TcpStream`, `TlsStream<TcpStream>` or `UnixStream`.
-async fn receive_message<S>(socket: &mut S) -> io::Result<(u8, K)> where S: Unpin + AsyncReadExt{
+async fn receive_message<S>(socket: &mut S) -> Result<(u8, K)> where S: Unpin + AsyncReadExt{
   // Read header
   let mut header_buffer=[0u8; 8];
   if let Err(err)=socket.read_exact(&mut header_buffer).await{
     // The expected message is header or EOF (close due to q process failure resulting from a bad query)
-    return Err(io::Error::new(io::ErrorKind::ConnectionAborted, format!("Connection dropped: {}", err)));
+    return Err(io::Error::new(io::ErrorKind::ConnectionAborted, format!("Connection dropped: {}", err)).into());
   }
 
   // Parse message header
@@ -990,7 +995,7 @@ async fn receive_message<S>(socket: &mut S) -> io::Result<(u8, K)> where S: Unpi
   body.resize(body_length, 0_u8);
   if let Err(err)=socket.read_exact(&mut body).await{
     // Fails if q process fails before reading the body
-    return Err(io::Error::new(io::ErrorKind::UnexpectedEof, format!("Failed to read body of message: {}", err)));
+    return Err(io::Error::new(io::ErrorKind::UnexpectedEof, format!("Failed to read body of message: {}", err)).into());
   }
 
   // Decompress if necessary

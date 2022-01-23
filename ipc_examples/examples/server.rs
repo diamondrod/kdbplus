@@ -6,11 +6,10 @@
 //! - A file path to a credential file must be set on `KDBPLUS_ACCOUNT_FILE`. See the README or the module document for the detail of the file format.
 //! - You can set an environmental variable `QUDSPATH`to change the default abstract namespace. See the README or the module document for the detail.
 
-use std::io;
 use kdbplus::ipc::*;
 
 #[tokio::main]
-async fn main() -> io::Result<()>{
+async fn main() -> Result<()>{
 
   // Start listenening over UDS at the port 7000.
   while let Ok(mut socket) = QStream::accept(ConnectionMethod::UDS, "", 7000).await{

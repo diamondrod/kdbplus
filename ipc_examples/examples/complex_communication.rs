@@ -1,4 +1,3 @@
-use std::io;
 use kdbplus::ipc::*;
 
 // Print `K` object.
@@ -12,7 +11,7 @@ fn nonsense(arg1: i64, arg2: i64) -> i64{
 }
 
 #[tokio::main]
-async fn main() -> io::Result<()>{
+async fn main() -> Result<()>{
 
   // Connect to qprocess running on localhost:5000 via TCP
   let mut socket=QStream::connect(ConnectionMethod::TCP, "localhost", 5000_u16, "ideal:person").await?;

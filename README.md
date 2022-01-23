@@ -92,10 +92,9 @@ the inner type is `i64` denoting an elapsed time in nanoseconds since `2000.01.0
 
 ```rust
 use kdbplus::ipc::*;
-use std::io;
 
 #[tokio::main(flavor = "multi_thread", worker_threads = 2)]
-async fn main()->io::Result<()>{
+async fn main() -> Result<()>{
 
   // Connect to qprocess running on localhost:5000 via UDS
   let mut socket=QStream::connect(ConnectionMethod::UDS, "", 5000_u16, "ideal:person").await?;
@@ -135,11 +134,10 @@ async fn main()->io::Result<()>{
 #### Listener
 
 ```rust
-use std::io;
 use kdbplus::ipc::*;
 
 #[tokio::main]
-async fn main() -> io::Result<()>{
+async fn main() -> Result<()>{
 
   // Start listenening over TCP at the port 7000 with authentication enabled.
   let mut socket_tcp=QStream::accept(ConnectionMethod::TCP, "127.0.0.1", 7000).await?;

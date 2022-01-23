@@ -6,6 +6,7 @@
 extern crate float_cmp;
 
 use kdbplus::*;
+use kdbplus::ipc::error::Error;
 use kdbplus::ipc::*;
 use chrono::prelude::*;
 use chrono::Duration;
@@ -39,7 +40,7 @@ macro_rules! add_null {
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 
 #[test]
-fn format_test()->Result<(), &'static str>{
+fn format_test()->Result<()>{
 
   // bool true
   let q_bool_true=K::new_bool(true);
@@ -436,7 +437,7 @@ fn format_test()->Result<(), &'static str>{
 }
 
 #[test]
-fn getter_test() -> Result<(), &'static str>{
+fn getter_test() -> Result<()>{
 
   // bool
   let q_bool=K::new_bool(true);
@@ -447,63 +448,63 @@ fn getter_test() -> Result<(), &'static str>{
   // guid
   let q_guid=K::new_guid([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]);
   assert_eq!(q_guid.get_guid(), Ok([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]));
-  assert_eq!(q_guid.get_bool(), Err("not a bool"));
+  assert_eq!(q_guid.get_bool(), Err(Error::InvalidCast{from: "guid", to: "bool"}));
   assert_eq!(q_guid.get_type(), qtype::GUID_ATOM);
 
   // byte
   let q_byte=K::new_byte(0x77);
   assert_eq!(q_byte.get_byte(), Ok(0x77));
-  assert_eq!(q_byte.get_guid(), Err("not a GUID"));
+  assert_eq!(q_byte.get_guid(), Err(Error::InvalidCast{from: "byte", to: "guid"}));
   assert_eq!(q_byte.get_type(), qtype::BYTE_ATOM);
 
   // short
   let q_short=K::new_short(-12);
   assert_eq!(q_short.get_short(), Ok(-12));
-  assert_eq!(q_short.get_byte(), Err("not a byte compatible"));
+  assert_eq!(q_short.get_byte(), Err(Error::InvalidCast{from: "short", to: "byte"}));
   assert_eq!(q_short.get_type(), qtype::SHORT_ATOM);
 
   // int
   let q_int=K::new_int(144000);
   assert_eq!(q_int.get_int(), Ok(144000));
-  assert_eq!(q_int.get_short(), Err("not a short"));
+  assert_eq!(q_int.get_short(), Err(Error::InvalidCast{from: "int", to: "short"}));
   assert_eq!(q_int.get_type(), qtype::INT_ATOM);
 
   // long
   let q_long=K::new_long(86400000000000);
   assert_eq!(q_long.get_long(), Ok(86400000000000));
-  assert_eq!(q_long.get_int(), Err("not an int compatible"));
+  assert_eq!(q_long.get_int(), Err(Error::InvalidCast{from: "long", to: "int"}));
   assert_eq!(q_long.get_type(), qtype::LONG_ATOM);
 
   // real
   let q_real=K::new_real(0.25);
   assert_eq!(q_real.get_real(), Ok(0.25));
-  assert_eq!(q_real.get_long(), Err("not a long compatible"));
+  assert_eq!(q_real.get_long(), Err(Error::InvalidCast{from: "real", to: "long"}));
   assert_eq!(q_real.get_type(), qtype::REAL_ATOM);
 
   // float
   let q_float=K::new_float(1000.23456);
   assert_eq!(q_float.get_float(), Ok(1000.23456));
-  assert_eq!(q_float.get_real(), Err("not a real"));
+  assert_eq!(q_float.get_real(), Err(Error::InvalidCast{from: "float", to: "real"}));
   assert_eq!(q_float.get_type(), qtype::FLOAT_ATOM);
 
   // char
   let q_char=K::new_char('C');
   assert_eq!(q_char.get_char(), Ok('C'));
   assert_eq!(q_char.get_byte(), Ok('C' as u8));
-  assert_eq!(q_char.get_float(), Err("not a float compatible"));
+  assert_eq!(q_char.get_float(), Err(Error::InvalidCast{from: "char", to: "float"}));
   assert_eq!(q_char.get_type(), qtype::CHAR);
 
   // symbol
   let q_symbol=K::new_symbol(String::from("Rust"));
   assert_eq!(q_symbol.get_symbol(), Ok("Rust"));
-  assert_eq!(q_symbol.get_char(), Err("not a char"));
+  assert_eq!(q_symbol.get_char(), Err(Error::InvalidCast{from: "symbol", to: "char"}));
   assert_eq!(q_symbol.get_type(), qtype::SYMBOL_ATOM);
 
   // timestamp
   let q_timestamp=K::new_timestamp(Utc.ymd(2001, 9, 15).and_hms_nano(4, 2, 30, 37204));
   assert_eq!(q_timestamp.get_timestamp(), Ok(Utc.ymd(2001, 9, 15).and_hms_nano(4, 2, 30, 37204)));
   assert_eq!(q_timestamp.get_long(), Ok(53841750000037204));
-  assert_eq!(q_timestamp.get_symbol(), Err("neither a symbol nor an error"));
+  assert_eq!(q_timestamp.get_symbol(), Err(Error::InvalidCast{from: "timestamp", to: "symbol"}));
   assert_eq!(q_timestamp.get_type(), qtype::TIMESTAMP_ATOM);
 
   // timestamp null
@@ -525,7 +526,7 @@ fn getter_test() -> Result<(), &'static str>{
   let q_month=K::new_month(Utc.ymd(2007, 8, 30));
   assert_eq!(q_month.get_month(), Ok(Utc.ymd(2007, 8, 1)));
   assert_eq!(q_month.get_int(), Ok(91));
-  assert_eq!(q_month.get_timestamp(), Err("not a timestamp"));
+  assert_eq!(q_month.get_timestamp(), Err(Error::InvalidCast{from: "month", to: "timestamp"}));
   assert_eq!(q_month.get_type(), qtype::MONTH_ATOM);
 
   // month null
@@ -547,7 +548,7 @@ fn getter_test() -> Result<(), &'static str>{
   let q_date=K::new_date(Utc.ymd(2000, 5, 10));
   assert_eq!(q_date.get_date(), Ok(Utc.ymd(2000, 5, 10)));
   assert_eq!(q_date.get_int(), Ok(130));
-  assert_eq!(q_date.get_month(), Err("not a month"));
+  assert_eq!(q_date.get_month(), Err(Error::InvalidCast{from: "date", to: "month"}));
   assert_eq!(q_date.get_type(), qtype::DATE_ATOM);
 
   // date null
@@ -569,7 +570,7 @@ fn getter_test() -> Result<(), &'static str>{
   let q_datetime=K::new_datetime(Utc.ymd(2011, 4, 7).and_hms_milli(19, 5, 41, 385));
   assert_eq!(q_datetime.get_datetime(), Ok(Utc.ymd(2011, 4, 7).and_hms_milli(19, 5, 41, 385)));
   assert_eq!(q_datetime.get_float(), Ok(4114.795617881944));
-  assert_eq!(q_datetime.get_date(), Err("not a date"));
+  assert_eq!(q_datetime.get_date(), Err(Error::InvalidCast{from: "datetime", to: "date"}));
   assert_eq!(q_datetime.get_type(), qtype::DATETIME_ATOM);
 
   // datetime null
@@ -592,7 +593,7 @@ fn getter_test() -> Result<(), &'static str>{
   let q_timespan=K::new_timespan(Duration::nanoseconds(131400000000000));
   assert_eq!(q_timespan.get_timespan(), Ok(Duration::nanoseconds(131400000000000)));
   assert_eq!(q_timespan.get_long(), Ok(131400000000000));
-  assert_eq!(q_timespan.get_datetime(), Err("not a datetime"));
+  assert_eq!(q_timespan.get_datetime(), Err(Error::InvalidCast{from: "timespan", to: "datetime"}));
   assert_eq!(q_timespan.get_type(), qtype::TIMESPAN_ATOM);
 
   // timespan null
@@ -614,7 +615,7 @@ fn getter_test() -> Result<(), &'static str>{
   let q_minute=K::new_minute(Duration::minutes(30));
   assert_eq!(q_minute.get_minute(), Ok(Duration::minutes(30)));
   assert_eq!(q_minute.get_int(), Ok(30));
-  assert_eq!(q_minute.get_timespan(), Err("not a timespan"));
+  assert_eq!(q_minute.get_timespan(), Err(Error::InvalidCast{from: "minute", to: "timespan"}));
   assert_eq!(q_minute.get_type(), qtype::MINUTE_ATOM);
 
   // minute null
@@ -636,7 +637,7 @@ fn getter_test() -> Result<(), &'static str>{
   let q_second=K::new_second(Duration::seconds(30));
   assert_eq!(q_second.get_second(), Ok(Duration::seconds(30)));
   assert_eq!(q_second.get_int(), Ok(30));
-  assert_eq!(q_second.get_minute(), Err("not a minute"));
+  assert_eq!(q_second.get_minute(), Err(Error::InvalidCast{from: "second", to: "minute"}));
   assert_eq!(q_second.get_type(), qtype::SECOND_ATOM);
 
   // second null
@@ -658,7 +659,7 @@ fn getter_test() -> Result<(), &'static str>{
   let q_time=K::new_time(Duration::milliseconds(3000));
   assert_eq!(q_time.get_time(), Ok(Duration::milliseconds(3000)));
   assert_eq!(q_time.get_int(), Ok(3000));
-  assert_eq!(q_time.get_second(), Err("not a second"));
+  assert_eq!(q_time.get_second(), Err(Error::InvalidCast{from: "time", to: "second"}));
   assert_eq!(q_time.get_type(), qtype::TIME_ATOM);
 
   // time null
@@ -704,11 +705,11 @@ fn getter_test() -> Result<(), &'static str>{
 }
 
 #[test]
-fn cast_test() -> Result<(), &'static str>{
+fn cast_test() -> Result<()>{
 
   // atom
   let atom=K::new_bool(false);
-  assert_eq!(atom.as_vec::<G>(), Err("not a list type"));
+  assert_eq!(atom.as_vec::<G>(), Err(Error::InvalidCastList("bool")));
 
   // bool list
   let q_bool_list=K::new_bool_list(vec![true, false], qattribute::UNIQUE);
@@ -719,13 +720,13 @@ fn cast_test() -> Result<(), &'static str>{
   // guid list
   let q_guid_list=K::new_guid_list(vec![[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]], qattribute::NONE);
   assert_eq!(*q_guid_list.as_vec::<U>().unwrap(), vec![[0_u8,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]]);
-  assert_eq!(q_guid_list.as_vec::<G>(), Err("failed to cast to specified type"));
+  assert_eq!(q_guid_list.as_vec::<G>(), Err(Error::InvalidCastList("guid list")));
   assert_eq!(q_guid_list.get_type(), qtype::GUID_LIST);
 
   // byte list
   let q_byte_list=K::new_byte_list(vec![7, 12, 21, 144], qattribute::NONE);
   assert_eq!(*q_byte_list.as_vec::<G>().unwrap(), vec![7_u8, 12, 21, 144]);
-  assert_eq!(q_byte_list.as_vec::<U>(), Err("failed to cast to specified type"));
+  assert_eq!(q_byte_list.as_vec::<U>(), Err(Error::InvalidCastList("byte list")));
   assert_eq!(q_byte_list.get_type(), qtype::BYTE_LIST);
 
   // short list
@@ -736,19 +737,19 @@ fn cast_test() -> Result<(), &'static str>{
   // int list
   let q_int_list=K::new_int_list(vec![-10000, -10000, 21, 21, qinf::INT, 144000], qattribute::PARTED);
   assert_eq!(*q_int_list.as_vec::<I>().unwrap(), vec![-10000, -10000, 21, 21, qinf::INT, 144000]);
-  assert_eq!(q_int_list.as_vec::<H>(), Err("failed to cast to specified type"));
+  assert_eq!(q_int_list.as_vec::<H>(), Err(Error::InvalidCastList("int list")));
   assert_eq!(q_int_list.get_type(), qtype::INT_LIST);
 
   // long list
   let q_long_list=K::new_long_list(vec![-86400000000000], qattribute::UNIQUE);
   assert_eq!(*q_long_list.as_vec::<J>().unwrap(), vec![-86400000000000_i64]);
-  assert_eq!(q_long_list.as_vec::<I>(), Err("failed to cast to specified type"));
+  assert_eq!(q_long_list.as_vec::<I>(), Err(Error::InvalidCastList("long list")));
   assert_eq!(q_long_list.get_type(), qtype::LONG_LIST);
 
   // real list
   let q_real_list=K::new_real_list(vec![30.2, 5.002], qattribute::NONE);
   assert_eq!(*q_real_list.as_vec::<E>().unwrap(), vec![30.2_f32, 5.002]);
-  assert_eq!(q_real_list.as_vec::<J>(), Err("failed to cast to specified type"));
+  assert_eq!(q_real_list.as_vec::<J>(), Err(Error::InvalidCastList("real list")));
   assert_eq!(q_real_list.get_type(), qtype::REAL_LIST);
 
   // float list
@@ -759,13 +760,13 @@ fn cast_test() -> Result<(), &'static str>{
   assert!(cast[2].is_nan());
   assert_eq_float!(cast[3], 15.882, 0.001);
   assert!(cast[4].is_infinite() && cast[4].is_sign_negative());
-  assert_eq!(q_float_list.as_vec::<E>(), Err("failed to cast to specified type"));
+  assert_eq!(q_float_list.as_vec::<E>(), Err(Error::InvalidCastList("float list")));
   assert_eq!(q_float_list.get_type(), qtype::FLOAT_LIST);
 
   // string
   let q_string=K::new_string(String::from("super"), qattribute::UNIQUE);
   assert_eq!(*q_string.as_string().unwrap(), String::from("super"));
-  assert_eq!(q_string.as_vec::<G>(), Err("not a list type"));
+  assert_eq!(q_string.as_vec::<G>(), Err(Error::InvalidCastList("string")));
   assert_eq!(q_string.get_type(), qtype::STRING);
 
   // symbol list
@@ -845,7 +846,7 @@ fn cast_test() -> Result<(), &'static str>{
 }
 
 #[test]
-fn length_test() -> Result<(), &'static str>{
+fn length_test() -> Result<()>{
 
   // atom
   let q_bool=K::new_bool(true);
@@ -902,17 +903,17 @@ fn length_test() -> Result<(), &'static str>{
 }
 
 #[test]
-fn push_pop_test() -> Result<(), &'static str>{
+fn push_pop_test() -> Result<()>{
 
   // empty list
   let mut q_empty_list=K::new_bool_list(Vec::<bool>::new(), qattribute::NONE);
   match q_empty_list.pop(){
     Ok(_) => assert!(false),
-    Err(error) => assert_eq!(error, "no element in this object")
+    Err(error) => assert_eq!(error, Error::PopFromEmptyList)
   };
   match q_empty_list.remove(0){
     Ok(_) => assert!(false),
-    Err(error) => assert_eq!(error, "index out of bounds")
+    Err(error) => assert_eq!(error, Error::IndexOutOfBounds{length: 0, index: 0})
   };
 
   // bool list
@@ -1196,7 +1197,7 @@ fn push_pop_test() -> Result<(), &'static str>{
   assert_eq!(format!("{}", tail), String::from("`s#10 20"));
 
   // dictionary
-  assert_eq!(q_compound_list.push_pair(&3, &String::from("woops")), Err("not a dictionary"));
+  assert_eq!(q_compound_list.push_pair(&3, &String::from("woops")), Err(Error::InvalidOperation{operator: "push_pair", operand_type: "compound list", expected: Some("dictionary")}));
 
   let keys=K::new_int_list(vec![0, 1, 2], qattribute::NONE);
   let values=K::new_date_list(vec![Utc.ymd(2000, 1, 9), Utc.ymd(2001, 4, 10), Utc.ymd(2015, 3, 16)], qattribute::NONE);
@@ -1218,7 +1219,7 @@ fn push_pop_test() -> Result<(), &'static str>{
 }
 
 #[async_std::test]
-async fn functional_message_test(socket:&mut Qsocket) -> Result<(), Box<dyn std::error::Error>>{
+async fn functional_message_test(socket:&mut Qsocket) -> Result<()>{
 
   // Connect to q process
   let mut socket=QStream::connect(ConnectionMethod::TCP, "localhost", 5000, "kdbuser:pass").await.expect("Failed to connect");
@@ -1606,7 +1607,7 @@ async fn functional_message_test(socket:&mut Qsocket) -> Result<(), Box<dyn std:
 }
 
 #[async_std::test]
-async fn compression_test() -> Result<(), Box<dyn std::error::Error>>{
+async fn compression_test() -> Result<()>{
 
   // Connect to q process
   let mut socket=QStream::connect(ConnectionMethod::TCP, "localhost", 5000_u16, "kdbuser:pass").await.expect("Failed to connect");

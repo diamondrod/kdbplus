@@ -5,19 +5,19 @@
 //! The only exceptions are `k` and `knk` which are not provided with a "safe" wrapper because
 //!  these functions are using elipsis (`...`) as their argument.
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-//                            Load Libraries                            //
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
+// >> Load Libraries
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 
 use super::{S, const_S, U, I, J, F, V, K};
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-//                          External C Functions                        //
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
+// >> External C Functions
+//++++++++++++++++++++++++++++++++++++++++++++++++++//
 
 extern "C"{
 
-  //%% Constructors %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+  //%% Constructors %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
   /// Creates an atom of the specified type.
   pub fn ka(qtype: I) -> K;
@@ -682,7 +682,7 @@ extern "C"{
   /// ```
   pub fn ee(result: K) -> K;
 
-  //%% IPC Functions %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+  //%% IPC Functions %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
   /// Send a text query or evaluate the text query in a process which are loading the shared library.
   ///  As this library is purposed to build shared object, the only choice of `socket` is `0`. This
@@ -851,7 +851,7 @@ extern "C"{
   /// ```
   pub fn sd1(socket: I, function: extern fn(I) -> K) -> K;
 
-  //%% Reference Count %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+  //%% Reference Count %%//vvvvvvvvvvvvvvvvvvvvvvvvvv/
 
   /// Decrement reference count of the q object. The decrement must be done when `k` function gets an error
   ///  object whose type is `qtype::ERROR` and when you created an object but do not intend to return it to
@@ -914,7 +914,7 @@ extern "C"{
   /// ```
   pub fn r1(qobject: K) -> K;
 
-  //%% Miscellaneous %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
+  //%% Miscellaneous %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
   /// Apply a function to q list object `.[func; args]`.
   /// # Example
