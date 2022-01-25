@@ -4220,7 +4220,8 @@ impl K{
   }
 
   /// Create a table object from a dictionary object. Return value is either of:
-  /// - `Err(self)`: If the argument is not a dictionary.
+  /// - `Err(original value)`: If the argument is not a dictionary. The returned object
+  ///  is wrapped in error enum and can be retrieved by [`into_inner`](error/enum.Error.html#method.into_inner).
   /// - `Ok(table)`: In case of successful conversion.
   /// # Note
   /// - Key type must be a symbol.
@@ -4261,8 +4262,8 @@ impl K{
   }
 
   /// Convert a table into a keyed table with the first `n` columns ebing keys.
-  ///  In case of error for type mismatch the original object is returned. The
-  ///  returned object is wrapped in error enum and can be retrieved by [``into_inner](error.into_inner).
+  ///  In case of error for type mismatch the original object is returned wrapped
+  ///  in error enum and can be retrieved by [`into_inner`](error/enum.Error.html#method.into_inner).
   ///  # Example
   /// ```
   /// use kdbplus::qattribute;
@@ -4303,7 +4304,7 @@ impl K{
   }
 
   /// Convert a keyed table into an ordinary table. In case of error for type mismatch
-  ///  the original object is returned.
+  ///  the original object is returned wrapped in error enum and can be retrieved by [`into_inner`](error/enum.Error.html#method.into_inner).
   /// # Example
   /// ```
   /// use kdbplus::qattribute;
