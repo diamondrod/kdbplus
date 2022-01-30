@@ -31,6 +31,8 @@ pub mod qtype{
   
   /// Type indicator of q error
   pub const ERROR: c_schar=-128;
+  /// Type indicator of q enum atom.
+  pub const ENUM_ATOM: c_schar=-20;
   /// Type indicator of q time atom.
   pub const TIME_ATOM: c_schar=-19;
   /// Type indicator of q second atom.
@@ -105,6 +107,8 @@ pub mod qtype{
   pub const SECOND_LIST: c_schar=18;
   /// Type indicator of q time list. Slice access type: `I`, i.e., `obj.as_mut_sice::<I>()`.
   pub const TIME_LIST: c_schar=19;
+  /// Type indicator of q enum list. Slice access type: `J`, i.e., `obj.as_mut_sice::<J>()`.
+  pub const ENUM_LIST: c_schar=20;
   /// Type indicator of q table.
   pub const TABLE: c_schar=98;
   /// Type indicator of q dictionary. Slice access type: `K`, i.e., `obj.as_mut_sice::<K>()`.

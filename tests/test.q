@@ -155,6 +155,8 @@ LIBPATH_: `libapi_examples 2:
 .api.parallel_sym_change: LIBPATH_ (`parallel_sym_change; 1);
 // r1
 .api.pass_through_cave: LIBPATH_ (`pass_through_cave; 1);
+// get_row
+.api.pick_row: LIBPATH_ (`pick_row; 2);
 // str_to_S
 .api.pingpong: LIBPATH_ (`pingpong; 1);
 // null_terminated_str_to_S
@@ -334,6 +336,12 @@ guid: first 1?0Ng;
 .test.ASSERT_EQ["get_string"; .api.hidden_key[([] t: `timestamp$.z.p+1e9*til 9; chr:"ljppkgfgs"; is: 7 8 12 14 21 316 400 1000 6000i)]; -8!`t`chr`is]
 // get_dictionary - error
 .test.ASSERT_ERROR["get_dictionary - failure"; .api.hidden_key; enlist 777; "not a table"]
+
+// get_row
+dictionaries: ([] time: `timestamp$2022.01.30D12:00:54.125743896 + 1000000000 * 1 + til 3; sym: `Green`Yellow`Red; go: "oxx"; miscellaneous: ("cow"; `lion; "eagle"));
+.test.ASSERT_EQ["get_row - 2nd"; .api.pick_row[dictionaries; 1]; `time`sym`go`miscellaneous!(2022.01.30D12:00:56.125743896;`Yellow;"x";`lion)]
+.test.ASSERT_EQ["get_row - 3rd"; .api.pick_row[dictionaries; 2]; `time`sym`go`miscellaneous!(2022.01.30D12:00:57.125743896;`Red;"x";"eagle")]
+.test.ASSERT_ERROR["get_row - 4th"; .api.pick_row; (dictionaries; 3); "index out of bounds"]
 
 // get_attribute - sorted
 .test.ASSERT_EQ["get_attribute - sorted"; .api.murmur[`s#1 2 3]; "Clean"]

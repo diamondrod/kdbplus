@@ -92,7 +92,7 @@
 //! ```
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++//
-//                              Settings                                //
+// >> Settings
 //++++++++++++++++++++++++++++++++++++++++++++++++++//
 
 #![allow(non_upper_case_globals)]
@@ -100,7 +100,7 @@
 #![allow(non_snake_case)]
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++//
-//                            Load Libraries                            //
+// >> Load Libraries
 //++++++++++++++++++++++++++++++++++++++++++++++++++//
 
 use std::str;
@@ -111,7 +111,7 @@ use super::qtype;
 pub mod native;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++//
-//                          Global Variables                            //
+// >> Global Variables
 //++++++++++++++++++++++++++++++++++++++++++++++++++//
 
 /// `K` nullptr. This value can be used as void value of a function which is called directly by q process
@@ -133,7 +133,7 @@ pub mod native;
 pub const KNULL:K=0 as K;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++//
-//                                Macros                                //
+// >> Macros
 //++++++++++++++++++++++++++++++++++++++++++++++++++//
 
 //%% Utility %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
@@ -165,7 +165,7 @@ macro_rules! str_to_S {
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++//
-//                               Structs                                //
+// >> Structs
 //++++++++++++++++++++++++++++++++++++++++++++++++++//
 
 //%% Alias %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
@@ -266,7 +266,7 @@ pub struct k0{
 pub type K=*mut k0;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++//
-//                               Structs                                //
+// >> Structs
 //++++++++++++++++++++++++++++++++++++++++++++++++++//
 
 //%% KUtility %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
@@ -621,6 +621,37 @@ pub trait KUtility{
   /// See the example of [`error_to_string`](fn.error_to_string.html).
   fn get_error_string(&self) -> Result<&str, &'static str>;
 
+  /// Get a table row of the given index.
+  /// ```no_run
+  /// use kdbplus::api::*;
+  /// 
+  /// #[no_mangle]
+  /// pub extern "C" fn print_row(object: K, index: K) -> K{
+  ///   match object.get_type(){
+  ///     qtype::TABLE => {
+  ///       if let Some(row) = object.get_row(index.get_long().unwrap() as usize){
+  ///         let null = unsafe{k(0, str_to_S!("{-1 \"row: \", .Q.s1 x}"), row, KNULL)};
+  ///         decrement_reference_count(null);
+  ///         KNULL
+  ///       }
+  ///       else{
+  ///         new_error("index out of bounds\0")
+  ///       }
+  ///     }
+  ///     _ => new_error("not a table\0")
+  ///   }
+  /// }
+  /// ```
+  /// ```q
+  /// q)row: `libapi_examples 2: (`print_row; 2)
+  /// q)table: ([] time: asc `timestamp$.z.p + 3?1000000000; sym: -3?`Green`Yellow`Red; go: "oxx"; miscellaneous: ("cow"; `lion; "eagle"))
+  /// q)row[table;2]
+  /// row: `time`sym`go`miscellaneous!(2022.01.30D07:55:48.404520689;`Yellow;"x";"eagle")
+  /// q)row[table;1]
+  /// row: `time`sym`go`miscellaneous!(2022.01.30D07:55:47.987133353;`Green;"x";`lion)
+  /// ```
+  fn get_row(&self, index: usize) -> Option<K>;
+
   /// Get an attribute of a q object.
   /// # Example
   /// ```no_run
@@ -910,6 +941,87 @@ impl KUtility for K{
   fn as_mut_slice<'a, T>(self) -> &'a mut[T]{
     unsafe{
       std::slice::from_raw_parts_mut((*self).value.list.G0.as_mut_ptr() as *mut T, (*self).value.list.n as usize)
+    }
+  }
+
+  fn get_row(&self, index: usize) -> Option<K>{
+    match unsafe{(**self).qtype}{
+      qtype::TABLE => {
+        let keys = unsafe{(**self).value.table}.as_mut_slice::<K>()[0];
+        let values = unsafe{(**self).value.table}.as_mut_slice::<K>()[1];
+        if (unsafe{(*values.as_mut_slice::<K>()[0]).value.list}.n as usize) < index+1{
+          // Index out of bounds
+          None
+        }
+        else{
+          let num_columns = unsafe{(*keys).value.list}.n;
+          let row = new_list(qtype::COMPOUND_LIST, num_columns);
+          let row_slice = row.as_mut_slice::<K>();
+          values.as_mut_slice::<K>().iter().enumerate().for_each(|(i, column)|{
+            match column.get_type(){
+              qtype::BOOL_LIST => {
+                row_slice[i] = new_bool(column.as_mut_slice::<G>()[index] as i32);
+              },
+              qtype::BYTE_LIST => {
+                row_slice[i] = new_byte(column.as_mut_slice::<G>()[index] as i32);
+              },
+              qtype::SHORT_LIST => {
+                row_slice[i] = new_short(column.as_mut_slice::<H>()[index] as i32);
+              },
+              qtype::INT_LIST => {
+                row_slice[i] = new_int(column.as_mut_slice::<I>()[index]);
+              },
+              qtype::LONG_LIST => {
+                row_slice[i] = new_long(column.as_mut_slice::<J>()[index]);
+              },
+              qtype::REAL_LIST => {
+                row_slice[i] = new_real(column.as_mut_slice::<E>()[index] as f64);
+              },
+              qtype::FLOAT_LIST => {
+                row_slice[i] = new_float(column.as_mut_slice::<F>()[index]);
+              },
+              qtype::STRING => {
+                row_slice[i] = new_char(column.as_mut_slice::<G>()[index] as char);
+              },
+              qtype::SYMBOL_LIST => {
+                row_slice[i] = new_symbol(S_to_str(column.as_mut_slice::<S>()[index]));
+              },
+              qtype::TIMESTAMP_LIST => {
+                row_slice[i] = new_timestamp(column.as_mut_slice::<J>()[index]);
+              },
+              qtype::MONTH_LIST => {
+                row_slice[i] = new_month(column.as_mut_slice::<I>()[index]);
+              },
+              qtype::DATE_LIST => {
+                row_slice[i] = new_date(column.as_mut_slice::<I>()[index]);
+              },
+              qtype::DATETIME_LIST => {
+                row_slice[i] = new_datetime(column.as_mut_slice::<F>()[index]);
+              },
+              qtype::TIMESPAN_LIST => {
+                row_slice[i] = new_timespan(column.as_mut_slice::<J>()[index]);
+              },
+              qtype::MINUTE_LIST => {
+                row_slice[i] = new_minute(column.as_mut_slice::<I>()[index]);
+              },
+              qtype::SECOND_LIST => {
+                row_slice[i] = new_second(column.as_mut_slice::<I>()[index]);
+              },
+              qtype::TIME_LIST => {
+                row_slice[i] = new_time(column.as_mut_slice::<I>()[index]);
+              },
+              qtype::COMPOUND_LIST => {
+                // Increment reference count since compound list consumes the element.
+                row_slice[i] = increment_reference_count(column.as_mut_slice::<K>()[index]);
+              },
+              // There are no other list type
+              _ => unreachable!()
+            }
+          });
+          Some(new_dictionary(increment_reference_count(keys), row))
+        }
+      },
+      _ => None
     }
   }
 

@@ -1,6 +1,6 @@
 [package]
 name = "kdbplus"
-version = "0.3.1"
+version = "0.3.2"
 authors = ["diamondrod"]
 edition = "2021"
 license = "Apache-2.0"

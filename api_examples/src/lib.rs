@@ -300,6 +300,22 @@ pub extern "C" fn hidden_key(table: K) -> K{
   }
 }
 
+/// Example of `get_row`.
+#[no_mangle]
+pub extern "C" fn pick_row(object: K, index: K) -> K{
+  match object.get_type(){
+    qtype::TABLE => {
+      if let Some(row) = object.get_row(index.get_long().unwrap() as usize){
+        row
+      }
+      else{
+        new_error("index out of bounds\0")
+      }
+    }
+    _ => new_error("not a table\0")
+  }
+}
+
 /// Example of `append`.
 #[no_mangle]
 pub extern "C" fn concat_list2(mut list1: K, list2: K) -> K{

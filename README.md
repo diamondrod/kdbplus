@@ -418,7 +418,7 @@ Planet { name: "earth", population: 7500000000, water: true }
 おいしい！
 おいしい！
 "Collect the clutter of apples!"
-test result: ok. 137 passed; 0 failed
+test result: ok. 140 passed; 0 failed
 q)What are the three largest elements?: `belief`love`hope
 ```
 
