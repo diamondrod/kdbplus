@@ -629,7 +629,7 @@ pub trait KUtility{
   /// pub extern "C" fn print_row(object: K, index: K) -> K{
   ///   match object.get_type(){
   ///     qtype::TABLE => {
-  ///       if let Some(row) = object.get_row(index.get_long().unwrap() as usize){
+  ///       if let Some(row) = object.get_row("sym", index.get_long().unwrap() as usize){
   ///         let null = unsafe{k(0, str_to_S!("{-1 \"row: \", .Q.s1 x}"), row, KNULL)};
   ///         decrement_reference_count(null);
   ///         KNULL
@@ -650,7 +650,7 @@ pub trait KUtility{
   /// q)row[table;1]
   /// row: `time`sym`go`miscellaneous!(2022.01.30D07:55:47.987133353;`Green;"x";`lion)
   /// ```
-  fn get_row(&self, index: usize) -> Option<K>;
+  fn get_row(&self, sym: &str, index: usize) -> Option<K>;
 
   /// Get an attribute of a q object.
   /// # Example
@@ -944,7 +944,7 @@ impl KUtility for K{
     }
   }
 
-  fn get_row(&self, index: usize) -> Option<K>{
+  fn get_row(&self, sym: &str, index: usize) -> Option<K>{
     match unsafe{(**self).qtype}{
       qtype::TABLE => {
         let keys = unsafe{(**self).value.table}.as_mut_slice::<K>()[0];
@@ -957,7 +957,8 @@ impl KUtility for K{
           let num_columns = unsafe{(*keys).value.list}.n;
           let row = new_list(qtype::COMPOUND_LIST, num_columns);
           let row_slice = row.as_mut_slice::<K>();
-          values.as_mut_slice::<K>().iter().enumerate().for_each(|(i, column)|{
+          let mut i = 0;
+          for column in values.as_mut_slice::<K>(){
             match column.get_type(){
               qtype::BOOL_LIST => {
                 row_slice[i] = new_bool(column.as_mut_slice::<G>()[index] as i32);
@@ -1010,6 +1011,16 @@ impl KUtility for K{
               qtype::TIME_LIST => {
                 row_slice[i] = new_time(column.as_mut_slice::<I>()[index]);
               },
+              qtype::ENUM_LIST => {
+                let enum_value = new_enum(sym, column.as_mut_slice::<J>()[index]);
+                if unsafe{(*enum_value).qtype} == qtype::ERROR{
+                  decrement_reference_count(row);
+                  return Some(enum_value);
+                }
+                else{
+                  row_slice[i] = enum_value;
+                }
+              }
               qtype::COMPOUND_LIST => {
                 // Increment reference count since compound list consumes the element.
                 row_slice[i] = increment_reference_count(column.as_mut_slice::<K>()[index]);
@@ -1017,7 +1028,8 @@ impl KUtility for K{
               // There are no other list type
               _ => unreachable!()
             }
-          });
+            i += 1;
+          }
           Some(new_dictionary(increment_reference_count(keys), row))
         }
       },
@@ -1070,7 +1082,7 @@ impl KUtility for K{
   #[inline]
   fn get_long(&self) -> Result<i64, &'static str>{
     match unsafe{(**self).qtype}{
-      qtype::LONG_ATOM | qtype::TIMESTAMP_ATOM | qtype::TIMESPAN_ATOM => Ok(unsafe{(**self).value.long}),
+      qtype::LONG_ATOM | qtype::TIMESTAMP_ATOM | qtype::TIMESPAN_ATOM | qtype::ENUM_ATOM => Ok(unsafe{(**self).value.long}),
       _ => Err("not a long\0")
     }
   }
@@ -1811,6 +1823,71 @@ pub fn new_second(seconds: I) -> K{
 pub fn new_time(milliseconds: I) -> K{
   unsafe{
     native::kt(milliseconds)
+  }
+}
+
+/// Constructor of q enum object. This is a complememtal constructor of
+///  missing second type.
+/// # Example
+/// ```no_run
+/// use kdbplus::api::*;
+/// 
+/// #[no_mangle]
+/// pub extern "C" fn create_enum(source: K, index: K) -> K{
+///   // Error if the specified enum source does not exist or it is not a symbol list or the index is out of enum range
+///   new_enum(source.get_str().unwrap(), index.get_long().unwrap())
+/// }
+/// ```
+/// ```q
+/// q)enumerate: libc_api_examples 2: (`create_enum; 2);
+/// q)sym: `a`b`c
+/// q)enumerate["sym"; 1]
+/// `sym$`b
+/// q)enumerate["sym"; 3]
+/// 'index out of enum range
+///   [0]  enumerate["sym"; 3]
+///        ^
+/// q)enumerate["som"; 0]
+/// 'som
+/// [1]  som
+///      ^
+/// q))\
+/// q)som:til 3
+/// q)enumerate["som"; 0]
+/// 'enum must be cast to symbol list
+///   [0]  enumerate["som"; 0]
+///        ^
+/// q)som:`a`b
+/// q)enumerate["som"; 0]
+/// `som$`a
+/// ```
+#[inline]
+pub fn new_enum(source: &str, index: J) -> K{
+  let sym = unsafe{native::k(0, str_to_S!(source), KNULL)};
+  if unsafe{(*sym).qtype} == qtype::ERROR{
+    // Error. Specified sym does not exist
+    sym
+  }
+  else if unsafe{(*sym).qtype} != qtype::SYMBOL_LIST{
+    // sym is not a symbol list
+    unsafe{
+      native::r0(sym);
+      native::krr(null_terminated_str_to_const_S("enum must be cast to symbol list\0"))
+    }
+  }
+  else if unsafe{(*sym).value.list.n} <= index{
+    // Index is out of sym range
+    unsafe{
+      native::r0(sym);
+      native::krr(null_terminated_str_to_const_S("index out of enum range\0"))
+    }
+  }
+  else{
+    let function = format!("{{`{}${} x}}", source, source);
+    unsafe{
+      native::r0(sym);
+      native::k(0, str_to_S!(function.as_str()), native::kj(index), KNULL)
+    }
   }
 }
 

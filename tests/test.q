@@ -61,6 +61,8 @@ LIBPATH_: `libapi_examples 2:
 .api.create_datetime: LIBPATH_ (`create_datetime; 1);
 // xD
 .api.create_dictionary: LIBPATH_ (`create_dictionary; 1);
+// new_enum
+.api.create_enum: LIBPATH_ (`create_enum; 2);
 // kf
 .api.create_float: LIBPATH_ (`create_float; 1);
 // knt
@@ -99,6 +101,8 @@ LIBPATH_: `libapi_examples 2:
 .api.create_table2: LIBPATH_ (`create_table2; 1);
 // kt
 .api.create_time: LIBPATH_ (`create_time; 1);
+// new_time
+.api.create_time2: LIBPATH_ (`create_time2; 1);
 // ktj
 .api.create_timespan: LIBPATH_ (`create_timespan; 1);
 // new_timespan
@@ -297,6 +301,9 @@ guid: first 1?0Ng;
 .test.ASSERT_EQ["get_long - timestamp"; .api.print_long[2000.01.01D12:00:00.123456789]; (::)]
 // get_long - timespan
 .test.ASSERT_EQ["get_long - timespan"; .api.print_long[-3D18:23:09.000000021]; (::)]
+// get_long - enum
+enum: `a`b;
+.test.ASSERT_EQ["get_long - enum"; .api.print_long[`enum$`a]; (::)]
 // get_long - error
 .test.ASSERT_ERROR["get_long - failure"; .api.print_long; enlist 1b; "not a long"]
 
@@ -561,6 +568,18 @@ get_item2:{[man] "boiling pot, facing away from the north"}
 
 // new_second
 .test.ASSERT_EQ["new_second"; .api.create_second[]; -02:00:00]
+
+// new_time
+.test.ASSERT_EQ["new_time"; .api.create_time2[]; -01:30:00.123]
+
+// new_enum
+enum: `a`b`c;
+.test.ASSERT_EQ["new_enum"; .api.create_enum["enum"; 0]; `enum$`a]
+.test.ASSERT_ERROR["new_enum - out of range"; .api.create_enum; ("enum"; 3); "index out of enum range"]
+enum: til 3;
+.test.ASSERT_ERROR["new_enum - non symbol list"; .api.create_enum; ("enum"; 3); "enum must be cast to symbol list"]
+delete enum from `.;
+.test.ASSERT_ERROR["new_enum - non-existing enum"; .api.create_enum; ("enum"; 3); "enum"]
 
 // new_null
 .test.ASSERT_EQ["new_second"; .api.nullify[]; (::; "null is not a general null"; ::)]

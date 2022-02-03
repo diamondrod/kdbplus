@@ -391,6 +391,7 @@ int: 2056636
 long: -109210
 long: 43200123456789
 long: -325389000000021
+long: 0
 real: 193810.31
 float: -37017.09330000
 float: 742.41927468
@@ -418,7 +419,7 @@ Planet { name: "earth", population: 7500000000, water: true }
 おいしい！
 おいしい！
 "Collect the clutter of apples!"
-test result: ok. 140 passed; 0 failed
+test result: ok. 146 passed; 0 failed
 q)What are the three largest elements?: `belief`love`hope
 ```
 

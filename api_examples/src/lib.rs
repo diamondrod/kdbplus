@@ -305,7 +305,7 @@ pub extern "C" fn hidden_key(table: K) -> K{
 pub extern "C" fn pick_row(object: K, index: K) -> K{
   match object.get_type(){
     qtype::TABLE => {
-      if let Some(row) = object.get_row(index.get_long().unwrap() as usize){
+      if let Some(row) = object.get_row("sym", index.get_long().unwrap() as usize){
         row
       }
       else{
@@ -873,6 +873,20 @@ pub extern "C" fn create_minute(_: K) -> K{
 pub extern "C" fn create_second(_: K) -> K{
   // -02:00:00
   new_second(-7200)
+}
+
+/// Example of `new_time`.
+#[no_mangle]
+pub extern "C" fn create_time2(_: K) -> K{
+  // -01:30:00.123
+  new_time(-5400123)
+}
+
+/// Example of `new_enum`.
+#[no_mangle]
+pub extern "C" fn create_enum(source: K, index: K) -> K{
+  // Error if the specified enum source does not exist or it is not a symbol list or the index is out of enum range
+  new_enum(source.get_str().unwrap(), index.get_long().unwrap())
 }
 
 /// Example of `new_null`.
