@@ -119,6 +119,8 @@ LIBPATH_: `libapi_examples 2:
 .api.dictionary_list_to_table: LIBPATH_ (`dictionary_list_to_table; 1);
 // simple_to_compound
 .api.drift: LIBPATH_ (`drift; 1);
+// simple_to_compound
+.api.drift2: LIBPATH_ (`drift2; 1);
 // set_qtype
 .api.eden: LIBPATH_ (`eden; 1);
 // q_ipc_encode
@@ -625,6 +627,9 @@ shout:{[precious] -1 "What are the three largest elements?: ", .Q.s1 precious;};
 
 // simple_to_compound
 .test.ASSERT_EQ["simple_to_compound"; .api.drift[]; (12i; 34i; `vague; -3000i)]
+enum: `mashroom`broccoli`cucumber;
+enum2: `mackerel`swordfish;
+.test.ASSERT_EQ["simple_to_compound"; .api.drift2[]; (`enum$`mashroom; `enum2$`swordfish; `enum$`cucumber; 2000.04m)]
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 //                          	  Result   	        		                  //

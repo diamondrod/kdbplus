@@ -1121,6 +1121,16 @@ pub extern "C" fn drift(_: K)->K{
   simple.as_mut_slice::<I>().copy_from_slice(&[12, 34]);
   let extra=new_list(qtype::COMPOUND_LIST, 2);
   extra.as_mut_slice::<K>().copy_from_slice(&[new_symbol("vague"), new_int(-3000)]);
-  let mut compound = simple_to_compound(simple);
+  let mut compound = simple_to_compound(simple, &[]);
   compound.append(extra).unwrap()
+}
+
+/// Second example of `simple_to_compound`.
+#[no_mangle]
+pub extern "C" fn drift2(_: K)->K{
+  let simple=new_list(qtype::ENUM_LIST, 3);
+  simple.as_mut_slice::<J>().copy_from_slice(&[0_i64, 1, 2]);
+  let mut compound = simple_to_compound(simple, &["enum", "enum2", "enum"]);
+  compound.push(new_month(3)).unwrap();
+  compound
 }

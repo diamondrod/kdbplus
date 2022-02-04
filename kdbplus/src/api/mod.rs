@@ -621,7 +621,9 @@ pub trait KUtility{
   /// See the example of [`error_to_string`](fn.error_to_string.html).
   fn get_error_string(&self) -> Result<&str, &'static str>;
 
-  /// Get a table row of the given index.
+  /// Get a table row of the given index. For enumerated column, a name of a target `sym` list
+  ///  to which symbol values are cast must be passed. In the example below, it is assumed that
+  ///  enum values are cast to a symbol list whose name is `sym`.
   /// ```no_run
   /// use kdbplus::api::*;
   /// 
@@ -1222,11 +1224,11 @@ impl KUtility for K{
   #[inline]
   fn len(&self) -> i64{
     match unsafe{(**self).qtype}{
-      _t@qtype::TIME_ATOM..=qtype::BOOL_ATOM => {
+      _t@qtype::ENUM_ATOM..=qtype::BOOL_ATOM => {
         // Atom
         1
       },
-      _t@qtype::COMPOUND_LIST..=qtype::TIME_LIST => {
+      _t@qtype::COMPOUND_LIST..=qtype::ENUM_LIST => {
         // List
         unsafe{(**self).value.list}.n
       },
@@ -2684,22 +2686,39 @@ pub fn days_to_ymd(days: I) -> I{
 ///   simple.as_mut_slice::<I>().copy_from_slice(&[12, 34]);
 ///   let extra=new_list(qtype::COMPOUND_LIST, 2);
 ///   extra.as_mut_slice::<K>().copy_from_slice(&[new_symbol("vague"), new_int(-3000)]);
-///   let mut compound = simple_to_compound(simple);
+///   let mut compound = simple_to_compound(simple, &[]);
 ///   compound.append(extra).unwrap()
+/// }
+/// 
+/// #[no_mangle]
+/// pub extern "C" fn drift2(_: K)->K{
+///   let simple=new_list(qtype::ENUM_LIST, 3);
+///   simple.as_mut_slice::<J>().copy_from_slice(&[0, 1, 2]);
+///   let mut compound = simple_to_compound(simple, &["enum", "enum2", "enum"]);
+///   compound.push(new_month(3)).unwrap();
+///   compound
 /// }
 /// ```
 /// ```q
 /// q)drift: LIBPATH_ (`drift; 1);
+/// q)drift2: LIBPATH_ (`drift2; 1);
 /// q)drift[]
 /// 12i
 /// 34i
 /// `vague
 /// -3000i
+/// q)enum: `mashroom`broccoli`cucumber
+/// q)enum2: `mackerel`swordfish
+/// q)drift2[]
+/// `enum$`mashroom
+/// `enum2$`swordfish
+/// `enum$`cucumber
+/// 2000.04m
 /// ```
 /// # Note
 /// To convert a list provided externally (i.e., passed from a q process), apply
 ///  [`increment_reference_count`](fn.increment_reference_count.html) before converting the list.
-pub fn simple_to_compound(simple: K) -> K{
+pub fn simple_to_compound(simple: K, enum_sources: &[&str]) -> K{
   let size=simple.len() as usize;
   let compound=new_list(qtype::COMPOUND_LIST, size as J);
   let compound_slice=compound.as_mut_slice::<K>();
@@ -2780,6 +2799,15 @@ pub fn simple_to_compound(simple: K) -> K{
       let simple_slice=simple.as_mut_slice::<I>();
       for i in 0..size{
         compound_slice[i]=new_time(simple_slice[i]);
+      }
+    },
+    qtype::ENUM_LIST => {
+      if enum_sources.len() < size{
+        return new_error("insufficient enum sources\0");
+      }
+      let simple_slice=simple.as_mut_slice::<J>();
+      for i in 0..size{
+        compound_slice[i]=new_enum(enum_sources[i], simple_slice[i]);
       }
     },
     _ => {
