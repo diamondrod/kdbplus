@@ -305,7 +305,7 @@ pub extern "C" fn hidden_key(table: K) -> K{
 pub extern "C" fn pick_row(object: K, index: K) -> K{
   match object.get_type(){
     qtype::TABLE => {
-      match object.get_row(&["sym"], index.get_long().unwrap() as usize){
+      match object.get_row(index.get_long().unwrap() as usize, &["sym"]){
         Ok(row) => row,
         Err(error) => new_error(error)
       }
@@ -1119,16 +1119,17 @@ pub extern "C" fn drift(_: K)->K{
   simple.as_mut_slice::<I>().copy_from_slice(&[12, 34]);
   let extra=new_list(qtype::COMPOUND_LIST, 2);
   extra.as_mut_slice::<K>().copy_from_slice(&[new_symbol("vague"), new_int(-3000)]);
-  let mut compound = simple_to_compound(simple, &[]);
+  let mut compound = simple_to_compound(simple, "");
   compound.append(extra).unwrap()
 }
 
 /// Second example of `simple_to_compound`.
 #[no_mangle]
 pub extern "C" fn drift2(_: K)->K{
-  let simple=new_list(qtype::ENUM_LIST, 3);
-  simple.as_mut_slice::<J>().copy_from_slice(&[0_i64, 1, 2]);
-  let mut compound = simple_to_compound(simple, &["enum", "enum2", "enum"]);
+  let simple=new_list(qtype::ENUM_LIST, 2);
+  simple.as_mut_slice::<J>().copy_from_slice(&[0_i64, 1]);
+  let mut compound = simple_to_compound(simple, "enum");
+  compound.push(new_enum("enum2", 2)).unwrap();
   compound.push(new_month(3)).unwrap();
   compound
 }

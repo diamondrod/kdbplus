@@ -631,7 +631,7 @@ pub trait KUtility{
   /// pub extern "C" fn print_row(object: K, index: K) -> K{
   ///   match object.get_type(){
   ///     qtype::TABLE => {
-  ///       match object.get_row(&["sym"], index.get_long().unwrap() as usize){
+  ///       match object.get_row(index.get_long().unwrap() as usize, &["sym"]){
   ///         Ok(row) => {
   ///           let null = unsafe{k(0, str_to_S!("{-1 \"row: \", .Q.s1 x}"), row, KNULL)};
   ///           decrement_reference_count(null);
@@ -652,7 +652,7 @@ pub trait KUtility{
   /// q)row[table;1]
   /// row: `time`sym`go`miscellaneous!(2022.01.30D07:55:47.987133353;`Green;"x";`lion)
   /// ```
-  fn get_row(&self, enum_sources: &[&str], index: usize) -> Result<K, &'static str>;
+  fn get_row(&self, index: usize, enum_sources: &[&str]) -> Result<K, &'static str>;
 
   /// Get an attribute of a q object.
   /// # Example
@@ -946,7 +946,7 @@ impl KUtility for K{
     }
   }
 
-  fn get_row(&self, enum_sources: &[&str], index: usize) -> Result<K, &'static str>{
+  fn get_row(&self, index: usize, enum_sources: &[&str]) -> Result<K, &'static str>{
     match unsafe{(**self).qtype}{
       qtype::TABLE => {
         let keys = unsafe{(**self).value.table}.as_mut_slice::<K>()[0];
@@ -2702,9 +2702,10 @@ pub fn days_to_ymd(days: I) -> I{
 /// 
 /// #[no_mangle]
 /// pub extern "C" fn drift2(_: K)->K{
-///   let simple=new_list(qtype::ENUM_LIST, 3);
-///   simple.as_mut_slice::<J>().copy_from_slice(&[0, 1, 2]);
-///   let mut compound = simple_to_compound(simple, &["enum", "enum2", "enum"]);
+///   let simple=new_list(qtype::ENUM_LIST, 2);
+///   simple.as_mut_slice::<J>().copy_from_slice(&[0_i64, 1]);
+///   let mut compound = simple_to_compound(simple, "enum");
+///   compound.push(new_enum("enum2", 2)).unwrap();
 ///   compound.push(new_month(3)).unwrap();
 ///   compound
 /// }
@@ -2718,17 +2719,20 @@ pub fn days_to_ymd(days: I) -> I{
 /// `vague
 /// -3000i
 /// q)enum: `mashroom`broccoli`cucumber
-/// q)enum2: `mackerel`swordfish
+/// q)enum2: `mackerel`swordfish`tuna
 /// q)drift2[]
 /// `enum$`mashroom
-/// `enum2$`swordfish
-/// `enum$`cucumber
+/// `enum$`broccoli
+/// `enum2$`tuna
 /// 2000.04m
 /// ```
 /// # Note
-/// To convert a list provided externally (i.e., passed from a q process), apply
+/// - To convert a list provided externally (i.e., passed from a q process), apply
 ///  [`increment_reference_count`](fn.increment_reference_count.html) before converting the list.
-pub fn simple_to_compound(simple: K, enum_sources: &[&str]) -> K{
+/// - Enum elements from different enum sources must be contained in a compound list. Therefore
+///  this function intentionally restricts the number of enum sources to one so that user switches
+///  a simple list to a compound list when the second enum sources are provided.
+pub fn simple_to_compound(simple: K, enum_source: &str) -> K{
   let size=simple.len() as usize;
   let compound=new_list(qtype::COMPOUND_LIST, size as J);
   let compound_slice=compound.as_mut_slice::<K>();
@@ -2812,12 +2816,9 @@ pub fn simple_to_compound(simple: K, enum_sources: &[&str]) -> K{
       }
     },
     qtype::ENUM_LIST => {
-      if enum_sources.len() < size{
-        return new_error("insufficient enum sources\0");
-      }
       let simple_slice=simple.as_mut_slice::<J>();
       for i in 0..size{
-        compound_slice[i]=new_enum(enum_sources[i], simple_slice[i]);
+        compound_slice[i]=new_enum(enum_source, simple_slice[i]);
       }
     },
     _ => {
