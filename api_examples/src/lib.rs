@@ -305,11 +305,9 @@ pub extern "C" fn hidden_key(table: K) -> K{
 pub extern "C" fn pick_row(object: K, index: K) -> K{
   match object.get_type(){
     qtype::TABLE => {
-      if let Some(row) = object.get_row("sym", index.get_long().unwrap() as usize){
-        row
-      }
-      else{
-        new_error("index out of bounds\0")
+      match object.get_row(&["sym"], index.get_long().unwrap() as usize){
+        Ok(row) => row,
+        Err(error) => new_error(error)
       }
     }
     _ => new_error("not a table\0")

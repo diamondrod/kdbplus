@@ -621,9 +621,9 @@ pub trait KUtility{
   /// See the example of [`error_to_string`](fn.error_to_string.html).
   fn get_error_string(&self) -> Result<&str, &'static str>;
 
-  /// Get a table row of the given index. For enumerated column, a name of a target `sym` list
+  /// Get a table row of the given index. For enumerated column, a names of a target `sym` list
   ///  to which symbol values are cast must be passed. In the example below, it is assumed that
-  ///  enum values are cast to a symbol list whose name is `sym`.
+  ///  there is a single enum column in a table and the column values are cast to a symbol list whose name is `sym`.
   /// ```no_run
   /// use kdbplus::api::*;
   /// 
@@ -631,15 +631,15 @@ pub trait KUtility{
   /// pub extern "C" fn print_row(object: K, index: K) -> K{
   ///   match object.get_type(){
   ///     qtype::TABLE => {
-  ///       if let Some(row) = object.get_row("sym", index.get_long().unwrap() as usize){
-  ///         let null = unsafe{k(0, str_to_S!("{-1 \"row: \", .Q.s1 x}"), row, KNULL)};
-  ///         decrement_reference_count(null);
-  ///         KNULL
+  ///       match object.get_row(&["sym"], index.get_long().unwrap() as usize){
+  ///         Ok(row) => {
+  ///           let null = unsafe{k(0, str_to_S!("{-1 \"row: \", .Q.s1 x}"), row, KNULL)};
+  ///           decrement_reference_count(null);
+  ///           KNULL
+  ///         }
+  ///         Err(error) => new_error(error)
   ///       }
-  ///       else{
-  ///         new_error("index out of bounds\0")
-  ///       }
-  ///     }
+  ///     },
   ///     _ => new_error("not a table\0")
   ///   }
   /// }
@@ -652,7 +652,7 @@ pub trait KUtility{
   /// q)row[table;1]
   /// row: `time`sym`go`miscellaneous!(2022.01.30D07:55:47.987133353;`Green;"x";`lion)
   /// ```
-  fn get_row(&self, sym: &str, index: usize) -> Option<K>;
+  fn get_row(&self, enum_sources: &[&str], index: usize) -> Result<K, &'static str>;
 
   /// Get an attribute of a q object.
   /// # Example
@@ -946,19 +946,20 @@ impl KUtility for K{
     }
   }
 
-  fn get_row(&self, sym: &str, index: usize) -> Option<K>{
+  fn get_row(&self, enum_sources: &[&str], index: usize) -> Result<K, &'static str>{
     match unsafe{(**self).qtype}{
       qtype::TABLE => {
         let keys = unsafe{(**self).value.table}.as_mut_slice::<K>()[0];
         let values = unsafe{(**self).value.table}.as_mut_slice::<K>()[1];
         if (unsafe{(*values.as_mut_slice::<K>()[0]).value.list}.n as usize) < index+1{
           // Index out of bounds
-          None
+          Err("index out of bounds\0")
         }
         else{
           let num_columns = unsafe{(*keys).value.list}.n;
           let row = new_list(qtype::COMPOUND_LIST, num_columns);
           let row_slice = row.as_mut_slice::<K>();
+          let mut enum_source_index = 0;
           let mut i = 0;
           for column in values.as_mut_slice::<K>(){
             match column.get_type(){
@@ -1014,13 +1015,22 @@ impl KUtility for K{
                 row_slice[i] = new_time(column.as_mut_slice::<I>()[index]);
               },
               qtype::ENUM_LIST => {
-                let enum_value = new_enum(sym, column.as_mut_slice::<J>()[index]);
-                if unsafe{(*enum_value).qtype} == qtype::ERROR{
+                if enum_sources.len() <= enum_source_index{
+                  // Index out of bounds
                   decrement_reference_count(row);
-                  return Some(enum_value);
+                  return Err("insufficient enum sources\0");
+                }
+                let enum_value = new_enum(enum_sources[enum_source_index], column.as_mut_slice::<J>()[index]);
+                if unsafe{(*enum_value).qtype} == qtype::ERROR{
+                  // Error in creating enum object.
+                  decrement_reference_count(row);
+                  let error = S_to_str(unsafe{(*enum_value).value.symbol});
+                  decrement_reference_count(enum_value);
+                  return Err(error);
                 }
                 else{
                   row_slice[i] = enum_value;
+                  enum_source_index += 1;
                 }
               }
               qtype::COMPOUND_LIST => {
@@ -1032,10 +1042,10 @@ impl KUtility for K{
             }
             i += 1;
           }
-          Some(new_dictionary(increment_reference_count(keys), row))
+          Ok(new_dictionary(increment_reference_count(keys), row))
         }
       },
-      _ => None
+      _ => Err("not a table\0")
     }
   }
 
