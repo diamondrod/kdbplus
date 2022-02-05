@@ -1210,7 +1210,7 @@ impl KUtility for K{
   #[inline]
   fn push_raw<T>(&mut self, mut atom: T)->Result<K, &'static str>{
     match unsafe{(**self).qtype}{
-      _t@qtype::BOOL_LIST..=qtype::TIME_LIST => Ok(unsafe{native::ja(self, std::mem::transmute::<*mut T, *mut V>(&mut atom))}),
+      _t@qtype::BOOL_LIST..=qtype::ENUM_LIST => Ok(unsafe{native::ja(self, std::mem::transmute::<*mut T, *mut V>(&mut atom))}),
       _ => Err("not a simple list or types do not match\0")
     }
   }
