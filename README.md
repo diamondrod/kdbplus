@@ -425,8 +425,8 @@ q)What are the three largest elements?: `belief`love`hope
 
 ### Projects Using This Library
 
-- [qrpc](https://github.com/diamondrod/qrpc)(gRPC client)
-- [q_comtrade](https://github.com/diamondrod/q_comtrade)(COMTRADE file parser)
+- [qrpc](https://github.com/diamondrod/qrpc) (gRPC client)
+- [q_comtrade](https://github.com/diamondrod/q_comtrade) (COMTRADE file parser)
 
 ## Document
 
