@@ -423,6 +423,11 @@ test result: ok. 147 passed; 0 failed
 q)What are the three largest elements?: `belief`love`hope
 ```
 
+### Projects Using This Library
+
+- [qrpc](https://github.com/diamondrod/qrpc)(gRPC client)
+- [q_comtrade](https://github.com/diamondrod/q_comtrade)(COMTRADE file parser)
+
 ## Document
 
 The document of this crate itself is on the [crates.io page](https://crates.io.docs/kdbplus).

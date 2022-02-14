@@ -768,7 +768,7 @@ pub trait KUtility{
   /// 2000.01.01 2000.01.02 2000.01.03 2000.01.04 2000.01.05
   /// ```
   /// # Note
-  /// - Concrete type of `T` is not checked. Its type must be either of `I`, `J` and `F` and it must be compatible
+  /// - Concrete type of `T` is not checked. Its type must be either of `I`, `J`, `E` and `F` and it must be compatible
   ///  with the list type. For example, timestamp list requires `J` type atom.
   /// - For symbol list, use [`push_symbol`](#fn.push_symbol) or [`push_symbol_n`](#fn.push_symbol_n).
   fn push_raw<T>(&mut self, atom: T)->Result<K, &'static str>;
