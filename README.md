@@ -164,7 +164,7 @@ Use `kdbplus` as a library name in `Cargo.toml` with `"ipc"` feature.
 
 ```toml
 [dependencies]
-kdbplus={version="^0.2", features=["ipc"]}
+kdbplus={version="^0.3", features=["ipc"]}
 ```
 
 ## Rust Wrapper of q/kdb+ C API
@@ -181,7 +181,7 @@ Use `kdbplus` as a library name in `Cargo.toml` with `"api"` feature.
 
 ```toml
 [dependencies]
-kdbplus={version="^0.2", features=["api"]}
+kdbplus={version="^0.3", features=["api"]}
 ```
 
 ### Examples
