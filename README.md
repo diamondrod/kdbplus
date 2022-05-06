@@ -430,7 +430,7 @@ q)What are the three largest elements?: `belief`love`hope
 
 ## Document
 
-The document of this crate itself is on the [crates.io page](https://crates.io.docs/kdbplus).
+The document of this crate itself is on the [crates.io page](https://docs.rs/kdbplus/).
 
 For details of C API itself, check the documents of KX website.
 
