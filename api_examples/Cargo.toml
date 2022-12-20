@@ -2,7 +2,7 @@
 name = "api_examples"
 version = "0.1.0"
 authors = ["diamondrod"]
-edition = "2018"
+edition = "2021"
 description = """
 NOT A PACKAGE TO PUBLISH.
 
@@ -14,5 +14,5 @@ This module provides examples of using `api` feature of `kdbplus` library. The f
 crate-type=["cdylib"]
 
 [dependencies]
-libc="^0.2"
+libc="0.2"
 kdbplus={path="../kdbplus", features=["api"]}

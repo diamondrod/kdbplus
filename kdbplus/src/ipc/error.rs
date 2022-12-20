@@ -16,6 +16,8 @@ use super::K;
 
 /// Error from network IO or invalid operation.
 pub enum Error{
+  /// Invalid time was used to build `Date` or `DateTime`.
+  InvalidDateTime,
   /// Network error.
   IO(IOError),
   /// Tried to cast to wrong type.
@@ -175,6 +177,7 @@ impl PartialEq<Self> for Error{
 impl fmt::Display for Error{
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result{
     match self{
+      Self::InvalidDateTime => write!(f, "invalid datetime"),
       Self::IO(error) => write!(f, "IO error: {}", error),
       Self::InvalidCast{from, to} => write!(f, "invalid cast from {} to {}", from, to),
       Self::InvalidCastList(from) => write!(f, "invalid cast from {} to list of generics T", from),
@@ -203,6 +206,7 @@ impl fmt::Display for Error{
 impl fmt::Debug for Error{
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result{
     match self{
+      Self::InvalidDateTime => write!(f, "invalid datetime"),
       Self::IO(error) => write!(f, "IO error: {:?}", error),
       Self::InvalidCast{from, to} => write!(f, "invalid cast from {} to {}", from, to),
       Self::InvalidCastList(from) => write!(f, "invalid cast from {} to list of generics T", from),

@@ -626,6 +626,7 @@ pub trait KUtility{
   ///  there is a single enum column in a table and the column values are cast to a symbol list whose name is `sym`.
   /// ```no_run
   /// use kdbplus::api::*;
+  /// use kdbplus::qtype;
   /// 
   /// #[no_mangle]
   /// pub extern "C" fn print_row(object: K, index: K) -> K{
@@ -2696,7 +2697,8 @@ pub fn days_to_ymd(days: I) -> I{
 ///   simple.as_mut_slice::<I>().copy_from_slice(&[12, 34]);
 ///   let extra=new_list(qtype::COMPOUND_LIST, 2);
 ///   extra.as_mut_slice::<K>().copy_from_slice(&[new_symbol("vague"), new_int(-3000)]);
-///   let mut compound = simple_to_compound(simple, &[]);
+///   // Convert an integer list into a compound list
+///   let mut compound = simple_to_compound(simple, "");
 ///   compound.append(extra).unwrap()
 /// }
 /// 
@@ -2704,7 +2706,10 @@ pub fn days_to_ymd(days: I) -> I{
 /// pub extern "C" fn drift2(_: K)->K{
 ///   let simple=new_list(qtype::ENUM_LIST, 2);
 ///   simple.as_mut_slice::<J>().copy_from_slice(&[0_i64, 1]);
+///   // Convert an enum indices into a compound list while creating enum values from the indices which are tied with
+///   //  an existing enum variable named "enum", i.e., Enum indices [0, 1] in the code are cast into `(enum[0]; enum[1])`.
 ///   let mut compound = simple_to_compound(simple, "enum");
+///   // Add `enum2[2]`.
 ///   compound.push(new_enum("enum2", 2)).unwrap();
 ///   compound.push(new_month(3)).unwrap();
 ///   compound

@@ -159,7 +159,7 @@ fn format_test()->Result<()>{
   assert_eq!(format!("{}", q_symbol_null), String::from("`"));
 
   // timestamp
-  let q_timestamp=K::new_timestamp(Utc.ymd(2019, 5, 9).and_hms_nano(0, 39, 2, 194756));
+  let q_timestamp=K::new_timestamp(NaiveDate::from_ymd_opt(2019, 5, 9).unwrap().and_hms_nano_opt(0, 39, 2, 194756).unwrap().and_local_timezone(Utc).unwrap());
   assert_eq!(format!("{}", q_timestamp), String::from("2019.05.09D00:39:02.000194756"));
 
   // timestamp null
@@ -175,7 +175,7 @@ fn format_test()->Result<()>{
   assert_eq!(format!("{}", q_timestamp_ninf), String::from("-0Wp"));
 
   // month
-  let q_month=K::new_month(Utc.ymd(2019, 12, 15));
+  let q_month=K::new_month(NaiveDate::from_ymd_opt(2019, 12, 15).unwrap());
   assert_eq!(format!("{}", q_month), String::from("2019.12m"));
 
   // month null
@@ -191,7 +191,7 @@ fn format_test()->Result<()>{
   assert_eq!(format!("{}", q_month_ninf), String::from("-0Wm"));
 
   // date
-  let q_date=K::new_date(Utc.ymd(2012, 3, 12));
+  let q_date=K::new_date(NaiveDate::from_ymd_opt(2012, 3, 12).unwrap());
   assert_eq!(format!("{}", q_date), String::from("2012.03.12"));
 
   // date null
@@ -207,7 +207,7 @@ fn format_test()->Result<()>{
   assert_eq!(format!("{}", q_date_ninf), String::from("-0Wd"));
 
   // datetime
-  let q_datetime=K::new_datetime(Utc.ymd(2013, 1, 10).and_hms_milli(0, 9, 50, 38));
+  let q_datetime=K::new_datetime(NaiveDate::from_ymd_opt(2013, 1, 10).unwrap().and_hms_milli_opt(0, 9, 50, 38).unwrap().and_local_timezone(Utc).unwrap());
   assert_eq!(format!("{}", q_datetime), String::from("2013.01.10T00:09:50.038"));
 
   // datetime null
@@ -349,29 +349,29 @@ fn format_test()->Result<()>{
   // timestamp list
   let mut q_timestamp_list=K::new_timestamp_list(vec![], qattribute::NONE);
   assert_eq!(format!("{}", q_timestamp_list), String::from("`timestamp$()"));
-  q_timestamp_list=K::new_timestamp_list(vec![*qnull::TIMESTAMP, Utc.ymd(2000, 2, 6).and_hms_nano(5, 11, 28, 4032), *qinf::TIMESTAMP], qattribute::NONE);
+  q_timestamp_list=K::new_timestamp_list(vec![*qnull::TIMESTAMP, NaiveDate::from_ymd_opt(2000, 2, 6).unwrap().and_hms_nano_opt(5, 11, 28, 4032).unwrap().and_local_timezone(Utc).unwrap(), *qinf::TIMESTAMP], qattribute::NONE);
   assert_eq!(format!("{}", q_timestamp_list), String::from("0N 2000.02.06D05:11:28.000004032 0Wp"));
 
   // timestamp list2
-  let q_timestamp_list2=K::new_timestamp_list(vec![*qninf::TIMESTAMP, Utc.ymd(2000, 2, 6).and_hms_nano(5, 11, 28, 4032)], qattribute::NONE);
+  let q_timestamp_list2=K::new_timestamp_list(vec![*qninf::TIMESTAMP, NaiveDate::from_ymd_opt(2000, 2, 6).unwrap().and_hms_nano_opt(5, 11, 28, 4032).unwrap().and_local_timezone(Utc).unwrap()], qattribute::NONE);
   assert_eq!(format!("{}", q_timestamp_list2), String::from("-0W 2000.02.06D05:11:28.000004032"));
 
   // month list
   let mut q_month_list=K::new_month_list(vec![], qattribute::NONE);
   assert_eq!(format!("{}", q_month_list), String::from("`month$()"));
-  q_month_list=K::new_month_list(vec![Utc.ymd(2006, 3, 9), Utc.ymd(1999, 5, 31), qnull::MONTH], qattribute::NONE);
+  q_month_list=K::new_month_list(vec![NaiveDate::from_ymd_opt(2006, 3, 9).unwrap(), NaiveDate::from_ymd_opt(1999, 5, 31).unwrap(), qnull::MONTH], qattribute::NONE);
   assert_eq!(format!("{}", q_month_list), String::from("2006.03 1999.05 0Nm"));
 
   // date list
   let mut q_date_list=K::new_date_list(vec![], qattribute::NONE);
   assert_eq!(format!("{}", q_date_list), String::from("`date$()"));
-  q_date_list=K::new_date_list(vec![Utc.ymd(2001, 2, 18), Utc.ymd(2019, 12, 12), qinf::DATE, Utc.ymd(2003, 10, 16)], qattribute::NONE);
+  q_date_list=K::new_date_list(vec![NaiveDate::from_ymd_opt(2001, 2, 18).unwrap(), NaiveDate::from_ymd_opt(2019, 12, 12).unwrap(), qinf::DATE, NaiveDate::from_ymd_opt(2003, 10, 16).unwrap()], qattribute::NONE);
   assert_eq!(format!("{}", q_date_list), String::from("2001.02.18 2019.12.12 0W 2003.10.16"));
 
   // datetime list
   let mut q_datetime_list=K::new_datetime_list(vec![], qattribute::NONE);
   assert_eq!(format!("{}", q_datetime_list), String::from("`datetime$()"));
-  q_datetime_list=K::new_datetime_list(vec![Utc.ymd(2002, 1, 26).and_hms_nano(9,39, 2, 368376238), *qinf::DATETIME], qattribute::SORTED);
+  q_datetime_list=K::new_datetime_list(vec![NaiveDate::from_ymd_opt(2002, 1, 26).unwrap().and_hms_nano_opt(9,39, 2, 368376238).unwrap().and_local_timezone(Utc).unwrap(), *qinf::DATETIME], qattribute::SORTED);
   assert_eq!(format!("{}", q_datetime_list), String::from("`s#2002.01.26T09:39:02.368 0Wz"));
 
   // timespan list
@@ -405,7 +405,7 @@ fn format_test()->Result<()>{
     K::new_symbol_list(vec![String::from("Ruby"), String::from("Diamond"), String::from("Sapphire")], qattribute::UNIQUE),
     K::new_timestamp(*qnull::TIMESTAMP),
     K::new_long_list(vec![0, 1, 2, qninf::LONG], qattribute::NONE),
-    K::new_month_list(vec![Utc.ymd(2004, 2, 7)], qattribute::NONE)
+    K::new_month_list(vec![NaiveDate::from_ymd_opt(2004, 2, 7).unwrap()], qattribute::NONE)
   ]);
   assert_eq!(format!("{}", q_compound_list), String::from("(`u#`Ruby`Diamond`Sapphire;0Np;0 1 2 -0W;,2004.02m)"));
 
@@ -501,8 +501,8 @@ fn getter_test() -> Result<()>{
   assert_eq!(q_symbol.get_type(), qtype::SYMBOL_ATOM);
 
   // timestamp
-  let q_timestamp=K::new_timestamp(Utc.ymd(2001, 9, 15).and_hms_nano(4, 2, 30, 37204));
-  assert_eq!(q_timestamp.get_timestamp(), Ok(Utc.ymd(2001, 9, 15).and_hms_nano(4, 2, 30, 37204)));
+  let q_timestamp=K::new_timestamp(NaiveDate::from_ymd_opt(2001, 9, 15).unwrap().and_hms_nano_opt(4, 2, 30, 37204).unwrap().and_local_timezone(Utc).unwrap());
+  assert_eq!(q_timestamp.get_timestamp(), Ok(NaiveDate::from_ymd_opt(2001, 9, 15).unwrap().and_hms_nano_opt(4, 2, 30, 37204).unwrap().and_local_timezone(Utc).unwrap()));
   assert_eq!(q_timestamp.get_long(), Ok(53841750000037204));
   assert_eq!(q_timestamp.get_symbol(), Err(Error::InvalidCast{from: "timestamp", to: "symbol"}));
   assert_eq!(q_timestamp.get_type(), qtype::TIMESTAMP_ATOM);
@@ -523,8 +523,8 @@ fn getter_test() -> Result<()>{
   assert_eq!(q_timestamp_ninf.get_long(), Ok(qninf::LONG));
 
   // month
-  let q_month=K::new_month(Utc.ymd(2007, 8, 30));
-  assert_eq!(q_month.get_month(), Ok(Utc.ymd(2007, 8, 1)));
+  let q_month=K::new_month(NaiveDate::from_ymd_opt(2007, 8, 30).unwrap());
+  assert_eq!(q_month.get_month(), Ok(NaiveDate::from_ymd_opt(2007, 8, 1).unwrap()));
   assert_eq!(q_month.get_int(), Ok(91));
   assert_eq!(q_month.get_timestamp(), Err(Error::InvalidCast{from: "month", to: "timestamp"}));
   assert_eq!(q_month.get_type(), qtype::MONTH_ATOM);
@@ -545,8 +545,8 @@ fn getter_test() -> Result<()>{
   assert_eq!(q_month_ninf.get_int(), Ok(qninf::INT));
 
   // date
-  let q_date=K::new_date(Utc.ymd(2000, 5, 10));
-  assert_eq!(q_date.get_date(), Ok(Utc.ymd(2000, 5, 10)));
+  let q_date=K::new_date(NaiveDate::from_ymd_opt(2000, 5, 10).unwrap());
+  assert_eq!(q_date.get_date(), Ok(NaiveDate::from_ymd_opt(2000, 5, 10).unwrap()));
   assert_eq!(q_date.get_int(), Ok(130));
   assert_eq!(q_date.get_month(), Err(Error::InvalidCast{from: "date", to: "month"}));
   assert_eq!(q_date.get_type(), qtype::DATE_ATOM);
@@ -567,8 +567,8 @@ fn getter_test() -> Result<()>{
   assert_eq!(q_date_ninf.get_int(), Ok(qninf::INT));
 
   // datetime
-  let q_datetime=K::new_datetime(Utc.ymd(2011, 4, 7).and_hms_milli(19, 5, 41, 385));
-  assert_eq!(q_datetime.get_datetime(), Ok(Utc.ymd(2011, 4, 7).and_hms_milli(19, 5, 41, 385)));
+  let q_datetime=K::new_datetime(NaiveDate::from_ymd_opt(2011, 4, 7).unwrap().and_hms_milli_opt(19, 5, 41, 385).unwrap().and_local_timezone(Utc).unwrap());
+  assert_eq!(q_datetime.get_datetime(), Ok(NaiveDate::from_ymd_opt(2011, 4, 7).unwrap().and_hms_milli_opt(19, 5, 41, 385).unwrap().and_local_timezone(Utc).unwrap()));
   assert_eq!(q_datetime.get_float(), Ok(4114.795617881944));
   assert_eq!(q_datetime.get_date(), Err(Error::InvalidCast{from: "datetime", to: "date"}));
   assert_eq!(q_datetime.get_type(), qtype::DATETIME_ATOM);
@@ -779,22 +779,22 @@ fn cast_test() -> Result<()>{
   assert_eq!(*q_string.as_string().unwrap(), String::from("super"));
 
   // timestamp list
-  let q_timestamp_list=K::new_timestamp_list(vec![*qnull::TIMESTAMP, Utc.ymd(2000, 2, 6).and_hms_nano(5, 11, 28, 4032), *qinf::TIMESTAMP], qattribute::NONE);
+  let q_timestamp_list=K::new_timestamp_list(vec![*qnull::TIMESTAMP, NaiveDate::from_ymd_opt(2000, 2, 6).unwrap().and_hms_nano_opt(5, 11, 28, 4032).unwrap().and_local_timezone(Utc).unwrap(), *qinf::TIMESTAMP], qattribute::NONE);
   assert_eq!(*q_timestamp_list.as_vec::<J>().unwrap(), vec![qnull_base::J, 3129088000004032, qinf_base::J]);
   assert_eq!(q_timestamp_list.get_type(), qtype::TIMESTAMP_LIST);
 
   // month list
-  let q_month_list=K::new_month_list(vec![Utc.ymd(2006, 3, 9), Utc.ymd(1999, 5, 31), qnull::MONTH], qattribute::NONE);
+  let q_month_list=K::new_month_list(vec![NaiveDate::from_ymd_opt(2006, 3, 9).unwrap(), NaiveDate::from_ymd_opt(1999, 5, 31).unwrap(), qnull::MONTH], qattribute::NONE);
   assert_eq!(*q_month_list.as_vec::<I>().unwrap(), vec![74, -8, qnull_base::I]);
   assert_eq!(q_month_list.get_type(), qtype::MONTH_LIST);
 
   // date list
-  let q_date_list=K::new_date_list(vec![Utc.ymd(2001, 2, 18), Utc.ymd(2019, 12, 12), qinf::DATE, Utc.ymd(2003, 10, 16)], qattribute::NONE);
+  let q_date_list=K::new_date_list(vec![NaiveDate::from_ymd_opt(2001, 2, 18).unwrap(), NaiveDate::from_ymd_opt(2019, 12, 12).unwrap(), qinf::DATE, NaiveDate::from_ymd_opt(2003, 10, 16).unwrap()], qattribute::NONE);
   assert_eq!(*q_date_list.as_vec::<I>().unwrap(), vec![414, 7285, qinf_base::I, 1384]);
   assert_eq!(q_date_list.get_type(), qtype::DATE_LIST);
 
   // datetime list
-  let q_datetime_list=K::new_datetime_list(vec![Utc.ymd(2002, 1, 26).and_hms_nano(9,39, 2, 368376238), *qinf::DATETIME], qattribute::SORTED);
+  let q_datetime_list=K::new_datetime_list(vec![NaiveDate::from_ymd_opt(2002, 1, 26).unwrap().and_hms_nano_opt(9,39, 2, 368376238).unwrap().and_local_timezone(Utc).unwrap(), *qinf::DATETIME], qattribute::SORTED);
   let cast=q_datetime_list.as_vec::<F>().unwrap();
   assert_eq_float!(cast[0], 756.4021, 0.0001);
   assert!(cast[1].is_infinite());
@@ -825,7 +825,7 @@ fn cast_test() -> Result<()>{
     K::new_symbol_list(vec![String::from("Ruby"), String::from("Diamond"), String::from("Sapphire")], qattribute::UNIQUE),
     K::new_timestamp(*qnull::TIMESTAMP),
     K::new_long_list(vec![0, 1, 2, qninf::LONG], qattribute::NONE),
-    K::new_month_list(vec![Utc.ymd(2004, 2, 7)], qattribute::NONE)
+    K::new_month_list(vec![NaiveDate::from_ymd_opt(2004, 2, 7).unwrap()], qattribute::NONE)
   ]);
   match q_compound_list.as_vec::<K>(){
     Ok(list) => assert_eq!(list.len(), 4),
@@ -873,7 +873,7 @@ fn length_test() -> Result<()>{
     K::new_symbol_list(vec![String::from("Ruby"), String::from("Diamond"), String::from("Sapphire")], qattribute::UNIQUE),
     K::new_timestamp(*qnull::TIMESTAMP),
     K::new_long_list(vec![0, 1, 2, qninf::LONG], qattribute::NONE),
-    K::new_month_list(vec![Utc.ymd(2004, 2, 7)], qattribute::NONE)
+    K::new_month_list(vec![NaiveDate::from_ymd_opt(2004, 2, 7).unwrap()], qattribute::NONE)
   ]);
   assert_eq!(q_compound_list.len(), 4);
   
@@ -1068,64 +1068,64 @@ fn push_pop_test() -> Result<()>{
   assert_eq!(tail.get_symbol().unwrap(), String::from("pistachio"));
 
   // timestamp list
-  let mut q_timestamp_list=K::new_timestamp_list(vec![Utc.ymd(2019, 8, 9).and_hms_nano(16, 28, 2, 468276775)], qattribute::NONE);
-  q_timestamp_list.push(&Utc.ymd(2003, 12, 9).and_hms_nano(19, 58, 30, 326987333)).unwrap();
-  q_timestamp_list.insert(0, &Utc.ymd(2001, 2, 18).and_hms_nano(0, 39, 8, 429879532)).unwrap();
+  let mut q_timestamp_list=K::new_timestamp_list(vec![NaiveDate::from_ymd_opt(2019, 8, 9).unwrap().and_hms_nano_opt(16, 28, 2, 468276775).unwrap().and_local_timezone(Utc).unwrap()], qattribute::NONE);
+  q_timestamp_list.push(&NaiveDate::from_ymd_opt(2003, 12, 9).unwrap().and_hms_nano_opt(19, 58, 30, 326987333).unwrap().and_local_timezone(Utc).unwrap()).unwrap();
+  q_timestamp_list.insert(0, &NaiveDate::from_ymd_opt(2001, 2, 18).unwrap().and_hms_nano_opt(0, 39, 8, 429879532).unwrap().and_local_timezone(Utc).unwrap()).unwrap();
   assert_eq!(*q_timestamp_list.as_vec::<J>().unwrap(), vec![35771948429879532, 618683282468276775, 124315110326987333]);
   let mut tail_timestamp=q_timestamp_list.pop_timestamp().unwrap();
-  assert_eq!(tail_timestamp, Utc.ymd(2003, 12, 9).and_hms_nano(19, 58, 30, 326987333));
+  assert_eq!(tail_timestamp, NaiveDate::from_ymd_opt(2003, 12, 9).unwrap().and_hms_nano_opt(19, 58, 30, 326987333).unwrap().and_local_timezone(Utc).unwrap());
   tail=q_timestamp_list.pop().unwrap();
-  assert_eq!(tail.get_timestamp().unwrap(), Utc.ymd(2019, 8, 9).and_hms_nano(16, 28, 2, 468276775));
+  assert_eq!(tail.get_timestamp().unwrap(), NaiveDate::from_ymd_opt(2019, 8, 9).unwrap().and_hms_nano_opt(16, 28, 2, 468276775).unwrap().and_local_timezone(Utc).unwrap());
   tail_timestamp=q_timestamp_list.remove_timestamp(0).unwrap();
-  assert_eq!(tail_timestamp, Utc.ymd(2001, 2, 18).and_hms_nano(0, 39, 8, 429879532));
-  q_timestamp_list.push(&Utc.ymd(2003, 12, 9).and_hms_nano(19, 58, 30, 326987333)).unwrap();
+  assert_eq!(tail_timestamp, NaiveDate::from_ymd_opt(2001, 2, 18).unwrap().and_hms_nano_opt(0, 39, 8, 429879532).unwrap().and_local_timezone(Utc).unwrap());
+  q_timestamp_list.push(&NaiveDate::from_ymd_opt(2003, 12, 9).unwrap().and_hms_nano_opt(19, 58, 30, 326987333).unwrap().and_local_timezone(Utc).unwrap()).unwrap();
   tail=q_timestamp_list.remove(0).unwrap();
-  assert_eq!(tail.get_timestamp().unwrap(), Utc.ymd(2003, 12, 9).and_hms_nano(19, 58, 30, 326987333));
+  assert_eq!(tail.get_timestamp().unwrap(), NaiveDate::from_ymd_opt(2003, 12, 9).unwrap().and_hms_nano_opt(19, 58, 30, 326987333).unwrap().and_local_timezone(Utc).unwrap());
 
   // month list
-  let mut q_month_list=K::new_month_list(vec![Utc.ymd(2011, 5, 1)], qattribute::NONE);
-  q_month_list.push(&Utc.ymd(2004, 8, 1)).unwrap();
-  q_month_list.insert(2, &Utc.ymd(2013, 5, 1)).unwrap();
+  let mut q_month_list=K::new_month_list(vec![NaiveDate::from_ymd_opt(2011, 5, 1).unwrap()], qattribute::NONE);
+  q_month_list.push(&NaiveDate::from_ymd_opt(2004, 8, 1).unwrap()).unwrap();
+  q_month_list.insert(2, &NaiveDate::from_ymd_opt(2013, 5, 1).unwrap()).unwrap();
   assert_eq!(*q_month_list.as_vec::<I>().unwrap(), vec![136, 55, 160]);
   let mut tail_month=q_month_list.pop_month().unwrap();
-  assert_eq!(tail_month, Utc.ymd(2013, 5, 1));
+  assert_eq!(tail_month, NaiveDate::from_ymd_opt(2013, 5, 1).unwrap());
   tail=q_month_list.pop().unwrap();
-  assert_eq!(tail.get_month().unwrap(), Utc.ymd(2004, 8, 1));
+  assert_eq!(tail.get_month().unwrap(), NaiveDate::from_ymd_opt(2004, 8, 1).unwrap());
   tail_month=q_month_list.remove_month(0).unwrap();
-  assert_eq!(tail_month, Utc.ymd(2011, 5, 1));
-  q_month_list.push(&Utc.ymd(2003, 12, 1)).unwrap();
+  assert_eq!(tail_month, NaiveDate::from_ymd_opt(2011, 5, 1).unwrap());
+  q_month_list.push(&NaiveDate::from_ymd_opt(2003, 12, 1).unwrap()).unwrap();
   tail=q_month_list.remove(0).unwrap();
-  assert_eq!(tail.get_month().unwrap(), Utc.ymd(2003, 12, 1));
+  assert_eq!(tail.get_month().unwrap(), NaiveDate::from_ymd_opt(2003, 12, 1).unwrap());
 
   // date list
-  let mut q_date_list=K::new_date_list(vec![Utc.ymd(2014, 6, 4)], qattribute::NONE);
-  q_date_list.push(&Utc.ymd(2013, 7, 3)).unwrap();
-  q_date_list.insert(2, &Utc.ymd(2007, 1, 1)).unwrap();
+  let mut q_date_list=K::new_date_list(vec![NaiveDate::from_ymd_opt(2014, 6, 4).unwrap()], qattribute::NONE);
+  q_date_list.push(&NaiveDate::from_ymd_opt(2013, 7, 3).unwrap()).unwrap();
+  q_date_list.insert(2, &NaiveDate::from_ymd_opt(2007, 1, 1).unwrap()).unwrap();
   assert_eq!(*q_date_list.as_vec::<I>().unwrap(), vec![5268, 4932, 2557]);
   let mut tail_date=q_date_list.pop_date().unwrap();
-  assert_eq!(tail_date, Utc.ymd(2007, 1, 1));
+  assert_eq!(tail_date, NaiveDate::from_ymd_opt(2007, 1, 1).unwrap());
   tail=q_date_list.pop().unwrap();
-  assert_eq!(tail.get_date().unwrap(), Utc.ymd(2013, 7, 3));
+  assert_eq!(tail.get_date().unwrap(), NaiveDate::from_ymd_opt(2013, 7, 3).unwrap());
   tail_date=q_date_list.remove_date(0).unwrap();
-  assert_eq!(tail_date, Utc.ymd(2014, 6, 4));
-  q_date_list.push(&Utc.ymd(2003, 12, 9)).unwrap();
+  assert_eq!(tail_date, NaiveDate::from_ymd_opt(2014, 6, 4).unwrap());
+  q_date_list.push(&NaiveDate::from_ymd_opt(2003, 12, 9).unwrap()).unwrap();
   tail=q_date_list.remove(0).unwrap();
-  assert_eq!(tail.get_date().unwrap(), Utc.ymd(2003, 12, 9));
+  assert_eq!(tail.get_date().unwrap(), NaiveDate::from_ymd_opt(2003, 12, 9).unwrap());
 
   // datetime list
-  let mut q_datetime_list=K::new_datetime_list(vec![Utc.ymd(2018, 9, 22).and_hms_milli(4, 58, 30, 204)], qattribute::NONE);
-  q_datetime_list.push(&Utc.ymd(2017, 8, 9).and_hms_milli(15, 32, 19, 600)).unwrap();
-  q_datetime_list.insert(0, &Utc.ymd(1997, 6, 23).and_hms_milli(13, 8, 57, 654)).unwrap();
+  let mut q_datetime_list=K::new_datetime_list(vec![NaiveDate::from_ymd_opt(2018, 9, 22).unwrap().and_hms_milli_opt(4, 58, 30, 204).unwrap().and_local_timezone(Utc).unwrap()], qattribute::NONE);
+  q_datetime_list.push(&NaiveDate::from_ymd_opt(2017, 8, 9).unwrap().and_hms_milli_opt(15, 32, 19, 600).unwrap().and_local_timezone(Utc).unwrap()).unwrap();
+  q_datetime_list.insert(0, &NaiveDate::from_ymd_opt(1997, 6, 23).unwrap().and_hms_milli_opt(13, 8, 57, 654).unwrap().and_local_timezone(Utc).unwrap()).unwrap();
   assert_eq_float_vec!(*q_datetime_list.as_vec::<F>().unwrap(), vec![-921.4521_f64, 6839.207, 6430.647], 0.001);
   let mut tail_datetime=q_datetime_list.pop_datetime().unwrap();
-  assert_eq!(tail_datetime, Utc.ymd(2017, 8, 9).and_hms_milli(15, 32, 19, 600));
+  assert_eq!(tail_datetime, NaiveDate::from_ymd_opt(2017, 8, 9).unwrap().and_hms_milli_opt(15, 32, 19, 600).unwrap().and_local_timezone(Utc).unwrap());
   tail=q_datetime_list.pop().unwrap();
-  assert_eq!(tail.get_datetime().unwrap(), Utc.ymd(2018, 9, 22).and_hms_milli(4, 58, 30, 204));
+  assert_eq!(tail.get_datetime().unwrap(), NaiveDate::from_ymd_opt(2018, 9, 22).unwrap().and_hms_milli_opt(4, 58, 30, 204).unwrap().and_local_timezone(Utc).unwrap());
   tail_datetime=q_datetime_list.remove_datetime(0).unwrap();
-  assert_eq!(tail_datetime, Utc.ymd(1997, 6, 23).and_hms_milli(13, 8, 57, 654));
-  q_datetime_list.push(&Utc.ymd(2003, 12, 9).and_hms_milli(19, 58, 30, 326)).unwrap();
+  assert_eq!(tail_datetime, NaiveDate::from_ymd_opt(1997, 6, 23).unwrap().and_hms_milli_opt(13, 8, 57, 654).unwrap().and_local_timezone(Utc).unwrap());
+  q_datetime_list.push(&NaiveDate::from_ymd_opt(2003, 12, 9).unwrap().and_hms_milli_opt(19, 58, 30, 326).unwrap().and_local_timezone(Utc).unwrap()).unwrap();
   tail=q_datetime_list.remove(0).unwrap();
-  assert_eq!(tail.get_datetime().unwrap(), Utc.ymd(2003, 12, 9).and_hms_milli(19, 58, 30, 326));
+  assert_eq!(tail.get_datetime().unwrap(), NaiveDate::from_ymd_opt(2003, 12, 9).unwrap().and_hms_milli_opt(19, 58, 30, 326).unwrap().and_local_timezone(Utc).unwrap());
 
   // timespan list
   let mut q_timespan_list=K::new_timespan_list(vec![Duration::nanoseconds(6782392639932)], qattribute::NONE);
@@ -1200,7 +1200,7 @@ fn push_pop_test() -> Result<()>{
   assert_eq!(q_compound_list.push_pair(&3, &String::from("woops")), Err(Error::InvalidOperation{operator: "push_pair", operand_type: "compound list", expected: Some("dictionary")}));
 
   let keys=K::new_int_list(vec![0, 1, 2], qattribute::NONE);
-  let values=K::new_date_list(vec![Utc.ymd(2000, 1, 9), Utc.ymd(2001, 4, 10), Utc.ymd(2015, 3, 16)], qattribute::NONE);
+  let values=K::new_date_list(vec![NaiveDate::from_ymd_opt(2000, 1, 9).unwrap(), NaiveDate::from_ymd_opt(2001, 4, 10).unwrap(), NaiveDate::from_ymd_opt(2015, 3, 16).unwrap()], qattribute::NONE);
   let mut q_dictionary=K::new_dictionary(keys, values).unwrap();
 
   // Try to insert wrong type element
@@ -1208,12 +1208,12 @@ fn push_pop_test() -> Result<()>{
   assert_eq!(format!("{}", q_dictionary), String::from("0 1 2i!2000.01.09 2001.04.10 2015.03.16"));
 
   // Add correct type element
-  q_dictionary.push_pair(&3, &Utc.ymd(2020, 8, 9)).unwrap();
+  q_dictionary.push_pair(&3, &NaiveDate::from_ymd_opt(2020, 8, 9).unwrap()).unwrap();
   assert_eq!(format!("{}", q_dictionary), String::from("0 1 2 3i!2000.01.09 2001.04.10 2015.03.16 2020.08.09"));
 
   let (key, value) = q_dictionary.pop_pair().unwrap();
   assert_eq!(key.get_int().unwrap(), 3);
-  assert_eq!(value.get_date().unwrap(), Utc.ymd(2020, 8, 9));
+  assert_eq!(value.get_date().unwrap(), NaiveDate::from_ymd_opt(2020, 8, 9).unwrap());
 
   Ok(())
 }
@@ -1337,8 +1337,8 @@ async fn functional_message_test(socket:&mut Qsocket) -> Result<()>{
   assert_eq!(res_symbol.get_symbol()?, qnull::SYMBOL);
 
   // timestamp
-  let mut res_timestamp=socket.send_sync_message(&add_null!(K::new_timestamp(Utc.ymd(2018, 2, 18).and_hms_nano(4, 0, 0, 100)))).await?;
-  assert_eq!(res_timestamp.get_timestamp()?, Utc.ymd(2018, 2, 18).and_hms_nano(4, 0, 0, 100));
+  let mut res_timestamp=socket.send_sync_message(&add_null!(K::new_timestamp(NaiveDate::from_ymd_opt(2018, 2, 18).unwrap().and_hms_nano_opt(4, 0, 0, 100).unwrap().and_local_timezone(Utc).unwrap()))).await?;
+  assert_eq!(res_timestamp.get_timestamp()?, NaiveDate::from_ymd_opt(2018, 2, 18).unwrap().and_hms_nano_opt(4, 0, 0, 100).unwrap().and_local_timezone(Utc).unwrap());
 
   // timestamp null
   res_timestamp=socket.send_sync_message(&add_null!(K::new_timestamp(*qnull::TIMESTAMP))).await?;
@@ -1353,8 +1353,8 @@ async fn functional_message_test(socket:&mut Qsocket) -> Result<()>{
   assert_eq!(res_timestamp.get_timestamp()?, *qninf::TIMESTAMP);
 
   // month   
-  let mut res_month=socket.send_sync_message(&add_null!(K::new_month(Utc.ymd(2013, 9, 1)))).await?;
-  assert_eq!(res_month.get_month()?, Utc.ymd(2013, 9, 1));
+  let mut res_month=socket.send_sync_message(&add_null!(K::new_month(NaiveDate::from_ymd_opt(2013, 9, 1).unwrap()))).await?;
+  assert_eq!(res_month.get_month()?, NaiveDate::from_ymd_opt(2013, 9, 1).unwrap());
 
   // month null
   res_month=socket.send_sync_message(&add_null!(K::new_month(qnull::MONTH))).await?;
@@ -1369,8 +1369,8 @@ async fn functional_message_test(socket:&mut Qsocket) -> Result<()>{
   assert_eq!(res_month.get_month()?, *qninf::MONTH);
 
   // date 
-  let mut res_date=socket.send_sync_message(&add_null!(K::new_date(Utc.ymd(2000, 2, 9)))).await?;
-  assert_eq!(res_date.get_date()?, Utc.ymd(2000, 2, 9));
+  let mut res_date=socket.send_sync_message(&add_null!(K::new_date(NaiveDate::from_ymd_opt(2000, 2, 9).unwrap()))).await?;
+  assert_eq!(res_date.get_date()?, NaiveDate::from_ymd_opt(2000, 2, 9).unwrap());
 
   // date null
   res_date=socket.send_sync_message(&add_null!(K::new_date(qnull::DATE))).await?;
@@ -1385,8 +1385,8 @@ async fn functional_message_test(socket:&mut Qsocket) -> Result<()>{
   assert_eq!(res_date.get_date()?, *qninf::DATE);
 
   // datetime
-  let mut res_datetime=socket.send_sync_message(&add_null!(K::new_datetime(Utc.ymd(2004, 6, 17).and_hms_milli(11, 32, 40, 803)))).await?;
-  assert_eq!(res_datetime.get_datetime()?, Utc.ymd(2004, 6, 17).and_hms_milli(11, 32, 40, 803));
+  let mut res_datetime=socket.send_sync_message(&add_null!(K::new_datetime(NaiveDate::from_ymd_opt(2004, 6, 17).unwrap().and_hms_milli_opt(11, 32, 40, 803).unwrap().and_local_timezone(Utc).unwrap()))).await?;
+  assert_eq!(res_datetime.get_datetime()?, NaiveDate::from_ymd_opt(2004, 6, 17).unwrap().and_hms_milli_opt(11, 32, 40, 803).unwrap().and_local_timezone(Utc).unwrap());
 
   // datetime null
   res_datetime=socket.send_sync_message(&add_null!(K::new_datetime(qnull::DATETIME))).await?;
@@ -1510,20 +1510,20 @@ async fn functional_message_test(socket:&mut Qsocket) -> Result<()>{
   assert_eq!(*res_symbol.as_vec::<S>()?, vec![String::from("kdb+"), String::from("q")]);
 
   // timestamp list
-  let timestamp_query=add_null!(K::new_timestamp_list(vec![Utc.ymd(2018, 2, 18).and_hms_nano(4, 0, 0, 100), Utc.ymd(2019, 12, 3).and_hms_nano(4, 5, 10, 3456)], qattribute::NONE));
+  let timestamp_query=add_null!(K::new_timestamp_list(vec![NaiveDate::from_ymd_opt(2018, 2, 18).unwrap().and_hms_nano_opt(4, 0, 0, 100).unwrap().and_local_timezone(Utc).unwrap(), NaiveDate::from_ymd_opt(2019, 12, 3).unwrap().and_hms_nano_opt(4, 5, 10, 3456).unwrap().and_local_timezone(Utc).unwrap()], qattribute::NONE));
   res_timestamp=socket.send_sync_message(&timestamp_query).await?;
   assert_eq!(*res_timestamp.as_vec::<J>()?, vec![572241600000000100_i64, 628661110000003456]);
   
   // month list
-  res_month=socket.send_sync_message(&add_null!(K::new_month_list(vec![Utc.ymd(2013, 9, 1), Utc.ymd(2009, 2, 1)], qattribute::NONE))).await?;
+  res_month=socket.send_sync_message(&add_null!(K::new_month_list(vec![NaiveDate::from_ymd_opt(2013, 9, 1).unwrap(), NaiveDate::from_ymd_opt(2009, 2, 1).unwrap()], qattribute::NONE))).await?;
   assert_eq!(*res_month.as_vec::<I>()?, vec![164_i32, 109]);
 
   // date list 
-  let res_date=socket.send_sync_message(&add_null!(K::new_date_list(vec![Utc.ymd(2000, 2, 9)], qattribute::NONE))).await?;
+  let res_date=socket.send_sync_message(&add_null!(K::new_date_list(vec![NaiveDate::from_ymd_opt(2000, 2, 9).unwrap()], qattribute::NONE))).await?;
   assert_eq!(*res_date.as_vec::<I>()?, vec![39]);
 
   // datetime list
-  res_datetime=socket.send_sync_message(&add_null!(K::new_datetime_list(vec![Utc.ymd(2004, 6, 17).and_hms_milli(11, 32, 40, 803)], qattribute::NONE))).await?;
+  res_datetime=socket.send_sync_message(&add_null!(K::new_datetime_list(vec![NaiveDate::from_ymd_opt(2004, 6, 17).unwrap().and_hms_milli_opt(11, 32, 40, 803).unwrap().and_local_timezone(Utc).unwrap()], qattribute::NONE))).await?;
   assert_eq_float_vec!(*res_datetime.as_vec::<F>()?, vec![1629.481], 0.001);
 
   // timespan list
@@ -1551,9 +1551,9 @@ async fn functional_message_test(socket:&mut Qsocket) -> Result<()>{
     K::new_compound_list(vec![
       K::new_long(42),
       K::new_real_list(vec![3.927524_f32, 5.170911], qattribute::SORTED),
-      K::new_timestamp(Utc.ymd(2020, 2, 10).and_hms_nano(3, 19, 3, 247856731)),
+      K::new_timestamp(NaiveDate::from_ymd_opt(2020, 2, 10).unwrap().and_hms_nano_opt(3, 19, 3, 247856731).unwrap().and_local_timezone(Utc).unwrap()),
       K::new_symbol_list(vec![String::from("KxSystems"), String::from("kdb+")], qattribute::NONE),
-      K::new_datetime_list(vec![Utc.ymd(2020, 10, 1).and_hms_milli(3, 30, 12, 45), Utc.ymd(2008, 2, 18).and_hms_milli(21, 39, 10, 567)], qattribute::NONE),
+      K::new_datetime_list(vec![NaiveDate::from_ymd_opt(2020, 10, 1).unwrap().and_hms_milli_opt(3, 30, 12, 45).unwrap().and_local_timezone(Utc).unwrap(), NaiveDate::from_ymd_opt(2008, 2, 18).unwrap().and_hms_milli_opt(21, 39, 10, 567).unwrap().and_local_timezone(Utc).unwrap()], qattribute::NONE),
       K::new_char('k')
     ])
   ]);
@@ -1564,7 +1564,7 @@ async fn functional_message_test(socket:&mut Qsocket) -> Result<()>{
   let real_list=res_compound.remove(0)?;
   assert_eq!(real_list.get_attribute(), qattribute::SORTED);
   assert_eq!(*real_list.as_vec::<E>()?, vec![3.927524_f32, 5.170911]);
-  assert_eq!(res_compound.remove(0)?.get_timestamp()?, Utc.ymd(2020, 2, 10).and_hms_nano(3, 19, 3, 247856731));
+  assert_eq!(res_compound.remove(0)?.get_timestamp()?, NaiveDate::from_ymd_opt(2020, 2, 10).unwrap().and_hms_nano_opt(3, 19, 3, 247856731).unwrap().and_local_timezone(Utc).unwrap());
   assert_eq!(*res_compound.remove(0)?.as_vec::<S>()?, vec![String::from("KxSystems"), String::from("kdb+")]);
   assert_eq_float_vec!(res_compound.remove(0)?.as_vec::<F>()?, vec![7579.146, 2970.902], 0.001);
   assert_eq!(res_compound.remove(0)?.get_char()?, 'k');
@@ -1581,7 +1581,7 @@ async fn functional_message_test(socket:&mut Qsocket) -> Result<()>{
   // sorted dictionary
   q_dictionary=K::new_dictionary(
     K::new_long_list(vec![1_i64, 2, 3], qattribute::SORTED),
-    K::new_compound_list(vec![K::new_string(String::from("string"), qattribute::NONE), K::new_bool_list(vec![true, false], qattribute::NONE), K::new_date(Utc.ymd(2021, 3, 9))])
+    K::new_compound_list(vec![K::new_string(String::from("string"), qattribute::NONE), K::new_bool_list(vec![true, false], qattribute::NONE), K::new_date(NaiveDate::from_ymd_opt(2021, 3, 9).unwrap())])
   )?;
   res_dictionary=socket.send_sync_message(&add_null!(q_dictionary)).await?;
   assert_eq!(format!("{}", res_dictionary), String::from("`s#1 2 3!(\"string\";10b;2021.03.09)"));

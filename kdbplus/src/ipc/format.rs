@@ -196,7 +196,7 @@ fn put_date(days: I, stream: &mut String) -> bool{
     true
   }
   else{
-    stream.push_str(Utc.timestamp_nanos(ONE_DAY_NANOS * (days + KDB_DAY_OFFSET) as i64).date().format("%Y.%m.%d").to_string().as_str());
+    stream.push_str(Utc.timestamp_nanos(ONE_DAY_NANOS * (days + KDB_DAY_OFFSET) as i64).date_naive().format("%Y.%m.%d").to_string().as_str());
     false
   }
 }

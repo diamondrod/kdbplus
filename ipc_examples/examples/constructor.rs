@@ -13,7 +13,7 @@ fn main(){
   let string=K::new_string(String::from("something"), qattribute::NONE);
   println!("string: {}", string);
 
-  let timestamp=K::new_timestamp_list(vec![Utc.ymd(2009, 5, 28).and_hms_nano(17, 30, 0, 188906523)], qattribute::NONE);
+  let timestamp=K::new_timestamp_list(vec![NaiveDate::from_ymd_opt(2009, 5, 28).unwrap().and_hms_nano_opt(17, 30, 0, 188906523).unwrap().and_local_timezone(Utc).unwrap()], qattribute::NONE);
   println!("timestamp_list: {}", timestamp);
 
   let timespan_list=K::new_timespan_list(vec![Duration::minutes(30), Duration::seconds(15), Duration::nanoseconds(123456)], qattribute::NONE);
@@ -22,7 +22,7 @@ fn main(){
   let short_list=K::new_short_list(vec![12_i16, -7, 1440], qattribute::NONE);
   let string=K::new_string("kdbplus".to_string(), qattribute::UNIQUE);
   let symbol_list=K::new_symbol_list(vec![String::from("David"), String::from("Solomon")], qattribute::NONE);
-  let datetime_list=K::new_datetime_list(vec![Utc.ymd(2017, 4, 9).and_hms_milli(16, 51, 30, 97), Utc.ymd(2020, 11, 3).and_hms_milli(10, 20, 8, 103)], qattribute::SORTED);
+  let datetime_list=K::new_datetime_list(vec![NaiveDate::from_ymd_opt(2017, 4, 9).unwrap().and_hms_milli_opt(16, 51, 30, 97).unwrap().and_local_timezone(Utc).unwrap(), NaiveDate::from_ymd_opt(2020, 11, 3).unwrap().and_hms_milli_opt(10, 20, 8, 103).unwrap().and_local_timezone(Utc).unwrap()], qattribute::SORTED);
   let long=K::new_long(530000_i64);
   let compound_list=K::new_compound_list(vec![short_list, string, symbol_list, long, datetime_list]);
   println!("{}", compound_list);

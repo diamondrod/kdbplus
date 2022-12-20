@@ -322,7 +322,7 @@ pub mod qnull{
   /// ```
   /// # Note
   /// The range of timestamp in Rust is wider than in q.
-  pub const TIMESTAMP: Lazy<DateTime<Utc>> = Lazy::new(|| Utc.ymd(1707, 9, 22).and_hms_nano(0, 12, 43, 145224192));
+  pub const TIMESTAMP: Lazy<DateTime<Utc>> = Lazy::new(|| NaiveDate::from_ymd_opt(1707, 9, 22).unwrap().and_hms_nano_opt(0, 12, 43, 145224192).unwrap().and_local_timezone(Utc).unwrap());
 
   /// Null value of month (`0Nm`).
   /// # Example
@@ -336,7 +336,7 @@ pub mod qnull{
   /// ```
   /// # Note
   /// The range of month in Rust is narrower than in q.
-  pub const MONTH: Date<Utc>=chrono::MIN_DATE;
+  pub const MONTH: NaiveDate=NaiveDate::MIN;
 
   /// Null valueo of date (`0Nd`).
   /// # Example
@@ -350,7 +350,7 @@ pub mod qnull{
   /// ```
   /// # Note
   /// The range of date in Rust is narrower than in q.
-  pub const DATE: Date<Utc>=chrono::MIN_DATE;
+  pub const DATE: NaiveDate=NaiveDate::MIN;
 
   /// Null value of datetime (`0Nz`).
   /// # Example
@@ -364,7 +364,7 @@ pub mod qnull{
   /// ```
   /// # Note
   /// The range of datetime in Rust is narrower than in q.
-  pub const DATETIME: DateTime<Utc>=chrono::MIN_DATETIME;
+  pub const DATETIME: DateTime<Utc>=DateTime::<Utc>::MIN_UTC;
 
   /// Null value of timespan (`0Nn`).
   /// # Example
@@ -498,7 +498,7 @@ pub mod qinf{
   /// ```
   /// # Note
   /// The range of timestamp in Rust is wider than in q.
-  pub const TIMESTAMP: Lazy<DateTime<Utc>>=Lazy::new(|| Utc.ymd(2292, 4, 10).and_hms_nano(23, 47, 16, 854775807));
+  pub const TIMESTAMP: Lazy<DateTime<Utc>>=Lazy::new(|| NaiveDate::from_ymd_opt(2292, 4, 10).unwrap().and_hms_nano_opt(23, 47, 16, 854775807).unwrap().and_local_timezone(Utc).unwrap());
 
   /// Infinity value of month (`0Wm`).
   /// # Example
@@ -512,7 +512,7 @@ pub mod qinf{
   /// ```
   /// # Note
   /// The range of month in Rust is narrower than in q.
-  pub const MONTH: Lazy<Date<Utc>>=Lazy::new(|| chrono::MAX_DATE - Duration::days(30));
+  pub const MONTH: Lazy<NaiveDate>=Lazy::new(|| NaiveDate::MAX - Duration::days(30));
 
   /// Infinity valueo of date (`0Wd`).
   /// # Example
@@ -526,7 +526,7 @@ pub mod qinf{
   /// ```
   /// # Note
   /// The range of date in Rust is narrower than in q.
-  pub const DATE: Date<Utc>=chrono::MAX_DATE;
+  pub const DATE: NaiveDate=NaiveDate::MAX;
 
   /// Infinity value of datetime (`0Wz`).
   /// # Example
@@ -540,7 +540,7 @@ pub mod qinf{
   /// ```
   /// # Note
   /// The range of datetime in Rust is narrower than in q.
-  pub const DATETIME: Lazy<DateTime<Utc>>=Lazy::new(|| chrono::MAX_DATETIME - Duration::nanoseconds(999999));
+  pub const DATETIME: Lazy<DateTime<Utc>>=Lazy::new(|| DateTime::<Utc>::MAX_UTC - Duration::nanoseconds(999999));
 
   /// Infinity value of timespan (`0Wn`).
   /// # Example
@@ -674,7 +674,7 @@ pub mod qninf{
   /// ```
   /// # Note
   /// The range of timestamp in Rust is wider than in q.
-  pub const TIMESTAMP: Lazy<DateTime<Utc>>=Lazy::new(|| Utc.ymd(1707, 9, 22).and_hms_nano(0, 12, 43, 145224193));
+  pub const TIMESTAMP: Lazy<DateTime<Utc>>=Lazy::new(|| NaiveDate::from_ymd_opt(1707, 9, 22).unwrap().and_hms_nano_opt(0, 12, 43, 145224193).unwrap().and_local_timezone(Utc).unwrap());
 
   /// Infinity value of month (`-0Wm`).
   /// # Example
@@ -688,7 +688,7 @@ pub mod qninf{
   /// ```
   /// # Note
   /// The range of month in Rust is narrower than in q.
-  pub const MONTH: Lazy<Date<Utc>>=Lazy::new(|| chrono::MIN_DATE + Duration::days(31));
+  pub const MONTH: Lazy<NaiveDate>=Lazy::new(|| NaiveDate::MIN + Duration::days(31));
 
   /// Infinity valueo of date (`-0Wd`).
   /// # Example
@@ -702,7 +702,7 @@ pub mod qninf{
   /// ```
   /// # Note
   /// The range of date in Rust is narrower than in q.
-  pub const DATE: Lazy<Date<Utc>>=Lazy::new(|| chrono::MIN_DATE + Duration::days(1));
+  pub const DATE: Lazy<NaiveDate>=Lazy::new(|| NaiveDate::MIN + Duration::days(1));
 
   /// Infinity value of datetime (`-0Wz`).
   /// # Example
@@ -716,7 +716,7 @@ pub mod qninf{
   /// ```
   /// # Note
   /// The range of datetime in Rust is narrower than in q.
-  pub const DATETIME: Lazy<DateTime<Utc>>=Lazy::new(|| chrono::MIN_DATETIME + Duration::nanoseconds(1000000));
+  pub const DATETIME: Lazy<DateTime<Utc>>=Lazy::new(|| DateTime::<Utc>::MIN_UTC + Duration::nanoseconds(1000000));
 
   /// Infinity value of timespan (`-0Wn`).
   /// # Example
@@ -1251,11 +1251,11 @@ impl K{
   /// use chrono::prelude::*;
   /// 
   /// fn main(){
-  ///   let q_month=K::new_month(Utc.ymd(2019, 12, 15));
+  ///   let q_month=K::new_month(NaiveDate::from_ymd_opt(2019, 12, 15).unwrap());
   ///   assert_eq!(format!("{}", q_month), String::from("2019.12m"));
   /// }
   /// ```
-  pub fn new_month(month: Date<Utc>) -> Self{
+  pub fn new_month(month: NaiveDate) -> Self{
     K::new(qtype::MONTH_ATOM, qattribute::NONE, k0_inner::int(date_to_q_month(month)))
   }
 
@@ -1266,11 +1266,11 @@ impl K{
   /// use chrono::prelude::*;
   /// 
   /// fn main(){
-  ///   let q_date=K::new_date(Utc.ymd(2012, 3, 12));
+  ///   let q_date=K::new_date(NaiveDate::from_ymd_opt(2012, 3, 12).unwrap());
   ///   assert_eq!(format!("{}", q_date), String::from("2012.03.12"));
   /// }
   /// ```
-  pub fn new_date(date: Date<Utc>) -> Self{
+  pub fn new_date(date: NaiveDate) -> Self{
     K::new(qtype::DATE_ATOM, qattribute::NONE, k0_inner::int(date_to_q_date(date)))
   }
 
@@ -1536,11 +1536,11 @@ impl K{
   /// use chrono::prelude::*;
   /// 
   /// fn main(){
-  ///   let q_month_list=K::new_month_list(vec![Utc.ymd(2006, 3, 9), Utc.ymd(1999, 5, 31), qnull::MONTH], qattribute::NONE);
+  ///   let q_month_list=K::new_month_list(vec![NaiveDate::from_ymd_opt(2006, 3, 9).unwrap(), NaiveDate::from_ymd_opt(1999, 5, 31).unwrap(), qnull::MONTH], qattribute::NONE);
   ///   assert_eq!(format!("{}", q_month_list), String::from("2006.03 1999.05 0Nm"));
   /// }
   /// ```
-  pub fn new_month_list(list: Vec<Date<Utc>>, attribute: i8) -> Self{
+  pub fn new_month_list(list: Vec<NaiveDate>, attribute: i8) -> Self{
     let array=list.into_iter().map(|date| {
       date_to_q_month(date)
     }).collect::<Vec<I>>();
@@ -1555,11 +1555,11 @@ impl K{
   /// use chrono::prelude::*;
   /// 
   /// fn main(){
-  ///   let q_date_list=K::new_date_list(vec![Utc.ymd(2001, 2, 18), Utc.ymd(2019, 12, 12), qinf::DATE, Utc.ymd(2003, 10, 16)], qattribute::NONE);
+  ///   let q_date_list=K::new_date_list(vec![NaiveDate::from_ymd_opt(2001, 2, 18).unwrap(), NaiveDate::from_ymd_opt(2019, 12, 12).unwrap(), qinf::DATE, NaiveDate::from_ymd_opt(2003, 10, 16).unwrap()], qattribute::NONE);
   ///   assert_eq!(format!("{}", q_date_list), String::from("2001.02.18 2019.12.12 0W 2003.10.16"));
   /// }
   /// ```
-  pub fn new_date_list(list: Vec<Date<Utc>>, attribute: i8) -> Self{
+  pub fn new_date_list(list: Vec<NaiveDate>, attribute: i8) -> Self{
     let array=list.into_iter().map(|date| {
       date_to_q_date(date)
     }).collect::<Vec<I>>();
@@ -1673,7 +1673,7 @@ impl K{
   ///     K::new_symbol_list(vec![String::from("Ruby"), String::from("Diamond"), String::from("Sapphire")], qattribute::UNIQUE),
   ///     K::new_timestamp(*qnull::TIMESTAMP),
   ///     K::new_long_list(vec![0, 1, 2, qninf::LONG], qattribute::NONE),
-  ///     K::new_month_list(vec![Utc.ymd(2004, 2, 7)], qattribute::NONE)
+  ///     K::new_month_list(vec![NaiveDate::from_ymd_opt(2004, 2, 7).unwrap()], qattribute::NONE)
   ///   ]);
   ///   assert_eq!(format!("{}", q_compound_list), String::from("(`u#`Ruby`Diamond`Sapphire;0Np;0 1 2 -0W;,2004.02m)"));
   /// }
@@ -2007,11 +2007,11 @@ impl K{
   /// use chrono::prelude::*;
   /// 
   /// fn main(){
-  ///   let q_month=K::new_month(Utc.ymd(2007, 8, 30));
-  ///   assert_eq!(q_month.get_month(), Ok(Utc.ymd(2007, 8, 1)));
+  ///   let q_month=K::new_month(NaiveDate::from_ymd_opt(2007, 8, 30).unwrap());
+  ///   assert_eq!(q_month.get_month(), Ok(NaiveDate::from_ymd_opt(2007, 8, 1).unwrap()));
   /// }
   /// ```
-  pub fn get_month(&self) -> Result<Date<Utc>>{
+  pub fn get_month(&self) -> Result<NaiveDate>{
     match self.0.qtype{
       qtype::MONTH_ATOM => {
         match self.0.value{
@@ -2030,15 +2030,15 @@ impl K{
   /// use chrono::prelude::*;
   /// 
   /// fn main(){
-  ///   let q_date=K::new_date(Utc.ymd(2000, 5, 10));
-  ///   assert_eq!(q_date.get_date(), Ok(Utc.ymd(2000, 5, 10)));
+  ///   let q_date=K::new_date(NaiveDate::from_ymd_opt(2000, 5, 10).unwrap());
+  ///   assert_eq!(q_date.get_date(), Ok(NaiveDate::from_ymd_opt(2000, 5, 10).unwrap()));
   /// }
   /// ```
-  pub fn get_date(&self) -> Result<Date<Utc>>{
+  pub fn get_date(&self) -> Result<NaiveDate>{
     match self.0.qtype{
       qtype::DATE_ATOM => {
         match self.0.value{
-          k0_inner::int(days) => Ok(q_date_to_date(days)),
+          k0_inner::int(days) => Ok(q_date_to_date(days)?),
           _ => unreachable!()
         }
       },
@@ -2672,7 +2672,7 @@ impl K{
         }
       },
       qtype::MONTH_LIST => {
-        if let Some(month) = element.downcast_ref::<Date<Utc>>(){
+        if let Some(month) = element.downcast_ref::<NaiveDate>(){
           self.increment();
           Ok(self.as_mut_vec::<I>().unwrap().push(date_to_q_month(*month)))
         }
@@ -2681,7 +2681,7 @@ impl K{
         }
       },
       qtype::DATE_LIST => {
-        if let Some(date) = element.downcast_ref::<Date<Utc>>(){
+        if let Some(date) = element.downcast_ref::<NaiveDate>(){
           self.increment();
           Ok(self.as_mut_vec::<I>().unwrap().push(date_to_q_date(*date)))
         }
@@ -2874,7 +2874,7 @@ impl K{
           }
         },
         qtype::MONTH_LIST => {
-          if let Some(month) = element.downcast_ref::<Date<Utc>>(){
+          if let Some(month) = element.downcast_ref::<NaiveDate>(){
             self.increment();
             Ok(self.as_mut_vec::<I>().unwrap().insert(index, date_to_q_month(*month)))
           }
@@ -2883,7 +2883,7 @@ impl K{
           }
         },
         qtype::DATE_LIST => {
-          if let Some(date) = element.downcast_ref::<Date<Utc>>(){
+          if let Some(date) = element.downcast_ref::<NaiveDate>(){
             self.increment();
             Ok(self.as_mut_vec::<I>().unwrap().insert(index, date_to_q_date(*date)))
           }
@@ -3264,12 +3264,12 @@ impl K{
   /// use chrono::prelude::*;
   /// 
   /// fn main(){
-  ///   let mut q_month_list=K::new_month_list(vec![Utc.ymd(2011, 5, 1), Utc.ymd(2004, 8, 1)], qattribute::NONE);
+  ///   let mut q_month_list=K::new_month_list(vec![NaiveDate::from_ymd_opt(2011, 5, 1).unwrap(), NaiveDate::from_ymd_opt(2004, 8, 1).unwrap()], qattribute::NONE);
   ///   let tail=q_month_list.pop_month().unwrap();
-  ///   assert_eq!(tail, Utc.ymd(2004, 8, 1));
+  ///   assert_eq!(tail, NaiveDate::from_ymd_opt(2004, 8, 1).unwrap());
   /// }
   /// ```
-  pub fn pop_month(&mut self) -> Result<Date<Utc>>{
+  pub fn pop_month(&mut self) -> Result<NaiveDate>{
     if self.len() == 0{
       // 0 length
       Err(Error::pop_from_empty_list())
@@ -3293,12 +3293,12 @@ impl K{
   /// use chrono::prelude::*;
   /// 
   /// fn main(){
-  ///   let mut q_date_list=K::new_date_list(vec![Utc.ymd(2021, 3, 19), Utc.ymd(2004, 8, 1), Utc.ymd(2014, 6, 4)], qattribute::NONE);
+  ///   let mut q_date_list=K::new_date_list(vec![NaiveDate::from_ymd_opt(2021, 3, 19).unwrap(), NaiveDate::from_ymd_opt(2004, 8, 1).unwrap(), NaiveDate::from_ymd_opt(2014, 6, 4).unwrap()], qattribute::NONE);
   ///   let tail=q_date_list.pop_date().unwrap();
-  ///   assert_eq!(tail, Utc.ymd(2014, 6, 4));
+  ///   assert_eq!(tail, NaiveDate::from_ymd_opt(2014, 6, 4).unwrap());
   /// }
   /// ```
-  pub fn pop_date(&mut self) -> Result<Date<Utc>>{
+  pub fn pop_date(&mut self) -> Result<NaiveDate>{
     if self.len() == 0{
       // 0 length
       Err(Error::pop_from_empty_list())
@@ -3307,7 +3307,7 @@ impl K{
       match self.0.qtype{
         qtype::DATE_LIST => {
           self.decrement();
-          Ok(q_date_to_date(self.as_mut_vec::<I>().unwrap().pop().unwrap()))
+          Ok(q_date_to_date(self.as_mut_vec::<I>().unwrap().pop().unwrap())?)
         },
         _ => Err(Error::invalid_operation("pop_date", self.0.qtype, Some(qtype::DATE_LIST)))
       }
@@ -3851,12 +3851,12 @@ impl K{
   /// use chrono::prelude::*;
   /// 
   /// fn main(){
-  ///   let mut q_month_list=K::new_month_list(vec![Utc.ymd(2011, 5, 1), Utc.ymd(2004, 8, 1)], qattribute::NONE);
+  ///   let mut q_month_list=K::new_month_list(vec![NaiveDate::from_ymd_opt(2011, 5, 1).unwrap(), NaiveDate::from_ymd_opt(2004, 8, 1).unwrap()], qattribute::NONE);
   ///   let tail=q_month_list.remove_month(0).unwrap();
-  ///   assert_eq!(tail, Utc.ymd(2011, 5, 1));
+  ///   assert_eq!(tail, NaiveDate::from_ymd_opt(2011, 5, 1).unwrap());
   /// }
   /// ```
-  pub fn remove_month(&mut self, index: usize) -> Result<Date<Utc>>{
+  pub fn remove_month(&mut self, index: usize) -> Result<NaiveDate>{
     if index >= self.len(){
       // 0 length
       Err(Error::index_out_of_bounds(self.len(), index))
@@ -3877,19 +3877,19 @@ impl K{
   /// use chrono::prelude::*;
   /// 
   /// fn main(){
-  ///   let mut q_date_list=K::new_date_list(vec![Utc.ymd(2021, 3, 19), Utc.ymd(2004, 8, 1), Utc.ymd(2014, 6, 4)], qattribute::NONE);
+  ///   let mut q_date_list=K::new_date_list(vec![NaiveDate::from_ymd_opt(2021, 3, 19).unwrap(), NaiveDate::from_ymd_opt(2004, 8, 1).unwrap(), NaiveDate::from_ymd_opt(2014, 6, 4).unwrap()], qattribute::NONE);
   ///   let tail=q_date_list.remove_date(1).unwrap();
-  ///   assert_eq!(tail, Utc.ymd(2004, 8, 1));
+  ///   assert_eq!(tail, NaiveDate::from_ymd_opt(2004, 8, 1).unwrap());
   /// }
   /// ```
-  pub fn remove_date(&mut self, index: usize) -> Result<Date<Utc>>{
+  pub fn remove_date(&mut self, index: usize) -> Result<NaiveDate>{
     if index >= self.len(){
       // 0 length
       Err(Error::index_out_of_bounds(self.len(), index))
     }
     else{
       match self.0.qtype{
-        qtype::DATE_LIST => Ok(q_date_to_date(self.as_mut_vec::<I>().unwrap().remove(index))),
+        qtype::DATE_LIST => Ok(q_date_to_date(self.as_mut_vec::<I>().unwrap().remove(index))?),
         _ => Err(Error::invalid_operation("remove_date", self.0.qtype, Some(qtype::DATE_LIST)))
       }
     }
@@ -4066,7 +4066,7 @@ impl K{
         qtype::SYMBOL_LIST => Ok(K::new_symbol(self.as_mut_vec::<S>().unwrap().remove(index))),
         qtype::TIMESTAMP_LIST => Ok(K::new_timestamp(q_timestamp_to_datetime(self.as_mut_vec::<J>().unwrap().remove(index)))),
         qtype::MONTH_LIST => Ok(K::new_month(q_month_to_date(self.as_mut_vec::<I>().unwrap().remove(index)))),
-        qtype::DATE_LIST => Ok(K::new_date(q_date_to_date(self.as_mut_vec::<I>().unwrap().remove(index)))),
+        qtype::DATE_LIST => Ok(K::new_date(q_date_to_date(self.as_mut_vec::<I>().unwrap().remove(index))?)),
         qtype::DATETIME_LIST => Ok(K::new_datetime(q_datetime_to_datetime(self.as_mut_vec::<F>().unwrap().remove(index)))),
         qtype::TIMESPAN_LIST => Ok(K::new_timespan(Duration::nanoseconds(self.as_mut_vec::<J>().unwrap().remove(index)))),
         qtype::MINUTE_LIST => Ok(K::new_minute(Duration::minutes(self.as_mut_vec::<I>().unwrap().remove(index) as i64))),
@@ -4087,10 +4087,10 @@ impl K{
   /// 
   /// fn main(){
   ///   let keys=K::new_int_list(vec![0, 1, 2], qattribute::NONE);
-  ///   let values=K::new_date_list(vec![Utc.ymd(2000, 1, 9), Utc.ymd(2001, 4, 10), Utc.ymd(2015, 3, 16)], qattribute::NONE);
+  ///   let values=K::new_date_list(vec![NaiveDate::from_ymd_opt(2000, 1, 9).unwrap(), NaiveDate::from_ymd_opt(2001, 4, 10).unwrap(), NaiveDate::from_ymd_opt(2015, 3, 16).unwrap()], qattribute::NONE);
   ///   let mut q_dictionary=K::new_dictionary(keys, values).unwrap();
   ///
-  ///   q_dictionary.push_pair(&3, &Utc.ymd(2020, 8, 9)).unwrap();
+  ///   q_dictionary.push_pair(&3, &NaiveDate::from_ymd_opt(2020, 8, 9).unwrap()).unwrap();
   ///   assert_eq!(format!("{}", q_dictionary), String::from("0 1 2 3i!2000.01.09 2001.04.10 2015.03.16 2020.08.09"));
   /// }
   /// ```
@@ -4123,7 +4123,7 @@ impl K{
   /// 
   /// fn main(){
   ///   let keys=K::new_int_list(vec![0, 1, 2], qattribute::NONE);
-  ///   let values=K::new_date_list(vec![Utc.ymd(2000, 1, 9), Utc.ymd(2001, 4, 10), Utc.ymd(2015, 3, 16)], qattribute::NONE);
+  ///   let values=K::new_date_list(vec![NaiveDate::from_ymd_opt(2000, 1, 9).unwrap(), NaiveDate::from_ymd_opt(2001, 4, 10).unwrap(), NaiveDate::from_ymd_opt(2015, 3, 16).unwrap()], qattribute::NONE);
   ///   let mut q_dictionary=K::new_dictionary(keys, values).unwrap();
   ///
   ///   q_dictionary.pop_pair().unwrap();
@@ -4163,7 +4163,7 @@ impl K{
   ///   assert_eq!(q_symbol_list.len(), 3);
   /// 
   ///   let keys=K::new_int_list(vec![0, 1, 2], qattribute::NONE);
-  ///   let values=K::new_date_list(vec![Utc.ymd(2000, 1, 9), Utc.ymd(2001, 4, 10), Utc.ymd(2015, 3, 16)], qattribute::NONE);
+  ///   let values=K::new_date_list(vec![NaiveDate::from_ymd_opt(2000, 1, 9).unwrap(), NaiveDate::from_ymd_opt(2001, 4, 10).unwrap(), NaiveDate::from_ymd_opt(2015, 3, 16).unwrap()], qattribute::NONE);
   ///   let mut q_dictionary=K::new_dictionary(keys, values).unwrap();
   ///   assert_eq!(q_dictionary.len(), 3);
   /// }
@@ -4393,7 +4393,7 @@ fn datetime_to_q_timestamp(timestamp: DateTime<Utc>)->i64{
 }
 
 /// Convert `Date<Utc>` into `i32`. The returned value is an elapsed time in months since `2000.01.01`.
-fn date_to_q_month(month: Date<Utc>) -> i32{
+fn date_to_q_month(month: NaiveDate) -> i32{
 
   // q     |------------------------------------------------------|
   // Rust        |----------------------------------------|
@@ -4417,7 +4417,7 @@ fn date_to_q_month(month: Date<Utc>) -> i32{
 }
 
 /// Convert `Date<Utc>` into `i32`. The returned value is an elapsed time in days since `2000.01.01`.
-fn date_to_q_date(date: Date<Utc>) -> i32{
+fn date_to_q_date(date: NaiveDate) -> i32{
 
   // q     |------------------------------------------------------|
   // Rust        |-----------------------------------------|
@@ -4435,7 +4435,7 @@ fn date_to_q_date(date: Date<Utc>) -> i32{
     qinf_base::I
   }
   else{
-    let days= Date::signed_duration_since(date, Utc.ymd(1970, 1, 1)).num_days() as i32;
+    let days= NaiveDate::signed_duration_since(date, NaiveDate::from_ymd_opt(1970, 1, 1).unwrap()).num_days() as i32;
     days.saturating_sub(KDB_DAY_OFFSET)
   }
 }
@@ -4477,7 +4477,7 @@ pub(crate) fn q_timestamp_to_datetime(nanos: i64) -> DateTime<Utc>{
 }
 
 /// Convert q month (elapsed time in months since `2000.01.01`) into `Date<Utc>`.
-pub(crate) fn q_month_to_date(months: i32) -> Date<Utc>{
+pub(crate) fn q_month_to_date(months: i32) -> NaiveDate{
 
   // q     |------------------------------------------------------|
   // Rust        |-----------------------------------------|
@@ -4498,31 +4498,31 @@ pub(crate) fn q_month_to_date(months: i32) -> Date<Utc>{
     *qinf::MONTH
   }
   else{
-    Utc.ymd(2000 + months / 12, 1 + (months % 12) as u32, 1)
+    NaiveDate::from_ymd_opt(2000 + months / 12, 1 + (months % 12) as u32, 1).unwrap()
   }
 }
 
 /// Convert q month (elapsed time in days since `2000.01.01`) into `Date<Utc>`.
-pub(crate) fn q_date_to_date(days: i32) -> Date<Utc>{
+pub(crate) fn q_date_to_date(days: i32) -> Result<NaiveDate>{
 
   // q     |------------------------------------------------------|
   // Rust        |-----------------------------------------|
 
   if days == qnull_base::I{
-    qnull::DATE
+    Ok(qnull::DATE)
   }
   else if days <= -96476615{
     // Consider pulling date value from q, not only reverse Rust->q.
     // Date::signed_duration_since(chrono::MIN_DATE, Utc.ymd(2000, 1,1)).num_days())
-    *qninf::DATE
+    Ok(*qninf::DATE)
   }
   else if days >= 95015644{
     // Consider pulling date value from q, not only reverse Rust->q.
     // Date::signed_duration_since(chrono::MAX_DATE, Utc.ymd(2000, 1,1)).num_days())
-    qinf::DATE
+    Ok(qinf::DATE)
   }
   else{
-    (Utc.ymd(2000, 1, 1).and_hms(0, 0, 0) + Duration::days(days as i64)).date()
+    Ok((NaiveDate::from_ymd_opt(2000, 1, 1).ok_or_else(|| Error::InvalidDateTime)?.and_hms_opt(0, 0, 0).ok_or_else(|| Error::InvalidDateTime)?.and_local_timezone(Utc).unwrap() + Duration::days(days as i64)).date_naive())
   }
 }
 
@@ -4546,7 +4546,7 @@ pub(crate) fn q_datetime_to_datetime(days: f64) -> DateTime<Utc>{
     *qinf::DATETIME
   }
   else{
-    Utc.timestamp_millis((ONE_DAY_MILLIS as f64 * (days + KDB_DAY_OFFSET as f64)) as i64)
+    Utc.timestamp_millis_opt((ONE_DAY_MILLIS as f64 * (days + KDB_DAY_OFFSET as f64)) as i64).unwrap()
   } 
 }
 
