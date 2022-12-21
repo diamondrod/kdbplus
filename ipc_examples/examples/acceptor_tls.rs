@@ -9,16 +9,15 @@
 use kdbplus::ipc::*;
 
 #[tokio::main]
-async fn main() -> Result<()>{
+async fn main() -> Result<()> {
+    // Start listenening over TCP at the port 7000.
+    let mut socket_tcp = QStream::accept(ConnectionMethod::TLS, "canaan.com", 7000).await?;
 
-  // Start listenening over TCP at the port 7000.
-  let mut socket_tcp=QStream::accept(ConnectionMethod::TLS, "canaan.com", 7000).await?;
+    // Send a query with the socket.
+    let greeting = socket_tcp.send_sync_message(&"string `Hello").await?;
+    println!("Greeting: {}", greeting);
 
-  // Send a query with the socket.
-  let greeting=socket_tcp.send_sync_message(&"string `Hello").await?;
-  println!("Greeting: {}", greeting);
+    socket_tcp.shutdown().await?;
 
-  socket_tcp.shutdown().await?;
-
-  Ok(())
+    Ok(())
 }

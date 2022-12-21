@@ -9,24 +9,23 @@
 use kdbplus::ipc::*;
 
 #[tokio::main]
-async fn main() -> Result<()>{
+async fn main() -> Result<()> {
+    // Start listenening over UDS at the port 7000.
+    while let Ok(mut socket) = QStream::accept(ConnectionMethod::UDS, "", 7000).await {
+        tokio::task::spawn(async move {
+            loop {
+                match socket.receive_message().await {
+                    Ok((_, message)) => {
+                        println!("request: {}", message);
+                    }
+                    _ => {
+                        socket.shutdown().await.unwrap();
+                        break;
+                    }
+                }
+            }
+        });
+    }
 
-  // Start listenening over UDS at the port 7000.
-  while let Ok(mut socket) = QStream::accept(ConnectionMethod::UDS, "", 7000).await{
-    tokio::task::spawn(async move {
-      loop{
-        match socket.receive_message().await{
-          Ok((_, message)) => {
-            println!("request: {}", message);
-          },
-          _ => {
-            socket.shutdown().await.unwrap();
-            break
-          }
-        }
-      }
-    });
-  }
-
-  Ok(())
+    Ok(())
 }
