@@ -73,8 +73,8 @@ the inner type is `i64` denoting an elapsed time in nanoseconds since `2000.01.0
 | `char`           | `char`                                            |
 | `symbol`         | `String`                                          |
 | `timestamp`      | `chrono::DateTime<Utc>`                           |
-| `month`          | `chrono::Date<Utc>`                               |
-| `date`           | `chrono::Date<Utc>`                               |
+| `month`          | `chrono::NaiveDate`                               |
+| `date`           | `chrono::NaiveDate`                               |
 | `datetime`       | `chrono::DateTime<Utc>`                           |
 | `timespan`       | `chrono::Duration`                                |
 | `minute`         | `chrono::Duration`                                |
@@ -94,40 +94,40 @@ the inner type is `i64` denoting an elapsed time in nanoseconds since `2000.01.0
 use kdbplus::ipc::*;
 
 #[tokio::main(flavor = "multi_thread", worker_threads = 2)]
-async fn main() -> Result<()>{
+async fn main() -> Result<()> {
 
-  // Connect to qprocess running on localhost:5000 via UDS
-  let mut socket=QStream::connect(ConnectionMethod::UDS, "", 5000_u16, "ideal:person").await?;
-  println!("Connection type: {}", socket.get_connection_type());
+    // Connect to qprocess running on localhost:5000 via UDS
+    let mut socket = QStream::connect(ConnectionMethod::UDS, "", 5000_u16, "ideal:person").await?;
+    println!("Connection type: {}", socket.get_connection_type());
 
-  // Set remote function with asynchronous message
-  socket.send_async_message(&"collatz:{[n] seq:enlist n; while[not n = 1; seq,: n:$[n mod 2; 1 + 3 * n; `long$n % 2]]; seq}").await?;
+    // Set remote function with asynchronous message
+    socket.send_async_message(&"collatz:{[n] seq:enlist n; while[not n = 1; seq,: n:$[n mod 2; 1 + 3 * n; `long$n % 2]]; seq}").await?;
 
-  // Send a query synchronously
-  let mut result=socket.send_sync_message(&"collatz[12]").await?;
-  println!("collatz[12]: {}", result);
+    // Send a query synchronously
+    let mut result = socket.send_sync_message(&"collatz[12]").await?;
+    println!("collatz[12]: {}", result);
 
-  result=socket.send_sync_message(&"collatz[`a]").await?;
-  println!("collatz[`a]: {}", result);
+    result = socket.send_sync_message(&"collatz[`a]").await?;
+    println!("collatz[`a]: {}", result);
 
-  // Send a functional query.
-  let mut message=K::new_compound_list(vec![K::new_symbol(String::from("collatz")), K::new_long(100)]);
-  result=socket.send_sync_message(&message).await?;
-  println!("collatz[100]: {}", result);
+    // Send a functional query.
+    let mut message = K::new_compound_list(vec![K::new_symbol(String::from("collatz")), K::new_long(100)]);
+    result = socket.send_sync_message(&message).await?;
+    println!("collatz[100]: {}", result);
 
-  // Modify query to (`collatz; 20)
-  message.pop().unwrap();
-  message.push(&K::new_long(20)).unwrap();
-  result=socket.send_sync_message(&message).await?;
-  println!("collatz[20]: {}", result);
+    // Modify query to (`collatz; 20)
+    message.pop().unwrap();
+    message.push(&K::new_long(20)).unwrap();
+    result=socket.send_sync_message(&message).await?;
+    println!("collatz[20]: {}", result);
 
-  // Send a functional asynchronous query.
-  message=K::new_compound_list(vec![K::new_string(String::from("show"), qattribute::NONE), K::new_symbol(String::from("goodbye"))]);
-  socket.send_async_message(&message).await?;
+    // Send a functional asynchronous query.
+    message = K::new_compound_list(vec![K::new_string(String::from("show"), qattribute::NONE), K::new_symbol(String::from("goodbye"))]);
+    socket.send_async_message(&message).await?;
 
-  socket.shutdown().await?;
+    socket.shutdown().await?;
 
-  Ok(())
+    Ok(())
 }
 ```
 
@@ -137,13 +137,13 @@ async fn main() -> Result<()>{
 use kdbplus::ipc::*;
 
 #[tokio::main]
-async fn main() -> Result<()>{
+async fn main() -> Result<()> {
 
   // Start listenening over TCP at the port 7000 with authentication enabled.
-  let mut socket_tcp=QStream::accept(ConnectionMethod::TCP, "127.0.0.1", 7000).await?;
+  let mut socket_tcp = QStream::accept(ConnectionMethod::TCP, "127.0.0.1", 7000).await?;
 
   // Send a query with the socket.
-  let greeting=socket_tcp.send_sync_message(&"string `Hello").await?;
+  let greeting = socket_tcp.send_sync_message(&"string `Hello").await?;
   println!("Greeting: {}", greeting);
 
   socket_tcp.shutdown().await?;
@@ -198,51 +198,50 @@ use kdbplus::api::*;
 use kdbplus::api::native::*;
 
 #[no_mangle]
-pub extern "C" fn create_symbol_list(_: K) -> K{
-  unsafe{
-    let mut list=ktn(qtype::SYMBOL_LIST as i32, 0);
-    js(&mut list, ss(str_to_S!("Abraham")));
-    js(&mut list, ss(str_to_S!("Isaac")));
-    js(&mut list, ss(str_to_S!("Jacob")));
-    js(&mut list, sn(str_to_S!("Josephine"), 6));
-    list
-  }
+pub extern "C" fn create_symbol_list(_: K) -> K {
+    unsafe{
+        let mut list=ktn(qtype::SYMBOL_LIST as i32, 0);
+        js(&mut list, ss(str_to_S!("Abraham")));
+        js(&mut list, ss(str_to_S!("Isaac")));
+        js(&mut list, ss(str_to_S!("Jacob")));
+        js(&mut list, sn(str_to_S!("Josephine"), 6));
+        list
+    }
 }
  
 #[no_mangle]
-pub extern "C" fn catchy(func: K, args: K) -> K{
-  unsafe{
-    let result=ee(dot(func, args));
-    if (*result).qtype == qtype::ERROR{
-      println!("error: {}", S_to_str((*result).value.symbol));
-      // Decrement reference count of the error object
-      r0(result);
-      KNULL
+pub extern "C" fn catchy(func: K, args: K) -> K {
+    unsafe{
+        let result=ee(dot(func, args));
+        if (*result).qtype == qtype::ERROR{
+            println!("error: {}", S_to_str((*result).value.symbol));
+            // Decrement reference count of the error object
+            r0(result);
+            KNULL
+        } else {
+            result
+        }
     }
-    else{
-      result
-    }
-  }
 }
 
 #[no_mangle]
-pub extern "C" fn dictionary_list_to_table() -> K{
-  unsafe{
-    let dicts=knk(3);
-    let dicts_slice=dicts.as_mut_slice::<K>();
-    for i in 0..3{
-      let keys=ktn(qtype::SYMBOL_LIST as i32, 2);
-      let keys_slice=keys.as_mut_slice::<S>();
-      keys_slice[0]=ss(str_to_S!("a"));
-      keys_slice[1]=ss(str_to_S!("b"));
-      let values=ktn(qtype::INT_LIST as i32, 2);
-      values.as_mut_slice::<I>()[0..2].copy_from_slice(&[i*10, i*100]);
-      dicts_slice[i as usize]=xD(keys, values);
-    }
-    // Format list of dictionary as a table.
-    // ([] a: 0 10 20i; b: 0 100 200i)
-    k(0, str_to_S!("{[dicts] -1 _ dicts, (::)}"), dicts, KNULL)
-  } 
+pub extern "C" fn dictionary_list_to_table() -> K {
+    unsafe{
+        let dicts = knk(3);
+        let dicts_slice = dicts.as_mut_slice::<K>();
+        for i in 0..3 {
+            let keys = ktn(qtype::SYMBOL_LIST as i32, 2);
+            let keys_slice = keys.as_mut_slice::<S>();
+            keys_slice[0] = ss(str_to_S!("a"));
+            keys_slice[1] = ss(str_to_S!("b"));
+            let values = ktn(qtype::INT_LIST as i32, 2);
+            values.as_mut_slice::<I>()[0..2].copy_from_slice(&[i*10, i*100]);
+            dicts_slice[i as usize] = xD(keys, values);
+        }
+        // Format list of dictionary as a table.
+        // ([] a: 0 10 20i; b: 0 100 200i)
+        k(0, str_to_S!("{[dicts] -1 _ dicts, (::)}"), dicts, KNULL)
+    } 
 }
 ```
 
@@ -277,48 +276,48 @@ use kdbplus::api::*;
 use kdbplus::api::native::*;
 
 #[no_mangle]
-pub extern "C" fn create_symbol_list2(_: K) -> K{
-  let mut list=new_list(qtype::SYMBOL_LIST, 0);
-  list.push_symbol("Abraham").unwrap();
-  list.push_symbol("Isaac").unwrap();
-  list.push_symbol("Jacob").unwrap();
-  list.push_symbol_n("Josephine", 6).unwrap();
-  list
+pub extern "C" fn create_symbol_list2(_: K) -> K {
+    let mut list = new_list(qtype::SYMBOL_LIST, 0);
+    list.push_symbol("Abraham").unwrap();
+    list.push_symbol("Isaac").unwrap();
+    list.push_symbol("Jacob").unwrap();
+    list.push_symbol_n("Josephine", 6).unwrap();
+    list
 }
 
 #[no_mangle]
-fn no_panick(func: K, args: K) -> K{
-  let result=error_to_string(apply(func, args));
-  if let Ok(error) = result.get_error_string(){
-    println!("FYI: {}", error);
-    // Decrement reference count of the error object which is no longer used.
-    decrement_reference_count(result);
-    KNULL
-  }
-  else{
-    println!("success!");
-    result
-  }
+fn no_panick(func: K, args: K) -> K {
+    let result = error_to_string(apply(func, args));
+    if let Ok(error) = result.get_error_string() {
+        println!("FYI: {}", error);
+        // Decrement reference count of the error object which is no longer used.
+        decrement_reference_count(result);
+        KNULL
+    }
+    else{
+        println!("success!");
+        result
+    }
 }
 
 #[no_mangle]
-pub extern "C" fn create_table2(_: K) -> K{
-  // Build keys
-  let keys=new_list(qtype::SYMBOL_LIST, 2);
-  let keys_slice=keys.as_mut_slice::<S>();
-  keys_slice[0]=enumerate(str_to_S!("time"));
-  keys_slice[1]=enumerate_n(str_to_S!("temperature_and_humidity"), 11);
+pub extern "C" fn create_table2(_: K) -> K {
+    // Build keys
+    let keys = new_list(qtype::SYMBOL_LIST, 2);
+    let keys_slice = keys.as_mut_slice::<S>();
+    keys_slice[0] = enumerate(str_to_S!("time"));
+    keys_slice[1] = enumerate_n(str_to_S!("temperature_and_humidity"), 11);
 
-  // Build values
-  let values=new_list(qtype::COMPOUND_LIST, 2);
-  let time=new_list(qtype::TIMESTAMP_LIST, 3);
-  // 2003.10.10D02:24:19.167018272 2006.05.24D06:16:49.419710368 2008.08.12D23:12:24.018691392
-  time.as_mut_slice::<J>().copy_from_slice(&[119067859167018272_i64, 201766609419710368, 271897944018691392]);
-  let temperature=new_list(qtype::FLOAT_LIST, 3);
-  temperature.as_mut_slice::<F>().copy_from_slice(&[22.1_f64, 24.7, 30.5]);
-  values.as_mut_slice::<K>().copy_from_slice(&[time, temperature]);
-  
-  flip(new_dictionary(keys, values))
+    // Build values
+    let values = new_list(qtype::COMPOUND_LIST, 2);
+    let time = new_list(qtype::TIMESTAMP_LIST, 3);
+    // 2003.10.10D02:24:19.167018272 2006.05.24D06:16:49.419710368 2008.08.12D23:12:24.018691392
+    time.as_mut_slice::<J>().copy_from_slice(&[119067859167018272_i64, 201766609419710368, 271897944018691392]);
+    let temperature = new_list(qtype::FLOAT_LIST, 3);
+    temperature.as_mut_slice::<F>().copy_from_slice(&[22.1_f64, 24.7, 30.5]);
+    values.as_mut_slice::<K>().copy_from_slice(&[time, temperature]);
+    
+    flip(new_dictionary(keys, values))
 }
 ```
 

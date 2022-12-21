@@ -66,8 +66,8 @@
 //! | `char`           | `char`                                            |
 //! | `symbol`         | `String`                                          |
 //! | `timestamp`      | `chrono::DateTime<Utc>`                           |
-//! | `month`          | `chrono::Date<Utc>`                               |
-//! | `date`           | `chrono::Date<Utc>`                               |
+//! | `month`          | `chrono::NaiveDate`                               |
+//! | `date`           | `chrono::NaiveDate`                               |
 //! | `datetime`       | `chrono::DateTime<Utc>`                           |
 //! | `timespan`       | `chrono::Duration`                                |
 //! | `minute`         | `chrono::Duration`                                |
