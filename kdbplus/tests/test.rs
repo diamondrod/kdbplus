@@ -2,8 +2,7 @@
 //                     Load Library                      //
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 
-#[macro_use]
-extern crate float_cmp;
+use float_cmp::assert_approx_eq;
 
 use chrono::prelude::*;
 use chrono::Duration;
@@ -17,14 +16,14 @@ use kdbplus::*;
 
 macro_rules! assert_eq_float {
     ($lhs: expr, $rhs: expr, $precision: expr) => {
-        assert!(approx_eq!(f64, $lhs, $rhs, epsilon = $precision))
+        assert_approx_eq!(f64, $lhs, $rhs, epsilon = $precision)
     };
 }
 
 macro_rules! assert_eq_float_vec {
     ($lhs: expr, $rhs: expr, $precision: expr) => {
         for (&v1, &v2) in $lhs.iter().zip($rhs.iter()) {
-            assert!(approx_eq!(f64, v1, v2, epsilon = $precision))
+            assert_approx_eq!(f64, v1, v2, epsilon = $precision)
         }
     };
 }

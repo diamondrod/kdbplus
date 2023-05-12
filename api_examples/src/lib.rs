@@ -5,8 +5,7 @@
 //                            Load Libraries                            //
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 
-#[macro_use]
-extern crate kdbplus;
+use kdbplus::str_to_S;
 
 use kdbplus::api::native::*;
 use kdbplus::api::*;

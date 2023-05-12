@@ -13,6 +13,13 @@ This module provides examples of using `ipc` feature of `kdbplus` library. The f
 [dependencies]
 
 [dev-dependencies]
-kdbplus={path="../kdbplus", features=["ipc"]}
-chrono="0.4"
-tokio={version="1.0", features=["net", "rt", "io-util", "fs", "macros", "rt-multi-thread"]}
+kdbplus = { path = "../kdbplus", features = ["ipc"] }
+chrono = "0.4"
+tokio = { version = "1.0", features = [
+  "net",
+  "rt",
+  "io-util",
+  "fs",
+  "macros",
+  "rt-multi-thread",
+] }

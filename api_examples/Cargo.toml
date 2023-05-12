@@ -3,6 +3,7 @@ name = "api_examples"
 version = "0.1.0"
 authors = ["diamondrod"]
 edition = "2021"
+publish = false
 description = """
 NOT A PACKAGE TO PUBLISH.
 

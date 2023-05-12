@@ -21,6 +21,11 @@ async-trait={version= "0.1", optional = true}
 async-recursion="1"
 sha1_smol={version="1", optional=true}
 
+[[test]]
+name = "test"
+path = "tests/test.rs"
+required-features = ["ipc"]
+
 [features]
 # Include nothing by default
 default = []
