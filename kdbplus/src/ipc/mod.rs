@@ -222,13 +222,13 @@ pub mod qnull {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_guid_null = K::new_guid(qnull::GUID);
     ///     assert_eq!(
     ///         format!("{}", q_guid_null),
     ///         String::from("00000000-0000-0000-0000-000000000000")
     ///     );
-    /// }
+    ///
     /// ```
     pub const GUID: [u8; 16] = [0_u8; 16];
 
@@ -237,10 +237,10 @@ pub mod qnull {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_short_null = K::new_short(qnull::SHORT);
     ///     assert_eq!(format!("{}", q_short_null), String::from("0Nh"));
-    /// }
+    ///
     /// ```
     pub const SHORT: i16 = qnull_base::H;
 
@@ -249,10 +249,10 @@ pub mod qnull {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_int_null = K::new_int(qnull::INT);
     ///     assert_eq!(format!("{}", q_int_null), String::from("0Ni"));
-    /// }
+    ///
     /// ```
     pub const INT: i32 = qnull_base::I;
 
@@ -261,10 +261,10 @@ pub mod qnull {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_long_null = K::new_long(qnull::LONG);
     ///     assert_eq!(format!("{}", q_long_null), String::from("0N"));
-    /// }
+    ///
     /// ```
     pub const LONG: i64 = qnull_base::J;
 
@@ -273,10 +273,10 @@ pub mod qnull {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_real_null = K::new_real(qnull::REAL);
     ///     assert_eq!(format!("{}", q_real_null), String::from("0Ne"));
-    /// }
+    ///
     /// ```
     pub const REAL: f32 = qnull_base::E;
 
@@ -285,10 +285,10 @@ pub mod qnull {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_float_null = K::new_float(qnull::FLOAT);
     ///     assert_eq!(format!("{}", q_float_null), String::from("0n"));
-    /// }
+    ///
     /// ```
     pub const FLOAT: f64 = qnull_base::F;
 
@@ -297,10 +297,10 @@ pub mod qnull {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_char_null = K::new_char(qnull::CHAR);
     ///     assert_eq!(format!("{}", q_char_null), String::from("\" \""));
-    /// }
+    ///
     /// ```
     pub const CHAR: char = qnull_base::C;
 
@@ -309,10 +309,10 @@ pub mod qnull {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_symbol_null = K::new_symbol(qnull::SYMBOL);
     ///     assert_eq!(format!("{}", q_symbol_null), String::from("`"));
-    /// }
+    ///
     /// ```
     pub const SYMBOL: String = String::new();
 
@@ -321,14 +321,14 @@ pub mod qnull {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_timestamp_null = K::new_timestamp(*qnull::TIMESTAMP);
     ///     assert_eq!(format!("{}", q_timestamp_null), String::from("0Np"));
-    /// }
+    ///
     /// ```
     /// # Note
     /// The range of timestamp in Rust is wider than in q.
-    pub const TIMESTAMP: Lazy<DateTime<Utc>> = Lazy::new(|| {
+    pub static TIMESTAMP: Lazy<DateTime<Utc>> = Lazy::new(|| {
         NaiveDate::from_ymd_opt(1707, 9, 22)
             .unwrap()
             .and_hms_nano_opt(0, 12, 43, 145224192)
@@ -342,10 +342,10 @@ pub mod qnull {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_month_null = K::new_month(qnull::MONTH);
     ///     assert_eq!(format!("{}", q_month_null), String::from("0Nm"));
-    /// }
+    ///
     /// ```
     /// # Note
     /// The range of month in Rust is narrower than in q.
@@ -356,10 +356,10 @@ pub mod qnull {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_date_null = K::new_date(qnull::DATE);
     ///     assert_eq!(format!("{}", q_date_null), String::from("0Nd"));
-    /// }
+    ///
     /// ```
     /// # Note
     /// The range of date in Rust is narrower than in q.
@@ -370,10 +370,10 @@ pub mod qnull {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_datetime_null = K::new_datetime(qnull::DATETIME);
     ///     assert_eq!(format!("{}", q_datetime_null), String::from("0Nz"));
-    /// }
+    ///
     /// ```
     /// # Note
     /// The range of datetime in Rust is narrower than in q.
@@ -384,48 +384,48 @@ pub mod qnull {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_timespan_null = K::new_timespan(*qnull::TIMESPAN);
     ///     assert_eq!(format!("{}", q_timespan_null), String::from("0Nn"));
-    /// }
+    ///
     /// ```
-    pub const TIMESPAN: Lazy<Duration> = Lazy::new(|| Duration::nanoseconds(qnull_base::J));
+    pub static TIMESPAN: Lazy<Duration> = Lazy::new(|| Duration::nanoseconds(qnull_base::J));
 
     /// Null value of minute (`0Nu`).
     /// # Example
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_minute_null = K::new_minute(*qnull::MINUTE);
     ///     assert_eq!(format!("{}", q_minute_null), String::from("0Nu"));
-    /// }
+    ///
     /// ```
-    pub const MINUTE: Lazy<Duration> = Lazy::new(|| Duration::minutes(qnull_base::I as i64));
+    pub static MINUTE: Lazy<Duration> = Lazy::new(|| Duration::minutes(qnull_base::I as i64));
 
     /// Null value of second (`0Nv`).
     /// # Example
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_second_null = K::new_second(*qnull::SECOND);
     ///     assert_eq!(format!("{}", q_second_null), String::from("0Nv"));
-    /// }
+    ///
     /// ```
-    pub const SECOND: Lazy<Duration> = Lazy::new(|| Duration::seconds(qnull_base::I as i64));
+    pub static SECOND: Lazy<Duration> = Lazy::new(|| Duration::seconds(qnull_base::I as i64));
 
     /// Null value of time (`0Nt`).
     /// # Example
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_time_null = K::new_time(*qnull::TIME);
     ///     assert_eq!(format!("{}", q_time_null), String::from("0Nt"));
-    /// }
+    ///
     /// ```
-    pub const TIME: Lazy<Duration> = Lazy::new(|| Duration::milliseconds(qnull_base::I as i64));
+    pub static TIME: Lazy<Duration> = Lazy::new(|| Duration::milliseconds(qnull_base::I as i64));
 }
 
 pub mod qinf {
@@ -443,10 +443,10 @@ pub mod qinf {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_short_inf = K::new_short(qinf::SHORT);
     ///     assert_eq!(format!("{}", q_short_inf), String::from("0Wh"));
-    /// }
+    ///
     /// ```
     pub const SHORT: i16 = qinf_base::H;
 
@@ -455,10 +455,10 @@ pub mod qinf {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_int_inf = K::new_int(qinf::INT);
     ///     assert_eq!(format!("{}", q_int_inf), String::from("0Wi"));
-    /// }
+    ///
     /// ```
     pub const INT: i32 = qinf_base::I;
 
@@ -467,10 +467,10 @@ pub mod qinf {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_long = K::new_long(86400000000000);
     ///     assert_eq!(format!("{}", q_long), String::from("86400000000000"));
-    /// }
+    ///
     /// ```
     pub const LONG: i64 = qinf_base::J;
 
@@ -479,10 +479,10 @@ pub mod qinf {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_real_null = K::new_real(qnull::REAL);
     ///     assert_eq!(format!("{}", q_real_null), String::from("0Ne"));
-    /// }
+    ///
     /// ```
     pub const REAL: f32 = qinf_base::E;
 
@@ -491,10 +491,10 @@ pub mod qinf {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_float_inf = K::new_float(qinf::FLOAT);
     ///     assert_eq!(format!("{}", q_float_inf), String::from("0w"));
-    /// }
+    ///
     /// ```
     pub const FLOAT: f64 = qinf_base::F;
 
@@ -503,14 +503,14 @@ pub mod qinf {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_timestamp_inf = K::new_timestamp(*qinf::TIMESTAMP);
     ///     assert_eq!(format!("{}", q_timestamp_inf), String::from("0Wp"));
-    /// }
+    ///
     /// ```
     /// # Note
     /// The range of timestamp in Rust is wider than in q.
-    pub const TIMESTAMP: Lazy<DateTime<Utc>> = Lazy::new(|| {
+    pub static TIMESTAMP: Lazy<DateTime<Utc>> = Lazy::new(|| {
         NaiveDate::from_ymd_opt(2292, 4, 10)
             .unwrap()
             .and_hms_nano_opt(23, 47, 16, 854775807)
@@ -524,24 +524,24 @@ pub mod qinf {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_month_inf = K::new_month(*qinf::MONTH);
     ///     assert_eq!(format!("{}", q_month_inf), String::from("0Wm"));
-    /// }
+    ///
     /// ```
     /// # Note
     /// The range of month in Rust is narrower than in q.
-    pub const MONTH: Lazy<NaiveDate> = Lazy::new(|| NaiveDate::MAX - Duration::days(30));
+    pub static MONTH: Lazy<NaiveDate> = Lazy::new(|| NaiveDate::MAX - Duration::days(30));
 
     /// Infinity valueo of date (`0Wd`).
     /// # Example
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_date_inf = K::new_date(qinf::DATE);
     ///     assert_eq!(format!("{}", q_date_inf), String::from("0Wd"));
-    /// }
+    ///
     /// ```
     /// # Note
     /// The range of date in Rust is narrower than in q.
@@ -552,14 +552,14 @@ pub mod qinf {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_datetime_inf = K::new_datetime(*qinf::DATETIME);
     ///     assert_eq!(format!("{}", q_datetime_inf), String::from("0Wz"));
-    /// }
+    ///
     /// ```
     /// # Note
     /// The range of datetime in Rust is narrower than in q.
-    pub const DATETIME: Lazy<DateTime<Utc>> =
+    pub static DATETIME: Lazy<DateTime<Utc>> =
         Lazy::new(|| DateTime::<Utc>::MAX_UTC - Duration::nanoseconds(999999));
 
     /// Infinity value of timespan (`0Wn`).
@@ -567,48 +567,48 @@ pub mod qinf {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_timespan_inf = K::new_timespan(*qinf::TIMESPAN);
     ///     assert_eq!(format!("{}", q_timespan_inf), String::from("0Wn"));
-    /// }
+    ///
     /// ```
-    pub const TIMESPAN: Lazy<Duration> = Lazy::new(|| Duration::nanoseconds(qinf_base::J));
+    pub static TIMESPAN: Lazy<Duration> = Lazy::new(|| Duration::nanoseconds(qinf_base::J));
 
     /// Infinity value of minute (`0Wu`).
     /// # Example
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_minute_inf = K::new_minute(*qinf::MINUTE);
     ///     assert_eq!(format!("{}", q_minute_inf), String::from("0Wu"));
-    /// }
+    ///
     /// ```
-    pub const MINUTE: Lazy<Duration> = Lazy::new(|| Duration::minutes(qinf_base::I as i64));
+    pub static MINUTE: Lazy<Duration> = Lazy::new(|| Duration::minutes(qinf_base::I as i64));
 
     /// Infinity value of second (`0Wv`).
     /// # Example
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_second_inf = K::new_second(*qinf::SECOND);
     ///     assert_eq!(format!("{}", q_second_inf), String::from("0Wv"));
-    /// }
+    ///
     /// ```
-    pub const SECOND: Lazy<Duration> = Lazy::new(|| Duration::seconds(qinf_base::I as i64));
+    pub static SECOND: Lazy<Duration> = Lazy::new(|| Duration::seconds(qinf_base::I as i64));
 
     /// Infinity value of time (`0Wt`).
     /// # Example
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_time_inf = K::new_time(*qinf::TIME);
     ///     assert_eq!(format!("{}", q_time_inf), String::from("0Wt"));
-    /// }
+    ///
     /// ```
-    pub const TIME: Lazy<Duration> = Lazy::new(|| Duration::milliseconds(qinf_base::I as i64));
+    pub static TIME: Lazy<Duration> = Lazy::new(|| Duration::milliseconds(qinf_base::I as i64));
 }
 
 pub mod qninf {
@@ -626,10 +626,10 @@ pub mod qninf {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_short_ninf = K::new_short(qninf::SHORT);
     ///     assert_eq!(format!("{}", q_short_ninf), String::from("-0Wh"));
-    /// }
+    ///
     /// ```
     pub const SHORT: i16 = qninf_base::H;
 
@@ -638,10 +638,10 @@ pub mod qninf {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_int_ninf = K::new_int(qninf::INT);
     ///     assert_eq!(format!("{}", q_int_ninf), String::from("-0Wi"));
-    /// }
+    ///
     /// ```
     pub const INT: i32 = qninf_base::I;
 
@@ -650,10 +650,10 @@ pub mod qninf {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_long_ninf = K::new_long(qninf::LONG);
     ///     assert_eq!(format!("{}", q_long_ninf), String::from("-0W"));
-    /// }
+    ///
     /// ```
     pub const LONG: i64 = qninf_base::J;
 
@@ -662,10 +662,10 @@ pub mod qninf {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_real_ninf: K = K::new_real(qninf::REAL);
     ///     assert_eq!(format!("{}", q_real_ninf), String::from("-0We"));
-    /// }
+    ///
     /// ```
     pub const REAL: f32 = qninf_base::E;
 
@@ -674,10 +674,10 @@ pub mod qninf {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_float_ninf = K::new_float(qninf::FLOAT);
     ///     assert_eq!(format!("{}", q_float_ninf), String::from("-0w"));
-    /// }
+    ///
     /// ```
     pub const FLOAT: f64 = qninf_base::F;
 
@@ -686,14 +686,14 @@ pub mod qninf {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_timestamp_ninf = K::new_timestamp(*qninf::TIMESTAMP);
     ///     assert_eq!(format!("{}", q_timestamp_ninf), String::from("-0Wp"));
-    /// }
+    ///
     /// ```
     /// # Note
     /// The range of timestamp in Rust is wider than in q.
-    pub const TIMESTAMP: Lazy<DateTime<Utc>> = Lazy::new(|| {
+    pub static TIMESTAMP: Lazy<DateTime<Utc>> = Lazy::new(|| {
         NaiveDate::from_ymd_opt(1707, 9, 22)
             .unwrap()
             .and_hms_nano_opt(0, 12, 43, 145224193)
@@ -707,42 +707,42 @@ pub mod qninf {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_month_ninf = K::new_month(*qninf::MONTH);
     ///     assert_eq!(format!("{}", q_month_ninf), String::from("-0Wm"));
-    /// }
+    ///
     /// ```
     /// # Note
     /// The range of month in Rust is narrower than in q.
-    pub const MONTH: Lazy<NaiveDate> = Lazy::new(|| NaiveDate::MIN + Duration::days(31));
+    pub static MONTH: Lazy<NaiveDate> = Lazy::new(|| NaiveDate::MIN + Duration::days(31));
 
     /// Infinity valueo of date (`-0Wd`).
     /// # Example
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_date_ninf = K::new_date(*qninf::DATE);
     ///     assert_eq!(format!("{}", q_date_ninf), String::from("-0Wd"));
-    /// }
+    ///
     /// ```
     /// # Note
     /// The range of date in Rust is narrower than in q.
-    pub const DATE: Lazy<NaiveDate> = Lazy::new(|| NaiveDate::MIN + Duration::days(1));
+    pub static DATE: Lazy<NaiveDate> = Lazy::new(|| NaiveDate::MIN + Duration::days(1));
 
     /// Infinity value of datetime (`-0Wz`).
     /// # Example
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_datetime_ninf = K::new_datetime(*qninf::DATETIME);
     ///     assert_eq!(format!("{}", q_datetime_ninf), String::from("-0Wz"));
-    /// }
+    ///
     /// ```
     /// # Note
     /// The range of datetime in Rust is narrower than in q.
-    pub const DATETIME: Lazy<DateTime<Utc>> =
+    pub static DATETIME: Lazy<DateTime<Utc>> =
         Lazy::new(|| DateTime::<Utc>::MIN_UTC + Duration::nanoseconds(1000000));
 
     /// Infinity value of timespan (`-0Wn`).
@@ -750,48 +750,48 @@ pub mod qninf {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_timespan_ninf = K::new_timespan(*qninf::TIMESPAN);
     ///     assert_eq!(format!("{}", q_timespan_ninf), String::from("-0Wn"));
-    /// }
+    ///
     /// ```
-    pub const TIMESPAN: Lazy<Duration> = Lazy::new(|| Duration::nanoseconds(qninf_base::J));
+    pub static TIMESPAN: Lazy<Duration> = Lazy::new(|| Duration::nanoseconds(qninf_base::J));
 
     /// Infinity value of minute (`-0Wu`).
     /// # Example
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_minute_ninf = K::new_minute(*qninf::MINUTE);
     ///     assert_eq!(format!("{}", q_minute_ninf), String::from("-0Wu"));
-    /// }
+    ///
     /// ```
-    pub const MINUTE: Lazy<Duration> = Lazy::new(|| Duration::minutes(qninf_base::I as i64));
+    pub static MINUTE: Lazy<Duration> = Lazy::new(|| Duration::minutes(qninf_base::I as i64));
 
     /// Infinity value of second (`-0Wv`).
     /// # Example
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_second_ninf = K::new_second(*qninf::SECOND);
     ///     assert_eq!(format!("{}", q_second_ninf), String::from("-0Wv"));
-    /// }
+    ///
     /// ```
-    pub const SECOND: Lazy<Duration> = Lazy::new(|| Duration::seconds(qninf_base::I as i64));
+    pub static SECOND: Lazy<Duration> = Lazy::new(|| Duration::seconds(qninf_base::I as i64));
 
     /// Infinity value of time (`-0Wt`).
     /// # Example
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_time_ninf = K::new_time(*qninf::TIME);
     ///     assert_eq!(format!("{}", q_time_ninf), String::from("-0Wt"));
-    /// }
+    ///
     /// ```
-    pub const TIME: Lazy<Duration> = Lazy::new(|| Duration::milliseconds(qninf_base::I as i64));
+    pub static TIME: Lazy<Duration> = Lazy::new(|| Duration::milliseconds(qninf_base::I as i64));
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -1125,10 +1125,10 @@ impl K {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_bool_false = K::new_bool(false);
     ///     assert_eq!(format!("{}", q_bool_false), String::from("0b"));
-    /// }
+    ///
     /// ```
     pub fn new_bool(boolean: bool) -> Self {
         K::new(
@@ -1143,13 +1143,13 @@ impl K {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_guid = K::new_guid([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
     ///     assert_eq!(
     ///         format!("{}", q_guid),
     ///         String::from("01020304-0506-0708-090a-0b0c0d0e0f10")
     ///     );
-    /// }
+    ///
     /// ```
     pub fn new_guid(guid: [G; 16]) -> Self {
         K::new(qtype::GUID_ATOM, qattribute::NONE, k0_inner::guid(guid))
@@ -1160,10 +1160,10 @@ impl K {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_byte = K::new_byte(0x9e);
     ///     assert_eq!(format!("{}", q_byte), String::from("0x9e"));
-    /// }
+    ///
     /// ```
     pub fn new_byte(byte: u8) -> Self {
         K::new(qtype::BYTE_ATOM, qattribute::NONE, k0_inner::byte(byte))
@@ -1174,10 +1174,10 @@ impl K {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_short = K::new_short(17);
     ///     assert_eq!(format!("{}", q_short), String::from("17h"));
-    /// }
+    ///
     /// ```
     pub fn new_short(short: i16) -> Self {
         K::new(qtype::SHORT_ATOM, qattribute::NONE, k0_inner::short(short))
@@ -1188,10 +1188,10 @@ impl K {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_int = K::new_int(-256);
     ///     assert_eq!(format!("{}", q_int), String::from("-256i"));
-    /// }
+    ///
     /// ```
     pub fn new_int(int: i32) -> Self {
         K::new(qtype::INT_ATOM, qattribute::NONE, k0_inner::int(int))
@@ -1202,10 +1202,10 @@ impl K {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_long = K::new_long(86400000000000);
     ///     assert_eq!(format!("{}", q_long), String::from("86400000000000"));
-    /// }
+    ///
     /// ```
     pub fn new_long(long: i64) -> Self {
         K::new(qtype::LONG_ATOM, qattribute::NONE, k0_inner::long(long))
@@ -1216,10 +1216,10 @@ impl K {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_real = K::new_real(0.25);
     ///     assert_eq!(format!("{:.2}", q_real), String::from("0.25e"));
-    /// }
+    ///
     /// ```
     pub fn new_real(real: f32) -> Self {
         K::new(qtype::REAL_ATOM, qattribute::NONE, k0_inner::real(real))
@@ -1230,10 +1230,10 @@ impl K {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_float = K::new_float(113.0456);
     ///     assert_eq!(format!("{:.7}", q_float), String::from("113.0456000"));
-    /// }
+    ///
     /// ```
     pub fn new_float(float: f64) -> Self {
         K::new(qtype::FLOAT_ATOM, qattribute::NONE, k0_inner::float(float))
@@ -1244,10 +1244,10 @@ impl K {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_char = K::new_char('r');
     ///     assert_eq!(format!("{}", q_char), String::from("\"r\""));
-    /// }
+    ///
     /// ```
     pub fn new_char(character: char) -> Self {
         K::new(
@@ -1262,10 +1262,10 @@ impl K {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_symbol = K::new_symbol(String::from("Jordan"));
     ///     assert_eq!(format!("{}", q_symbol), String::from("`Jordan"));
-    /// }
+    ///
     /// ```
     pub fn new_symbol(symbol: String) -> Self {
         K::new(
@@ -1281,7 +1281,7 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_timestamp = K::new_timestamp(
     ///         NaiveDate::from_ymd_opt(2019, 5, 9)
     ///             .unwrap()
@@ -1294,7 +1294,7 @@ impl K {
     ///         format!("{}", q_timestamp),
     ///         String::from("2019.05.09D00:39:02.000194756")
     ///     );
-    /// }
+    ///
     /// ```
     pub fn new_timestamp(timestamp: DateTime<Utc>) -> Self {
         K::new(
@@ -1310,10 +1310,10 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_month = K::new_month(NaiveDate::from_ymd_opt(2019, 12, 15).unwrap());
     ///     assert_eq!(format!("{}", q_month), String::from("2019.12m"));
-    /// }
+    ///
     /// ```
     pub fn new_month(month: NaiveDate) -> Self {
         K::new(
@@ -1329,10 +1329,10 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_date = K::new_date(NaiveDate::from_ymd_opt(2012, 3, 12).unwrap());
     ///     assert_eq!(format!("{}", q_date), String::from("2012.03.12"));
-    /// }
+    ///
     /// ```
     pub fn new_date(date: NaiveDate) -> Self {
         K::new(
@@ -1348,7 +1348,7 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_datetime = K::new_datetime(
     ///         NaiveDate::from_ymd_opt(2013, 1, 10)
     ///             .unwrap()
@@ -1361,7 +1361,7 @@ impl K {
     ///         format!("{}", q_datetime),
     ///         String::from("2013.01.10T00:09:50.038")
     ///     );
-    /// }
+    ///
     /// ```
     pub fn new_datetime(datetime: DateTime<Utc>) -> Self {
         K::new(
@@ -1377,13 +1377,13 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
     ///
-    /// fn main() {
+    ///  
     ///     let q_timespan = K::new_timespan(Duration::nanoseconds(102899277539844));
     ///     assert_eq!(
     ///         format!("{}", q_timespan),
     ///         String::from("1D04:34:59.277539844")
     ///     );
-    /// }
+    ///
     /// ```
     pub fn new_timespan(duration: Duration) -> Self {
         K::new(
@@ -1399,10 +1399,10 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
     ///
-    /// fn main() {
+    ///  
     ///     let q_minute = K::new_minute(Duration::minutes(99));
     ///     assert_eq!(format!("{}", q_minute), String::from("01:39"));
-    /// }
+    ///
     /// ```
     pub fn new_minute(minute: Duration) -> Self {
         K::new(
@@ -1418,10 +1418,10 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
     ///
-    /// fn main() {
+    ///  
     ///     let q_second = K::new_second(Duration::seconds(3702));
     ///     assert_eq!(format!("{}", q_second), String::from("01:01:42"));
-    /// }
+    ///
     /// ```
     pub fn new_second(second: Duration) -> Self {
         K::new(
@@ -1437,10 +1437,10 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
     ///
-    /// fn main() {
+    ///  
     ///     let q_time = K::new_time(Duration::milliseconds(27843489));
     ///     assert_eq!(format!("{}", q_time), String::from("07:44:03.489"));
-    /// }
+    ///
     /// ```
     pub fn new_time(time: Duration) -> Self {
         K::new(
@@ -1456,10 +1456,10 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_bool_list = K::new_bool_list(vec![true, false, true], qattribute::NONE);
     ///     assert_eq!(format!("{}", q_bool_list), String::from("101b"));
-    /// }
+    ///
     /// ```
     pub fn new_bool_list(list: Vec<bool>, attribute: i8) -> Self {
         let array = list
@@ -1483,7 +1483,7 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_guid_list = K::new_guid_list(
     ///         vec![
     ///             [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
@@ -1499,7 +1499,7 @@ impl K {
     ///             "00010203-0405-0607-0809-0a0b0c0d0e0f f0f1f2f3-f4f5-f6f7-f8f9-fafbfcfdfeff"
     ///         )
     ///     );
-    /// }
+    ///
     /// ```
     pub fn new_guid_list(list: Vec<[u8; 16]>, attribute: i8) -> Self {
         K::new(
@@ -1515,10 +1515,10 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_byte_list = K::new_byte_list(vec![7, 12, 21, 144], qattribute::NONE);
     ///     assert_eq!(format!("{}", q_byte_list), String::from("0x070c1590"));
-    /// }
+    ///
     /// ```
     pub fn new_byte_list(list: Vec<u8>, attribute: i8) -> Self {
         K::new(
@@ -1534,14 +1534,14 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_short_list =
     ///         K::new_short_list(vec![qnull::SHORT, -7, 12, 21, 144], qattribute::SORTED);
     ///     assert_eq!(
     ///         format!("{}", q_short_list),
     ///         String::from("`s#0N -7 12 21 144h")
     ///     );
-    /// }
+    ///
     /// ```
     pub fn new_short_list(list: Vec<i16>, attribute: i8) -> Self {
         K::new(
@@ -1557,7 +1557,7 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_int_list = K::new_int_list(
     ///         vec![-10000, -10000, 21, 21, qinf::INT, 144000],
     ///         qattribute::PARTED,
@@ -1566,7 +1566,7 @@ impl K {
     ///         format!("{}", q_int_list),
     ///         String::from("`p#-10000 -10000 21 21 0W 144000i")
     ///     );
-    /// }
+    ///
     /// ```
     pub fn new_int_list(list: Vec<i32>, attribute: i8) -> Self {
         K::new(
@@ -1582,13 +1582,13 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_long_list = K::new_long_list(vec![-86400000000000], qattribute::UNIQUE);
     ///     assert_eq!(
     ///         format!("{}", q_long_list),
     ///         String::from("`u#,-86400000000000")
     ///     );
-    /// }
+    ///
     /// ```
     pub fn new_long_list(list: Vec<i64>, attribute: i8) -> Self {
         K::new(
@@ -1604,10 +1604,10 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_real_list = K::new_real_list(vec![30.2, 5.002], qattribute::NONE);
     ///     assert_eq!(format!("{:.3}", q_real_list), String::from("30.200 5.002e"));
-    /// }
+    ///
     /// ```
     pub fn new_real_list(list: Vec<f32>, attribute: i8) -> Self {
         K::new(
@@ -1623,7 +1623,7 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_float_list = K::new_float_list(
     ///         vec![100.23, 0.4268, qnull::FLOAT, 15.882, qninf::FLOAT],
     ///         qattribute::NONE,
@@ -1632,7 +1632,7 @@ impl K {
     ///         format!("{}", q_float_list),
     ///         String::from("100.23 0.4268 0n 15.882 -0w")
     ///     );
-    /// }
+    ///
     /// ```
     pub fn new_float_list(list: Vec<f64>, attribute: i8) -> Self {
         K::new(
@@ -1648,10 +1648,10 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_string = K::new_string(String::from("super"), qattribute::UNIQUE);
     ///     assert_eq!(format!("{}", q_string), String::from("`u#\"super\""));
-    /// }
+    ///
     /// ```
     /// # Note
     /// q string must be accessed with `as_string` or `as_mut_string`.
@@ -1665,7 +1665,7 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_symbol_list = K::new_symbol_list(
     ///         vec![
     ///             String::from("a"),
@@ -1676,7 +1676,7 @@ impl K {
     ///         qattribute::GROUPED,
     ///     );
     ///     assert_eq!(format!("{}", q_symbol_list), String::from("`g#`a`b`a`c"));
-    /// }
+    ///
     /// ```
     pub fn new_symbol_list(list: Vec<String>, attribute: i8) -> Self {
         K::new(
@@ -1693,7 +1693,7 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_timestamp_list = K::new_timestamp_list(
     ///         vec![
     ///             *qnull::TIMESTAMP,
@@ -1711,7 +1711,7 @@ impl K {
     ///         format!("{}", q_timestamp_list),
     ///         String::from("0N 2000.02.06D05:11:28.000004032 0Wp")
     ///     );
-    /// }
+    ///
     /// ```
     pub fn new_timestamp_list(list: Vec<DateTime<Utc>>, attribute: i8) -> Self {
         let array = list
@@ -1732,7 +1732,7 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_month_list = K::new_month_list(
     ///         vec![
     ///             NaiveDate::from_ymd_opt(2006, 3, 9).unwrap(),
@@ -1745,13 +1745,10 @@ impl K {
     ///         format!("{}", q_month_list),
     ///         String::from("2006.03 1999.05 0Nm")
     ///     );
-    /// }
+    ///
     /// ```
     pub fn new_month_list(list: Vec<NaiveDate>, attribute: i8) -> Self {
-        let array = list
-            .into_iter()
-            .map(date_to_q_month)
-            .collect::<Vec<I>>();
+        let array = list.into_iter().map(date_to_q_month).collect::<Vec<I>>();
         K::new(
             qtype::MONTH_LIST,
             attribute,
@@ -1766,7 +1763,7 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_date_list = K::new_date_list(
     ///         vec![
     ///             NaiveDate::from_ymd_opt(2001, 2, 18).unwrap(),
@@ -1780,13 +1777,10 @@ impl K {
     ///         format!("{}", q_date_list),
     ///         String::from("2001.02.18 2019.12.12 0W 2003.10.16")
     ///     );
-    /// }
+    ///
     /// ```
     pub fn new_date_list(list: Vec<NaiveDate>, attribute: i8) -> Self {
-        let array = list
-            .into_iter()
-            .map(date_to_q_date)
-            .collect::<Vec<I>>();
+        let array = list.into_iter().map(date_to_q_date).collect::<Vec<I>>();
         K::new(
             qtype::DATE_LIST,
             attribute,
@@ -1801,7 +1795,7 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_datetime_list = K::new_datetime_list(
     ///         vec![
     ///             NaiveDate::from_ymd_opt(2002, 1, 26)
@@ -1818,7 +1812,7 @@ impl K {
     ///         format!("{}", q_datetime_list),
     ///         String::from("`s#2002.01.26T09:39:02.368 0Wz")
     ///     );
-    /// }
+    ///
     /// ```
     pub fn new_datetime_list(list: Vec<DateTime<Utc>>, attribute: i8) -> Self {
         let array = list
@@ -1839,7 +1833,7 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
     ///
-    /// fn main() {
+    ///  
     ///     let q_timespan_list = K::new_timespan_list(
     ///         vec![
     ///             *qinf::TIMESPAN,
@@ -1852,7 +1846,7 @@ impl K {
     ///         format!("{}", q_timespan_list),
     ///         String::from("0W 83D19:15:14.990625504 -1246D11:22:43.440640000")
     ///     );
-    /// }
+    ///
     /// ```
     pub fn new_timespan_list(list: Vec<Duration>, attribute: i8) -> Self {
         let array = list
@@ -1873,13 +1867,13 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
     ///
-    /// fn main() {
+    ///  
     ///     let q_minute_list = K::new_minute_list(
     ///         vec![Duration::minutes(504), Duration::seconds(-100)],
     ///         qattribute::NONE,
     ///     );
     ///     assert_eq!(format!("{}", q_minute_list), String::from("08:24 -00:01"));
-    /// }
+    ///
     /// ```
     pub fn new_minute_list(list: Vec<Duration>, attribute: i8) -> Self {
         let array = list
@@ -1900,7 +1894,7 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
     ///
-    /// fn main() {
+    ///  
     ///     let q_second_list = K::new_second_list(
     ///         vec![
     ///             Duration::seconds(-3554),
@@ -1915,7 +1909,7 @@ impl K {
     ///         format!("{}", q_second_list),
     ///         String::from("-00:59:14 0W 03:49:04 -0W 0Nv")
     ///     );
-    /// }
+    ///
     /// ```
     pub fn new_second_list(list: Vec<Duration>, attribute: i8) -> Self {
         let array = list
@@ -1936,7 +1930,7 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
     ///
-    /// fn main() {
+    ///  
     ///     let q_time_list = K::new_time_list(
     ///         vec![
     ///             Duration::milliseconds(642982),
@@ -1950,7 +1944,7 @@ impl K {
     ///         format!("{}", q_time_list),
     ///         String::from("00:10:42.982 00:13:09.848 -0W 16:18:45.553")
     ///     );
-    /// }
+    ///
     /// ```
     pub fn new_time_list(list: Vec<Duration>, attribute: i8) -> Self {
         let array = list
@@ -1971,7 +1965,7 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_compound_list = K::new_compound_list(vec![
     ///         K::new_symbol_list(
     ///             vec![
@@ -1992,7 +1986,7 @@ impl K {
     ///         format!("{}", q_compound_list),
     ///         String::from("(`u#`Ruby`Diamond`Sapphire;0Np;0 1 2 -0W;,2004.02m)")
     ///     );
-    /// }
+    ///
     /// ```
     pub fn new_compound_list(list: Vec<K>) -> Self {
         K::new(
@@ -2008,7 +2002,7 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let keys = K::new_int_list(vec![20, 30, 40], qattribute::SORTED);
     ///     let values = K::new_bool_list(vec![false, false, true], qattribute::NONE);
     ///     let q_dictionary = K::new_dictionary(keys, values).unwrap();
@@ -2016,7 +2010,7 @@ impl K {
     ///         format!("{}", q_dictionary),
     ///         String::from("`s#20 30 40i!001b")
     ///     );
-    /// }
+    ///
     /// ```
     /// # Note
     /// This constructor can return an error object whose type is `qtype::ERROR`. In that case the error message can be
@@ -2043,10 +2037,10 @@ impl K {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_null = K::new_null();
     ///     assert_eq!(format!("{}", q_null), String::from("::"));
-    /// }
+    ///
     /// ```
     pub fn new_null() -> Self {
         K::new(qtype::NULL, qattribute::NONE, k0_inner::null(()))
@@ -2060,7 +2054,7 @@ impl K {
     /// fn main(){
     ///   let q_error=K::new_error(String::from("woops"));
     ///   assert_eq!(format!("{}", q_error), String::from("'woops"));
-    /// }
+    ///
     /// ```
     pub fn new_error(error: String) -> Self {
         K::new(qtype::ERROR, qattribute::NONE, k0_inner::symbol(error))
@@ -2073,10 +2067,10 @@ impl K {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_bool = K::new_bool(true);
     ///     assert_eq!(q_bool.get_bool(), Ok(true));
-    /// }
+    ///
     /// ```
     pub fn get_bool(&self) -> Result<bool> {
         match self.0.qtype {
@@ -2093,13 +2087,13 @@ impl K {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_guid = K::new_guid([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
     ///     assert_eq!(
     ///         q_guid.get_guid(),
     ///         Ok([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
     ///     );
-    /// }
+    ///
     /// ```
     pub fn get_guid(&self) -> Result<[u8; 16]> {
         match self.0.qtype {
@@ -2119,10 +2113,10 @@ impl K {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_byte = K::new_byte(0x77);
     ///     assert_eq!(q_byte.get_byte(), Ok(0x77));
-    /// }
+    ///
     /// ```
     pub fn get_byte(&self) -> Result<u8> {
         match self.0.qtype {
@@ -2139,10 +2133,10 @@ impl K {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_short = K::new_short(-12);
     ///     assert_eq!(q_short.get_short(), Ok(-12));
-    /// }
+    ///
     /// ```
     pub fn get_short(&self) -> Result<i16> {
         match self.0.qtype {
@@ -2165,10 +2159,10 @@ impl K {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_int = K::new_int(144000);
     ///     assert_eq!(q_int.get_int(), Ok(144000));
-    /// }
+    ///
     /// ```
     pub fn get_int(&self) -> Result<i32> {
         match self.0.qtype {
@@ -2193,10 +2187,10 @@ impl K {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_long = K::new_long(86400000000000);
     ///     assert_eq!(q_long.get_long(), Ok(86400000000000));
-    /// }
+    ///
     /// ```
     pub fn get_long(&self) -> Result<i64> {
         match self.0.qtype {
@@ -2213,10 +2207,10 @@ impl K {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_real = K::new_real(0.25);
     ///     assert_eq!(q_real.get_real(), Ok(0.25));
-    /// }
+    ///
     /// ```
     pub fn get_real(&self) -> Result<f32> {
         match self.0.qtype {
@@ -2235,10 +2229,10 @@ impl K {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_float = K::new_float(1000.23456);
     ///     assert_eq!(q_float.get_float(), Ok(1000.23456));
-    /// }
+    ///
     /// ```
     pub fn get_float(&self) -> Result<f64> {
         match self.0.qtype {
@@ -2255,10 +2249,10 @@ impl K {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_char = K::new_char('C');
     ///     assert_eq!(q_char.get_char(), Ok('C'));
-    /// }
+    ///
     /// ```
     pub fn get_char(&self) -> Result<char> {
         match self.0.qtype {
@@ -2275,10 +2269,10 @@ impl K {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_symbol = K::new_symbol(String::from("Rust"));
     ///     assert_eq!(q_symbol.get_symbol(), Ok("Rust"));
-    /// }
+    ///
     /// ```
     pub fn get_symbol(&self) -> Result<&str> {
         match self.0.qtype {
@@ -2296,7 +2290,7 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_timestamp = K::new_timestamp(
     ///         NaiveDate::from_ymd_opt(2001, 9, 15)
     ///             .unwrap()
@@ -2314,7 +2308,7 @@ impl K {
     ///             .and_local_timezone(Utc)
     ///             .unwrap())
     ///     );
-    /// }
+    ///
     /// ```
     pub fn get_timestamp(&self) -> Result<DateTime<Utc>> {
         match self.0.qtype {
@@ -2332,13 +2326,13 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_month = K::new_month(NaiveDate::from_ymd_opt(2007, 8, 30).unwrap());
     ///     assert_eq!(
     ///         q_month.get_month(),
     ///         Ok(NaiveDate::from_ymd_opt(2007, 8, 1).unwrap())
     ///     );
-    /// }
+    ///
     /// ```
     pub fn get_month(&self) -> Result<NaiveDate> {
         match self.0.qtype {
@@ -2356,13 +2350,13 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_date = K::new_date(NaiveDate::from_ymd_opt(2000, 5, 10).unwrap());
     ///     assert_eq!(
     ///         q_date.get_date(),
     ///         Ok(NaiveDate::from_ymd_opt(2000, 5, 10).unwrap())
     ///     );
-    /// }
+    ///
     /// ```
     pub fn get_date(&self) -> Result<NaiveDate> {
         match self.0.qtype {
@@ -2380,7 +2374,7 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_datetime = K::new_datetime(
     ///         NaiveDate::from_ymd_opt(2011, 4, 7)
     ///             .unwrap()
@@ -2398,7 +2392,7 @@ impl K {
     ///             .and_local_timezone(Utc)
     ///             .unwrap())
     ///     );
-    /// }
+    ///
     /// ```
     pub fn get_datetime(&self) -> Result<DateTime<Utc>> {
         match self.0.qtype {
@@ -2416,13 +2410,13 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
     ///
-    /// fn main() {
+    ///  
     ///     let q_timespan = K::new_timespan(Duration::nanoseconds(131400000000000));
     ///     assert_eq!(
     ///         q_timespan.get_timespan(),
     ///         Ok(Duration::nanoseconds(131400000000000))
     ///     );
-    /// }
+    ///
     /// ```
     pub fn get_timespan(&self) -> Result<Duration> {
         match self.0.qtype {
@@ -2440,10 +2434,10 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
     ///
-    /// fn main() {
+    ///  
     ///     let q_minute = K::new_minute(Duration::minutes(30));
     ///     assert_eq!(q_minute.get_minute(), Ok(Duration::minutes(30)));
-    /// }
+    ///
     /// ```
     pub fn get_minute(&self) -> Result<Duration> {
         match self.0.qtype {
@@ -2461,10 +2455,10 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
     ///
-    /// fn main() {
+    ///  
     ///     let q_second = K::new_second(Duration::seconds(30));
     ///     assert_eq!(q_second.get_second(), Ok(Duration::seconds(30)));
-    /// }
+    ///
     /// ```
     pub fn get_second(&self) -> Result<Duration> {
         match self.0.qtype {
@@ -2482,10 +2476,10 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
     ///
-    /// fn main() {
+    ///  
     ///     let q_time = K::new_time(Duration::milliseconds(3000));
     ///     assert_eq!(q_time.get_time(), Ok(Duration::milliseconds(3000)));
-    /// }
+    ///
     /// ```
     pub fn get_time(&self) -> Result<Duration> {
         match self.0.qtype {
@@ -2503,7 +2497,7 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let headers = K::new_symbol_list(
     ///         vec![String::from("fruit"), String::from("price")],
     ///         qattribute::NONE,
@@ -2525,7 +2519,7 @@ impl K {
     ///         format!("{}", q_table.get_dictionary().unwrap()),
     ///         String::from("`fruit`price!(`p#`strawberry`orange`;2.5 1.25 117.8)")
     ///     );
-    /// }
+    ///
     /// ```
     pub fn get_dictionary(&self) -> Result<&K> {
         match self.0.qtype {
@@ -2543,7 +2537,7 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let headers = K::new_symbol_list(
     ///         vec![String::from("fruit"), String::from("price")],
     ///         qattribute::NONE,
@@ -2575,7 +2569,7 @@ impl K {
     ///         format!("{}", q_table),
     ///         String::from("+`fruit`price`color!(`p#`strawberry`orange`;2.5 1.25 117.8;\"RO\")")
     ///     );
-    /// }
+    ///
     /// ```
     pub fn get_mut_dictionary(&mut self) -> Result<&mut K> {
         match self.0.qtype {
@@ -2600,7 +2594,7 @@ impl K {
     ///     let result = socket.send_sync_message(&"1+`a").await?;
     ///     assert_eq!(result.get_error_string(), Ok("type"));
     ///     Ok(())
-    /// }
+    ///
     /// ```
     pub fn get_error_string(&self) -> Result<&str> {
         match self.0.qtype {
@@ -2618,10 +2612,10 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let string = K::new_string(String::from("something"), qattribute::NONE);
     ///     assert_eq!(string.as_string().unwrap(), "something");
-    /// }
+    ///
     /// ```
     pub fn as_string(&self) -> Result<&str> {
         match self.0.qtype {
@@ -2639,11 +2633,11 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let mut string = K::new_string(String::from("something"), qattribute::NONE);
     ///     string.as_mut_string().unwrap().push('!');
     ///     assert_eq!(format!("{}", string), String::from("\"something!\""));
-    /// }
+    ///
     /// ```
     pub fn as_mut_string(&mut self) -> Result<&mut String> {
         match self.0.qtype {
@@ -2662,7 +2656,7 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
-    /// fn main() {
+    ///  
     ///     let mut timestamp_list = K::new_timestamp_list(
     ///         vec![
     ///             Utc.ymd(2018, 2, 18).and_hms_nano(4, 0, 0, 100),
@@ -2675,7 +2669,7 @@ impl K {
     ///         .unwrap()
     ///         .push(682184439000046395);
     ///     assert_eq!(format!("{}", timestamp_list), String::from("2018.02.18D04:00:00.000000100 2019.12.03D04:05:10.000003456 2021.08.13D15:40:39.000046395"));
-    /// }
+    ///
     /// ```
     pub fn as_mut_vec<T>(&mut self) -> Result<&mut Vec<T>>
     where
@@ -2721,7 +2715,7 @@ impl K {
     /// fn main(){
     ///   let bool_list=K::new_bool_list(vec![true, false], qattribute::UNIQUE);
     ///   assert_eq!(*bool_list.as_vec::<G>().unwrap(), vec![1_u8, 0]);
-    /// }
+    ///
     /// ```
     pub fn as_vec<T>(&self) -> Result<&Vec<T>>
     where
@@ -2765,7 +2759,7 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
-    /// fn main() {
+    ///  
     ///     let header = K::new_symbol_list(
     ///         vec![String::from("time"), String::from("sym")],
     ///         qattribute::NONE,
@@ -2787,7 +2781,7 @@ impl K {
     ///         .unwrap();
     ///     let syms = table.get_column("sym").unwrap();
     ///     println!("syms: {}", syms);
-    /// }
+    ///
     /// ```
     pub fn get_column<T>(&self, column: T) -> Result<&K>
     where
@@ -2836,7 +2830,7 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
-    /// fn main() {
+    ///  
     ///     let header = K::new_symbol_list(
     ///         vec![String::from("time"), String::from("sym")],
     ///         qattribute::NONE,
@@ -2867,7 +2861,7 @@ impl K {
     ///         ),
     ///     );
     ///     println!("table: {}", table);
-    /// }
+    ///
     /// ```
     pub fn get_mut_column<T>(&mut self, column: T) -> Result<&mut K>
     where
@@ -2962,10 +2956,10 @@ impl K {
     /// use kdbplus::*;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let q_int = K::new_int(12);
     ///     assert_eq!(q_int.get_type(), qtype::INT_ATOM);
-    /// }
+    ///
     /// ```
     pub fn get_type(&self) -> i8 {
         self.0.qtype
@@ -2978,7 +2972,7 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
-    /// fn main() {
+    ///  
     ///     let timestamp_list = K::new_timestamp_list(
     ///         vec![
     ///             Utc.ymd(2021, 3, 9).and_hms_nano(12, 5, 40, 67824),
@@ -2987,7 +2981,7 @@ impl K {
     ///         qattribute::SORTED,
     ///     );
     ///     assert_eq!(timestamp_list.get_attribute(), qattribute::SORTED);
-    /// }
+    ///
     /// ```
     pub fn get_attribute(&self) -> i8 {
         self.0.attribute
@@ -3002,7 +2996,7 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
-    /// fn main() {
+    ///  
     ///     let mut timestamp_list = K::new_timestamp_list(
     ///         vec![Utc.ymd(2021, 3, 9).and_hms_nano(12, 5, 40, 67824)],
     ///         qattribute::NONE,
@@ -3014,7 +3008,7 @@ impl K {
     ///         .unwrap();
     ///     timestamp_list.set_attribute(qattribute::SORTED);
     ///     assert_eq!(timestamp_list.get_attribute(), qattribute::SORTED);
-    /// }
+    ///
     /// ```
     /// # Note
     /// The validity of the attribute is not checked. For example, if you set a sorted attribute to
@@ -3050,7 +3044,7 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let mut symbol_list = K::new_symbol_list(vec![String::from("first")], qattribute::NONE);
     ///     symbol_list.push(&String::from("second")).unwrap();
     ///     if let Err(error) = symbol_list.push(&12) {
@@ -3067,7 +3061,7 @@ impl K {
     ///     )]);
     ///     string_list.push(&K::new_bool(false)).unwrap();
     ///     assert_eq!(format!("{}", string_list), String::from("(\"string\";0b)"));
-    /// }
+    ///
     /// ```
     pub fn push(&mut self, element: &dyn Any) -> Result<()> {
         match self.0.qtype {
@@ -3175,10 +3169,9 @@ impl K {
             qtype::TIMESTAMP_LIST => {
                 if let Some(timestamp) = element.downcast_ref::<DateTime<Utc>>() {
                     self.increment();
-                    self
-                    .as_mut_vec::<J>()
-                    .unwrap()
-                    .push(datetime_to_q_timestamp(*timestamp));
+                    self.as_mut_vec::<J>()
+                        .unwrap()
+                        .push(datetime_to_q_timestamp(*timestamp));
                     Ok(())
                 } else {
                     Err(Error::insert_wrong_element(
@@ -3191,10 +3184,9 @@ impl K {
             qtype::MONTH_LIST => {
                 if let Some(month) = element.downcast_ref::<NaiveDate>() {
                     self.increment();
-                    self
-                    .as_mut_vec::<I>()
-                    .unwrap()
-                    .push(date_to_q_month(*month));
+                    self.as_mut_vec::<I>()
+                        .unwrap()
+                        .push(date_to_q_month(*month));
                     Ok(())
                 } else {
                     Err(Error::insert_wrong_element(
@@ -3220,10 +3212,9 @@ impl K {
             qtype::DATETIME_LIST => {
                 if let Some(datetime) = element.downcast_ref::<DateTime<Utc>>() {
                     self.increment();
-                    self
-                    .as_mut_vec::<F>()
-                    .unwrap()
-                    .push(datetime_to_q_datetime(*datetime));
+                    self.as_mut_vec::<F>()
+                        .unwrap()
+                        .push(datetime_to_q_datetime(*datetime));
                     Ok(())
                 } else {
                     Err(Error::insert_wrong_element(
@@ -3236,10 +3227,9 @@ impl K {
             qtype::TIMESPAN_LIST => {
                 if let Some(timespan) = element.downcast_ref::<Duration>() {
                     self.increment();
-                    self
-                    .as_mut_vec::<J>()
-                    .unwrap()
-                    .push(timespan.num_nanoseconds().expect("duration overflow"));
+                    self.as_mut_vec::<J>()
+                        .unwrap()
+                        .push(timespan.num_nanoseconds().expect("duration overflow"));
                     Ok(())
                 } else {
                     Err(Error::insert_wrong_element(
@@ -3252,10 +3242,9 @@ impl K {
             qtype::MINUTE_LIST => {
                 if let Some(minute) = element.downcast_ref::<Duration>() {
                     self.increment();
-                    self
-                    .as_mut_vec::<I>()
-                    .unwrap()
-                    .push(minute.num_minutes() as i32);
+                    self.as_mut_vec::<I>()
+                        .unwrap()
+                        .push(minute.num_minutes() as i32);
                     Ok(())
                 } else {
                     Err(Error::insert_wrong_element(
@@ -3268,10 +3257,9 @@ impl K {
             qtype::SECOND_LIST => {
                 if let Some(second) = element.downcast_ref::<Duration>() {
                     self.increment();
-                    self
-                    .as_mut_vec::<I>()
-                    .unwrap()
-                    .push(second.num_seconds() as i32);
+                    self.as_mut_vec::<I>()
+                        .unwrap()
+                        .push(second.num_seconds() as i32);
                     Ok(())
                 } else {
                     Err(Error::insert_wrong_element(
@@ -3284,10 +3272,9 @@ impl K {
             qtype::TIME_LIST => {
                 if let Some(time) = element.downcast_ref::<Duration>() {
                     self.increment();
-                    self
-                    .as_mut_vec::<I>()
-                    .unwrap()
-                    .push(time.num_milliseconds() as i32);
+                    self.as_mut_vec::<I>()
+                        .unwrap()
+                        .push(time.num_milliseconds() as i32);
                     Ok(())
                 } else {
                     Err(Error::insert_wrong_element(
@@ -3325,7 +3312,7 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_symbol_list = K::new_symbol_list(vec![String::from("almond")], qattribute::NONE);
     ///     q_symbol_list.push(&String::from("hazel")).unwrap();
     ///     q_symbol_list.insert(1, &String::from("macadamia")).unwrap();
@@ -3341,7 +3328,7 @@ impl K {
     ///     let mut q_minute_list = K::new_minute_list(vec![Duration::minutes(1024)], qattribute::NONE);
     ///     q_minute_list.insert(0, &Duration::minutes(12)).unwrap();
     ///     assert_eq!(*q_minute_list.as_vec::<I>().unwrap(), vec![12, 1024]);
-    /// }
+    ///
     /// ```
     pub fn insert(&mut self, index: usize, element: &dyn Any) -> Result<()> {
         if index > self.len() {
@@ -3351,10 +3338,9 @@ impl K {
                 qtype::BOOL_LIST => {
                     if let Some(boolean) = element.downcast_ref::<bool>() {
                         self.increment();
-                        self
-                        .as_mut_vec::<G>()
-                        .unwrap()
-                        .insert(index, *boolean as u8);
+                        self.as_mut_vec::<G>()
+                            .unwrap()
+                            .insert(index, *boolean as u8);
                         Ok(())
                     } else {
                         Err(Error::insert_wrong_element(true, qtype::BOOL_LIST, "bool"))
@@ -3438,10 +3424,9 @@ impl K {
                 qtype::SYMBOL_LIST => {
                     if let Some(symbol) = element.downcast_ref::<String>() {
                         self.increment();
-                        self
-                        .as_mut_vec::<S>()
-                        .unwrap()
-                        .insert(index, symbol.clone());
+                        self.as_mut_vec::<S>()
+                            .unwrap()
+                            .insert(index, symbol.clone());
                         Ok(())
                     } else {
                         Err(Error::insert_wrong_element(
@@ -3454,10 +3439,9 @@ impl K {
                 qtype::TIMESTAMP_LIST => {
                     if let Some(timestamp) = element.downcast_ref::<DateTime<Utc>>() {
                         self.increment();
-                        self
-                        .as_mut_vec::<J>()
-                        .unwrap()
-                        .insert(index, datetime_to_q_timestamp(*timestamp));
+                        self.as_mut_vec::<J>()
+                            .unwrap()
+                            .insert(index, datetime_to_q_timestamp(*timestamp));
                         Ok(())
                     } else {
                         Err(Error::insert_wrong_element(
@@ -3470,10 +3454,9 @@ impl K {
                 qtype::MONTH_LIST => {
                     if let Some(month) = element.downcast_ref::<NaiveDate>() {
                         self.increment();
-                        self
-                        .as_mut_vec::<I>()
-                        .unwrap()
-                        .insert(index, date_to_q_month(*month));
+                        self.as_mut_vec::<I>()
+                            .unwrap()
+                            .insert(index, date_to_q_month(*month));
                         Ok(())
                     } else {
                         Err(Error::insert_wrong_element(
@@ -3486,10 +3469,9 @@ impl K {
                 qtype::DATE_LIST => {
                     if let Some(date) = element.downcast_ref::<NaiveDate>() {
                         self.increment();
-                        self
-                        .as_mut_vec::<I>()
-                        .unwrap()
-                        .insert(index, date_to_q_date(*date));
+                        self.as_mut_vec::<I>()
+                            .unwrap()
+                            .insert(index, date_to_q_date(*date));
                         Ok(())
                     } else {
                         Err(Error::insert_wrong_element(
@@ -3502,10 +3484,9 @@ impl K {
                 qtype::DATETIME_LIST => {
                     if let Some(datetime) = element.downcast_ref::<DateTime<Utc>>() {
                         self.increment();
-                        self
-                        .as_mut_vec::<F>()
-                        .unwrap()
-                        .insert(index, datetime_to_q_datetime(*datetime));
+                        self.as_mut_vec::<F>()
+                            .unwrap()
+                            .insert(index, datetime_to_q_datetime(*datetime));
                         Ok(())
                     } else {
                         Err(Error::insert_wrong_element(
@@ -3534,10 +3515,9 @@ impl K {
                 qtype::MINUTE_LIST => {
                     if let Some(minute) = element.downcast_ref::<Duration>() {
                         self.increment();
-                        self
-                        .as_mut_vec::<I>()
-                        .unwrap()
-                        .insert(index, minute.num_minutes() as i32);
+                        self.as_mut_vec::<I>()
+                            .unwrap()
+                            .insert(index, minute.num_minutes() as i32);
                         Ok(())
                     } else {
                         Err(Error::insert_wrong_element(
@@ -3550,10 +3530,9 @@ impl K {
                 qtype::SECOND_LIST => {
                     if let Some(second) = element.downcast_ref::<Duration>() {
                         self.increment();
-                        self
-                        .as_mut_vec::<I>()
-                        .unwrap()
-                        .insert(index, second.num_seconds() as i32);
+                        self.as_mut_vec::<I>()
+                            .unwrap()
+                            .insert(index, second.num_seconds() as i32);
                         Ok(())
                     } else {
                         Err(Error::insert_wrong_element(
@@ -3566,10 +3545,9 @@ impl K {
                 qtype::TIME_LIST => {
                     if let Some(time) = element.downcast_ref::<Duration>() {
                         self.increment();
-                        self
-                        .as_mut_vec::<I>()
-                        .unwrap()
-                        .insert(index, time.num_milliseconds() as i32);
+                        self.as_mut_vec::<I>()
+                            .unwrap()
+                            .insert(index, time.num_milliseconds() as i32);
                         Ok(())
                     } else {
                         Err(Error::insert_wrong_element(
@@ -3603,11 +3581,11 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_bool_list = K::new_bool_list(vec![false, true], qattribute::NONE);
     ///     let tail = q_bool_list.pop_bool().unwrap();
     ///     assert_eq!(tail, true);
-    /// }
+    ///
     /// ```
     pub fn pop_bool(&mut self) -> Result<bool> {
         if self.len() == 0 {
@@ -3634,7 +3612,7 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_guid_list = K::new_guid_list(
     ///         vec![[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]],
     ///         qattribute::NONE,
@@ -3644,7 +3622,7 @@ impl K {
     ///         tail,
     ///         [0_u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
     ///     );
-    /// }
+    ///
     /// ```
     pub fn pop_guid(&mut self) -> Result<[u8; 16]> {
         if self.len() == 0 {
@@ -3671,11 +3649,11 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_byte_list = K::new_byte_list(vec![0x77, 0x99, 0xae], qattribute::NONE);
     ///     let tail = q_byte_list.pop_byte().unwrap();
     ///     assert_eq!(tail, 0xae_u8);
-    /// }
+    ///
     /// ```
     pub fn pop_byte(&mut self) -> Result<u8> {
         if self.len() == 0 {
@@ -3702,11 +3680,11 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_short_list = K::new_short_list(vec![12, 50], qattribute::NONE);
     ///     let tail = q_short_list.pop_short().unwrap();
     ///     assert_eq!(tail, 50_i16);
-    /// }
+    ///
     /// ```
     pub fn pop_short(&mut self) -> Result<i16> {
         if self.len() == 0 {
@@ -3733,11 +3711,11 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_int_list = K::new_int_list(vec![144000, -1, 888], qattribute::NONE);
     ///     let tail = q_int_list.pop_int().unwrap();
     ///     assert_eq!(tail, 888);
-    /// }
+    ///
     /// ```
     pub fn pop_int(&mut self) -> Result<i32> {
         if self.len() == 0 {
@@ -3764,11 +3742,11 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_long_list = K::new_long_list(vec![-86400_i64, 13800000000], qattribute::NONE);
     ///     let tail = q_long_list.pop_long().unwrap();
     ///     assert_eq!(tail, 13800000000_i64);
-    /// }
+    ///
     /// ```
     pub fn pop_long(&mut self) -> Result<i64> {
         if self.len() == 0 {
@@ -3795,11 +3773,11 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_real_list = K::new_real_list(vec![9.22_f32, -0.1], qattribute::NONE);
     ///     let tail = q_real_list.pop_real().unwrap();
     ///     assert_eq!(tail, -0.1_f32);
-    /// }
+    ///
     /// ```
     pub fn pop_real(&mut self) -> Result<f32> {
         if self.len() == 0 {
@@ -3826,11 +3804,11 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_float_list = K::new_float_list(vec![5634.7666, 120.45, 1001.3], qattribute::NONE);
     ///     let tail = q_float_list.pop_float().unwrap();
     ///     assert_eq!(tail, 1001.3);
-    /// }
+    ///
     /// ```
     pub fn pop_float(&mut self) -> Result<f64> {
         if self.len() == 0 {
@@ -3857,11 +3835,11 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_string = K::new_string(String::from("speedy"), qattribute::NONE);
     ///     let tail = q_string.pop_char().unwrap();
     ///     assert_eq!(tail, 'y');
-    /// }
+    ///
     /// ```
     pub fn pop_char(&mut self) -> Result<char> {
         if self.len() == 0 {
@@ -3889,7 +3867,7 @@ impl K {
     ///   let mut q_symbol_list=K::new_symbol_list(vec![String::from("almond"), String::from("macadamia"), String::from("hazel")], qattribute::NONE);
     ///   let tail=q_symbol_list.pop_symbol().unwrap();
     ///   assert_eq!(tail, String::from("hazel"));
-    /// }
+    ///
     /// ```
     pub fn pop_symbol(&mut self) -> Result<String> {
         if self.len() == 0 {
@@ -3917,14 +3895,14 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_timestamp_list = K::new_timestamp_list(
     ///         vec![Utc.ymd(2019, 8, 9).and_hms_nano(16, 28, 2, 468276775)],
     ///         qattribute::NONE,
     ///     );
     ///     let tail = q_timestamp_list.pop_timestamp().unwrap();
     ///     assert_eq!(tail, Utc.ymd(2019, 8, 9).and_hms_nano(16, 28, 2, 468276775));
-    /// }
+    ///
     /// ```
     pub fn pop_timestamp(&mut self) -> Result<DateTime<Utc>> {
         if self.len() == 0 {
@@ -3954,7 +3932,7 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_month_list = K::new_month_list(
     ///         vec![
     ///             NaiveDate::from_ymd_opt(2011, 5, 1).unwrap(),
@@ -3964,7 +3942,7 @@ impl K {
     ///     );
     ///     let tail = q_month_list.pop_month().unwrap();
     ///     assert_eq!(tail, NaiveDate::from_ymd_opt(2004, 8, 1).unwrap());
-    /// }
+    ///
     /// ```
     pub fn pop_month(&mut self) -> Result<NaiveDate> {
         if self.len() == 0 {
@@ -3994,7 +3972,7 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_date_list = K::new_date_list(
     ///         vec![
     ///             NaiveDate::from_ymd_opt(2021, 3, 19).unwrap(),
@@ -4005,7 +3983,7 @@ impl K {
     ///     );
     ///     let tail = q_date_list.pop_date().unwrap();
     ///     assert_eq!(tail, NaiveDate::from_ymd_opt(2014, 6, 4).unwrap());
-    /// }
+    ///
     /// ```
     pub fn pop_date(&mut self) -> Result<NaiveDate> {
         if self.len() == 0 {
@@ -4035,7 +4013,7 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_datetime_list = K::new_datetime_list(
     ///         vec![
     ///             Utc.ymd(2018, 9, 22).and_hms_milli(4, 58, 30, 204),
@@ -4045,7 +4023,7 @@ impl K {
     ///     );
     ///     let tail = q_datetime_list.pop_datetime().unwrap();
     ///     assert_eq!(tail, Utc.ymd(2003, 12, 9).and_hms_milli(19, 58, 30, 326));
-    /// }
+    ///
     /// ```
     pub fn pop_datetime(&mut self) -> Result<DateTime<Utc>> {
         if self.len() == 0 {
@@ -4075,7 +4053,7 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_timespan_list = K::new_timespan_list(
     ///         vec![
     ///             Duration::nanoseconds(6782392639932),
@@ -4085,7 +4063,7 @@ impl K {
     ///     );
     ///     let tail = q_timespan_list.pop_timespan().unwrap();
     ///     assert_eq!(tail, Duration::nanoseconds(219849398328832));
-    /// }
+    ///
     /// ```
     pub fn pop_timespan(&mut self) -> Result<Duration> {
         if self.len() == 0 {
@@ -4115,14 +4093,14 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_minute_list = K::new_minute_list(
     ///         vec![Duration::minutes(1024), Duration::minutes(-503)],
     ///         qattribute::NONE,
     ///     );
     ///     let tail = q_minute_list.pop_minute().unwrap();
     ///     assert_eq!(tail, Duration::minutes(-503));
-    /// }
+    ///
     /// ```
     pub fn pop_minute(&mut self) -> Result<Duration> {
         if self.len() == 0 {
@@ -4152,14 +4130,14 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_second_list = K::new_second_list(
     ///         vec![Duration::seconds(-32467), Duration::seconds(73984)],
     ///         qattribute::NONE,
     ///     );
     ///     let tail = q_second_list.pop_second().unwrap();
     ///     assert_eq!(tail, Duration::seconds(73984));
-    /// }
+    ///
     /// ```
     pub fn pop_second(&mut self) -> Result<Duration> {
         if self.len() == 0 {
@@ -4189,7 +4167,7 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_time_list = K::new_time_list(
     ///         vec![
     //             Duration::milliseconds(902467),
@@ -4199,7 +4177,7 @@ impl K {
     ///     );
     ///     let tail = q_time_list.pop_time().unwrap();
     ///     assert_eq!(tail, Duration::milliseconds(-23587934));
-    /// }
+    ///
     /// ```
     pub fn pop_time(&mut self) -> Result<Duration> {
         if self.len() == 0 {
@@ -4230,7 +4208,7 @@ impl K {
     /// use chrono::prelude::*;
     /// use chrono::Duration;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_time_list = K::new_time_list(
     ///         vec![
     ///             Duration::milliseconds(902467),
@@ -4256,7 +4234,7 @@ impl K {
     ///         format!("{}", tail),
     ///         String::from("2018.04.10D15:47:39.758934332 2008.12.04D14:12:07.548932080")
     ///     );
-    /// }
+    ///
     /// ```
     pub fn pop(&mut self) -> Result<K> {
         if self.len() == 0 {
@@ -4384,11 +4362,11 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_bool_list = K::new_bool_list(vec![false, true], qattribute::NONE);
     ///     let tail = q_bool_list.remove_bool(0).unwrap();
     ///     assert_eq!(tail, false);
-    /// }
+    ///
     /// ```
     pub fn remove_bool(&mut self, index: usize) -> Result<bool> {
         if index >= self.len() {
@@ -4412,11 +4390,10 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    ///  fn main(){
     ///    let mut q_guid_list=K::new_guid_list(vec![[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15], [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]], qattribute::NONE);
     ///    let tail=q_guid_list.remove_guid(1).unwrap();
     ///    assert_eq!(tail, [1_u8,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]);
-    ///  }
+    ///
     /// ```
     pub fn remove_guid(&mut self, index: usize) -> Result<[u8; 16]> {
         if index >= self.len() {
@@ -4440,11 +4417,11 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_byte_list = K::new_byte_list(vec![0x77, 0x99, 0xae], qattribute::NONE);
     ///     let tail = q_byte_list.remove_byte(1).unwrap();
     ///     assert_eq!(tail, 0x99_u8);
-    /// }
+    ///
     /// ```
     pub fn remove_byte(&mut self, index: usize) -> Result<u8> {
         if index >= self.len() {
@@ -4468,11 +4445,11 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_short_list = K::new_short_list(vec![12, 50], qattribute::NONE);
     ///     let tail = q_short_list.remove_short(0).unwrap();
     ///     assert_eq!(tail, 12_i16);
-    /// }
+    ///
     /// ```
     pub fn remove_short(&mut self, index: usize) -> Result<i16> {
         if index >= self.len() {
@@ -4496,11 +4473,11 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_int_list = K::new_int_list(vec![144000, -1, 888], qattribute::NONE);
     ///     let tail = q_int_list.remove_int(1).unwrap();
     ///     assert_eq!(tail, -1);
-    /// }
+    ///
     /// ```
     pub fn remove_int(&mut self, index: usize) -> Result<i32> {
         if index >= self.len() {
@@ -4524,11 +4501,11 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_long_list = K::new_long_list(vec![-86400_i64, 13800000000], qattribute::NONE);
     ///     let tail = q_long_list.remove_long(0).unwrap();
     ///     assert_eq!(tail, -86400_i64);
-    /// }
+    ///
     /// ```
     pub fn remove_long(&mut self, index: usize) -> Result<i64> {
         if index >= self.len() {
@@ -4552,11 +4529,11 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_real_list = K::new_real_list(vec![9.22_f32, -0.1], qattribute::NONE);
     ///     let tail = q_real_list.remove_real(1).unwrap();
     ///     assert_eq!(tail, -0.1_f32);
-    /// }
+    ///
     /// ```
     pub fn remove_real(&mut self, index: usize) -> Result<f32> {
         if index >= self.len() {
@@ -4580,11 +4557,11 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_float_list = K::new_float_list(vec![5634.7666, 120.45, 1001.3], qattribute::NONE);
     ///     let tail = q_float_list.remove_float(0).unwrap();
     ///     assert_eq!(tail, 5634.7666);
-    /// }
+    ///
     /// ```
     pub fn remove_float(&mut self, index: usize) -> Result<f64> {
         if index >= self.len() {
@@ -4608,11 +4585,11 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_string = K::new_string(String::from("speedy"), qattribute::NONE);
     ///     let tail = q_string.remove_char(2).unwrap();
     ///     assert_eq!(tail, 'e');
-    /// }
+    ///
     /// ```
     pub fn remove_char(&mut self, index: usize) -> Result<char> {
         if index >= self.len() {
@@ -4636,7 +4613,7 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_symbol_list = K::new_symbol_list(
     ///         vec![
     ///             String::from("almond"),
@@ -4647,7 +4624,7 @@ impl K {
     ///     );
     ///     let tail = q_symbol_list.remove_symbol(2).unwrap();
     ///     assert_eq!(tail, String::from("hazel"));
-    /// }
+    ///
     /// ```
     pub fn remove_symbol(&mut self, index: usize) -> Result<String> {
         if index >= self.len() {
@@ -4672,7 +4649,7 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_timestamp_list = K::new_timestamp_list(
     ///         vec![
     ///             Utc.ymd(2019, 8, 9).and_hms_nano(16, 28, 2, 468276775),
@@ -4682,7 +4659,7 @@ impl K {
     ///     );
     ///     let tail = q_timestamp_list.remove_timestamp(0).unwrap();
     ///     assert_eq!(tail, Utc.ymd(2019, 8, 9).and_hms_nano(16, 28, 2, 468276775));
-    /// }
+    ///
     /// ```
     pub fn remove_timestamp(&mut self, index: usize) -> Result<DateTime<Utc>> {
         if index >= self.len() {
@@ -4709,7 +4686,7 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_month_list = K::new_month_list(
     ///         vec![
     ///             NaiveDate::from_ymd_opt(2011, 5, 1).unwrap(),
@@ -4719,7 +4696,7 @@ impl K {
     ///     );
     ///     let tail = q_month_list.remove_month(0).unwrap();
     ///     assert_eq!(tail, NaiveDate::from_ymd_opt(2011, 5, 1).unwrap());
-    /// }
+    ///
     /// ```
     pub fn remove_month(&mut self, index: usize) -> Result<NaiveDate> {
         if index >= self.len() {
@@ -4746,7 +4723,7 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_date_list = K::new_date_list(
     ///         vec![
     ///             NaiveDate::from_ymd_opt(2021, 3, 19).unwrap(),
@@ -4757,7 +4734,7 @@ impl K {
     ///     );
     ///     let tail = q_date_list.remove_date(1).unwrap();
     ///     assert_eq!(tail, NaiveDate::from_ymd_opt(2004, 8, 1).unwrap());
-    /// }
+    ///
     /// ```
     pub fn remove_date(&mut self, index: usize) -> Result<NaiveDate> {
         if index >= self.len() {
@@ -4784,7 +4761,7 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_datetime_list = K::new_datetime_list(
     ///         vec![
     ///             Utc.ymd(2018, 9, 22).and_hms_milli(4, 58, 30, 204),
@@ -4794,7 +4771,7 @@ impl K {
     ///     );
     ///     let tail = q_datetime_list.remove_datetime(1).unwrap();
     ///     assert_eq!(tail, Utc.ymd(2003, 12, 9).and_hms_milli(19, 58, 30, 326));
-    /// }
+    ///
     /// ```
     pub fn remove_datetime(&mut self, index: usize) -> Result<DateTime<Utc>> {
         if index >= self.len() {
@@ -4821,7 +4798,7 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_timespan_list = K::new_timespan_list(
     ///         vec![
     ///             Duration::nanoseconds(6782392639932),
@@ -4831,7 +4808,7 @@ impl K {
     ///     );
     ///     let tail = q_timespan_list.remove_timespan(0).unwrap();
     ///     assert_eq!(tail, Duration::nanoseconds(6782392639932));
-    /// }
+    ///
     /// ```
     pub fn remove_timespan(&mut self, index: usize) -> Result<Duration> {
         if index >= self.len() {
@@ -4858,14 +4835,14 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
     ///
-    /// fn main() {
+    ///  
     ///     let mut q_minute_list = K::new_minute_list(
     ///         vec![Duration::minutes(1024), Duration::minutes(-503)],
     ///         qattribute::NONE,
     ///     );
     ///     let tail = q_minute_list.remove_minute(1).unwrap();
     ///     assert_eq!(tail, Duration::minutes(-503));
-    /// }
+    ///
     /// ```
     pub fn remove_minute(&mut self, index: usize) -> Result<Duration> {
         if index >= self.len() {
@@ -4892,14 +4869,14 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
     ///
-    /// fn main() {
+    ///
     ///     let mut q_second_list = K::new_second_list(
     ///         vec![Duration::seconds(-32467), Duration::seconds(73984)],
     ///         qattribute::NONE,
     ///     );
     ///     let tail = q_second_list.remove_second(0).unwrap();
     ///     assert_eq!(tail, Duration::seconds(-32467));
-    /// }
+    ///
     /// ```
     pub fn remove_second(&mut self, index: usize) -> Result<Duration> {
         if index >= self.len() {
@@ -4926,7 +4903,7 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
     ///
-    /// fn main() {
+    ///
     ///     let mut q_time_list = K::new_time_list(
     ///         vec![
     ///             Duration::milliseconds(902467),
@@ -4937,7 +4914,7 @@ impl K {
     ///     );
     ///     let tail = q_time_list.remove_time(2).unwrap();
     ///     assert_eq!(tail, Duration::milliseconds(278958528));
-    /// }
+    ///
     /// ```
     pub fn remove_time(&mut self, index: usize) -> Result<Duration> {
         if index >= self.len() {
@@ -4965,7 +4942,7 @@ impl K {
     /// use chrono::prelude::*;
     /// use chrono::Duration;
     ///
-    /// fn main() {
+    ///
     ///     let mut q_time_list = K::new_time_list(
     ///         vec![
     ///             Duration::milliseconds(902467),
@@ -4989,7 +4966,7 @@ impl K {
     ///     ]);
     ///     tail = q_compound_list.remove(0).unwrap();
     ///     assert_eq!(format!("{}", tail), String::from("`u#10000324 -43890"));
-    /// }
+    ///
     /// ```
     pub fn remove(&mut self, index: usize) -> Result<K> {
         if index >= self.len() {
@@ -5052,7 +5029,7 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
-    /// fn main() {
+    ///
     ///     let keys = K::new_int_list(vec![0, 1, 2], qattribute::NONE);
     ///     let values = K::new_date_list(
     ///         vec![
@@ -5071,7 +5048,7 @@ impl K {
     ///         format!("{}", q_dictionary),
     ///         String::from("0 1 2 3i!2000.01.09 2001.04.10 2015.03.16 2020.08.09")
     ///     );
-    /// }
+    ///
     /// ```
     pub fn push_pair(&mut self, key: &dyn Any, value: &dyn Any) -> Result<()> {
         match self.0.qtype {
@@ -5104,7 +5081,7 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
-    /// fn main() {
+    ///
     ///     let keys = K::new_int_list(vec![0, 1, 2], qattribute::NONE);
     ///     let values = K::new_date_list(
     ///         vec![
@@ -5121,7 +5098,7 @@ impl K {
     ///         format!("{}", q_dictionary),
     ///         String::from("0 1i!2000.01.09 2001.04.10")
     ///     );
-    /// }
+    ///
     /// ```
     pub fn pop_pair(&mut self) -> Result<(K, K)> {
         match self.0.qtype {
@@ -5154,7 +5131,6 @@ impl K {
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
-    /// fn main() {
     ///     let q_symbol_list = K::new_symbol_list(
     ///         vec![
     ///             String::from("almond"),
@@ -5176,8 +5152,8 @@ impl K {
     ///     );
     ///     let mut q_dictionary = K::new_dictionary(keys, values).unwrap();
     ///     assert_eq!(q_dictionary.len(), 3);
-    /// }
     /// ```
+    #[allow(clippy::len_without_is_empty)]
     pub fn len(&self) -> usize {
         match self.0.qtype {
             _t @ qtype::COMPOUND_LIST..=qtype::TIME_LIST => {
@@ -5244,33 +5220,31 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
-    ///     let q_dictionary = K::new_dictionary(
+    /// let q_dictionary = K::new_dictionary(
+    ///     K::new_symbol_list(
+    ///         vec![String::from("a"), String::from("b"), String::from("c")],
+    ///         qattribute::NONE,
+    ///     ),
+    ///     K::new_compound_list(vec![
+    ///         K::new_int_list(vec![10, 20, 30], qattribute::NONE),
     ///         K::new_symbol_list(
-    ///             vec![String::from("a"), String::from("b"), String::from("c")],
+    ///             vec![
+    ///                 String::from("honey"),
+    ///                 String::from("sugar"),
+    ///                 String::from("maple"),
+    ///             ],
     ///             qattribute::NONE,
     ///         ),
-    ///         K::new_compound_list(vec![
-    ///             K::new_int_list(vec![10, 20, 30], qattribute::NONE),
-    ///             K::new_symbol_list(
-    ///                 vec![
-    ///                     String::from("honey"),
-    ///                     String::from("sugar"),
-    ///                     String::from("maple"),
-    ///                 ],
-    ///                 qattribute::NONE,
-    ///             ),
-    ///             K::new_bool_list(vec![false, false, true], qattribute::NONE),
-    ///         ]),
-    ///     )
-    ///     .unwrap();
+    ///         K::new_bool_list(vec![false, false, true], qattribute::NONE),
+    ///     ]),
+    /// )
+    /// .unwrap();
     ///
-    ///     let q_table = q_dictionary.flip().unwrap();
-    ///     assert_eq!(
-    ///         format!("{}", q_table),
-    ///         String::from("+`a`b`c!(10 20 30i;`honey`sugar`maple;001b)")
-    ///     );
-    /// }
+    /// let q_table = q_dictionary.flip().unwrap();
+    /// assert_eq!(
+    ///     format!("{}", q_table),
+    ///     String::from("+`a`b`c!(10 20 30i;`honey`sugar`maple;001b)")
+    /// );
     /// ```
     pub fn flip(self) -> Result<Self> {
         match self.0.qtype {
@@ -5301,34 +5275,32 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
-    ///     let q_dictionary = K::new_dictionary(
-    ///         K::new_symbol_list(
-    ///             vec![String::from("a"), String::from("b"), String::from("c")],
+    /// let q_dictionary = K::new_dictionary(
+    ///     K::new_symbol_list(
+    ///         vec![String::from("a"), String::from("b"), String::from("c")],
+    ///         qattribute::NONE,
+    ///     ),
+    ///     K::new_compound_list(vec![
+    ///         K::new_int_list(vec![10, 20, 30], qattribute::NONE),
+    ///            K::new_symbol_list(
+    ///             vec![
+    ///                 String::from("honey"),
+    ///                 String::from("sugar"),
+    ///                 String::from("maple"),
+    ///             ],
     ///             qattribute::NONE,
     ///         ),
-    ///         K::new_compound_list(vec![
-    ///             K::new_int_list(vec![10, 20, 30], qattribute::NONE),
-    ///             K::new_symbol_list(
-    ///                 vec![
-    ///                     String::from("honey"),
-    ///                     String::from("sugar"),
-    ///                     String::from("maple"),
-    ///                 ],
-    ///                 qattribute::NONE,
-    ///             ),
-    ///             K::new_bool_list(vec![false, false, true], qattribute::NONE),
-    ///         ]),
-    ///     )
-    ///     .unwrap();
+    ///         K::new_bool_list(vec![false, false, true], qattribute::NONE),
+    ///     ]),
+    /// )
+    /// .unwrap();
     ///
-    ///     let q_table = q_dictionary.flip().unwrap();
-    ///     let q_keyed_table = q_table.enkey(1).unwrap();
-    ///     assert_eq!(
-    ///         format!("{}", q_keyed_table),
-    ///         String::from("(+,`a!,10 20 30i)!(+`b`c!(`honey`sugar`maple;001b))")
-    ///     );
-    /// }
+    /// let q_table = q_dictionary.flip().unwrap();
+    /// let q_keyed_table = q_table.enkey(1).unwrap();
+    /// assert_eq!(
+    ///     format!("{}", q_keyed_table),
+    ///     String::from("(+,`a!,10 20 30i)!(+`b`c!(`honey`sugar`maple;001b))")
+    /// );
     /// ```
     pub fn enkey(self, mut n: usize) -> Result<Self> {
         match self.0.value {
@@ -5365,39 +5337,37 @@ impl K {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main() {
-    ///     let q_dictionary = K::new_dictionary(
+    /// let q_dictionary = K::new_dictionary(
+    ///     K::new_symbol_list(
+    ///         vec![String::from("a"), String::from("b"), String::from("c")],
+    ///         qattribute::NONE,
+    ///     ),
+    ///     K::new_compound_list(vec![
+    ///         K::new_int_list(vec![10, 20, 30], qattribute::NONE),
     ///         K::new_symbol_list(
-    ///             vec![String::from("a"), String::from("b"), String::from("c")],
+    ///             vec![
+    ///                 String::from("honey"),
+    ///                 String::from("sugar"),
+    ///                 String::from("maple"),
+    ///             ],
     ///             qattribute::NONE,
     ///         ),
-    ///         K::new_compound_list(vec![
-    ///             K::new_int_list(vec![10, 20, 30], qattribute::NONE),
-    ///             K::new_symbol_list(
-    ///                 vec![
-    ///                     String::from("honey"),
-    ///                     String::from("sugar"),
-    ///                     String::from("maple"),
-    ///                 ],
-    ///                 qattribute::NONE,
-    ///             ),
-    ///             K::new_bool_list(vec![false, false, true], qattribute::NONE),
-    ///         ]),
-    ///     )
-    ///     .unwrap();
+    ///         K::new_bool_list(vec![false, false, true], qattribute::NONE),
+    ///     ]),
+    /// )
+    /// .unwrap();
     ///
-    ///     let q_table = q_dictionary.flip().unwrap();
-    ///     let q_keyed_table = q_table.enkey(1).unwrap();
-    ///     assert_eq!(
-    ///         format!("{}", q_keyed_table),
-    ///         String::from("(+,`a!,10 20 30i)!(+`b`c!(`honey`sugar`maple;001b))")
-    ///     );
-    ///     let revived_table = q_keyed_table.unkey().unwrap();
-    ///     assert_eq!(
-    ///         format!("{}", revived_table),
-    ///         String::from("+`a`b`c!(10 20 30i;`honey`sugar`maple;001b)")
-    ///     );
-    /// }
+    /// let q_table = q_dictionary.flip().unwrap();
+    /// let q_keyed_table = q_table.enkey(1).unwrap();
+    /// assert_eq!(
+    ///     format!("{}", q_keyed_table),
+    ///     String::from("(+,`a!,10 20 30i)!(+`b`c!(`honey`sugar`maple;001b))")
+    /// );
+    /// let revived_table = q_keyed_table.unkey().unwrap();
+    /// assert_eq!(
+    ///     format!("{}", revived_table),
+    ///     String::from("+`a`b`c!(10 20 30i;`honey`sugar`maple;001b)")
+    /// );
     /// ```
     pub fn unkey(mut self) -> Result<Self> {
         match self.0.qtype {

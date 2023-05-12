@@ -408,8 +408,8 @@ fn put_guid_list(list: &Vec<U>, stream: &mut String) {
         if size == 1 {
             stream.push(',');
         }
-        for i in 0..(size - 1) {
-            put_guid(list[i], stream);
+        for &item in list.iter().take(size - 1) {
+            put_guid(item, stream);
             stream.push(' ');
         }
         put_guid(list[size - 1], stream);
@@ -439,8 +439,8 @@ fn put_short_list(list: &Vec<H>, stream: &mut String) {
         if size == 1 {
             stream.push(',');
         }
-        for i in 0..(size - 1) {
-            put_short(list[i], stream);
+        for &item in list.iter().take(size - 1) {
+            put_short(item, stream);
             stream.push(' ');
         }
         put_short(list[size - 1], stream);
@@ -456,8 +456,8 @@ fn put_int_list(list: &Vec<I>, stream: &mut String) {
         if size == 1 {
             stream.push(',');
         }
-        for i in 0..(size - 1) {
-            put_int(list[i], stream);
+        for &item in list.iter().take(size - 1) {
+            put_int(item, stream);
             stream.push(' ');
         }
         put_int(list[size - 1], stream);
@@ -473,8 +473,8 @@ fn put_long_list(list: &Vec<J>, stream: &mut String) {
         if size == 1 {
             stream.push(',');
         }
-        for i in 0..(size - 1) {
-            put_long(list[i], stream);
+        for &item in list.iter().take(size - 1) {
+            put_long(item, stream);
             stream.push(' ');
         }
         put_long(list[size - 1], stream);
@@ -489,8 +489,8 @@ fn put_real_list(list: &Vec<E>, stream: &mut String, precision: usize) {
         if size == 1 {
             stream.push(',');
         }
-        for i in 0..(size - 1) {
-            put_real(list[i], stream, precision);
+        for &item in list.iter().take(size - 1) {
+            put_real(item, stream, precision);
             stream.push(' ');
         }
         put_real(list[size - 1], stream, precision);
@@ -506,8 +506,8 @@ fn put_float_list(list: &Vec<F>, stream: &mut String, precision: usize) {
         if size == 1 {
             stream.push(',');
         }
-        for i in 0..(size - 1) {
-            put_float(list[i], stream, precision);
+        for &item in list.iter().take(size - 1) {
+            put_float(item, stream, precision);
             stream.push(' ');
         }
         put_float(list[size - 1], stream, precision);
@@ -532,10 +532,9 @@ fn put_symbol_list(list: &Vec<S>, stream: &mut String) {
         if size == 1 {
             stream.push(',');
         }
-        for i in 0..(size - 1) {
-            put_symbol(&list[i], stream);
+        for item in list.iter() {
+            put_symbol(item, stream);
         }
-        put_symbol(&list[size - 1], stream);
     }
 }
 
@@ -547,8 +546,8 @@ fn put_timestamp_list(list: &Vec<J>, stream: &mut String) {
         if size == 1 {
             stream.push(',');
         }
-        for i in 0..(size - 1) {
-            put_timestamp(list[i], stream);
+        for &item in list.iter().take(size - 1) {
+            put_timestamp(item, stream);
             stream.push(' ');
         }
         if put_timestamp(list[size - 1], stream) {
@@ -565,8 +564,8 @@ fn put_month_list(list: &Vec<I>, stream: &mut String) {
         if size == 1 {
             stream.push(',');
         }
-        for i in 0..(size - 1) {
-            put_month(list[i], stream);
+        for &item in list.iter().take(size - 1) {
+            put_month(item, stream);
             stream.push(' ');
         }
         put_month(list[size - 1], stream);
@@ -582,8 +581,8 @@ fn put_date_list(list: &Vec<I>, stream: &mut String) {
         if size == 1 {
             stream.push(',');
         }
-        for i in 0..(size - 1) {
-            put_date(list[i], stream);
+        for &item in list.iter().take(size - 1) {
+            put_date(item, stream);
             stream.push(' ');
         }
         if put_date(list[size - 1], stream) {
@@ -600,8 +599,8 @@ fn put_datetime_list(list: &Vec<F>, stream: &mut String) {
         if size == 1 {
             stream.push(',');
         }
-        for i in 0..(size - 1) {
-            put_datetime(list[i], stream);
+        for &item in list.iter().take(size - 1) {
+            put_datetime(item, stream);
             stream.push(' ');
         }
         if put_datetime(list[size - 1], stream) {
@@ -618,8 +617,8 @@ fn put_timespan_list(list: &Vec<J>, stream: &mut String) {
         if size == 1 {
             stream.push(',');
         }
-        for i in 0..(size - 1) {
-            put_timespan(list[i], stream);
+        for &item in list.iter().take(size - 1) {
+            put_timespan(item, stream);
             stream.push(' ');
         }
         if put_timespan(list[size - 1], stream) {
@@ -636,8 +635,8 @@ fn put_minute_list(list: &Vec<I>, stream: &mut String) {
         if size == 1 {
             stream.push(',');
         }
-        for i in 0..(size - 1) {
-            put_minute(list[i], stream);
+        for &item in list.iter().take(size - 1) {
+            put_minute(item, stream);
             stream.push(' ');
         }
         if put_minute(list[size - 1], stream) {
@@ -654,8 +653,8 @@ fn put_second_list(list: &Vec<I>, stream: &mut String) {
         if size == 1 {
             stream.push(',');
         }
-        for i in 0..(size - 1) {
-            put_second(list[i], stream);
+        for &item in list.iter().take(size - 1) {
+            put_second(item, stream);
             stream.push(' ');
         }
         if put_second(list[size - 1], stream) {
@@ -672,8 +671,8 @@ fn put_time_list(list: &Vec<I>, stream: &mut String) {
         if size == 1 {
             stream.push(',');
         }
-        for i in 0..(size - 1) {
-            put_time(list[i], stream);
+        for &item in list.iter().take(size - 1) {
+            put_time(item, stream);
             stream.push(' ');
         }
         if put_time(list[size - 1], stream) {
@@ -691,8 +690,8 @@ fn put_compound_list(list: &Vec<K>, stream: &mut String, precision: usize) {
         put_q(&list[0], stream, precision);
     } else {
         stream.push('(');
-        for i in 0..(size - 1) {
-            put_q(&list[i], stream, precision);
+        for item in list.iter().take(size - 1) {
+            put_q(item, stream, precision);
             stream.push(';');
         }
         put_q(&list[size - 1], stream, precision);

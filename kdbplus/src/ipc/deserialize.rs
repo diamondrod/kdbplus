@@ -161,7 +161,7 @@ macro_rules! build_list {
 
 impl K {
     /// Deserialize bytes to q object in a manner of q function `-9!`.
-    pub(crate) async fn q_ipc_decode(bytes: &Vec<u8>, encode: u8) -> Self {
+    pub(crate) async fn q_ipc_decode(bytes: &[u8], encode: u8) -> Self {
         deserialize_bytes(bytes, 0, encode).await.0
     }
 }
@@ -171,7 +171,7 @@ impl K {
 //++++++++++++++++++++++++++++++++++++++++++++++++++//
 
 #[async_recursion]
-async fn deserialize_bytes(bytes: &Vec<u8>, cursor: usize, encode: u8) -> (K, usize) {
+async fn deserialize_bytes(bytes: &[u8], cursor: usize, encode: u8) -> (K, usize) {
     match bytes[cursor] as i8 {
         qtype::BOOL_ATOM => deserialize_bool(bytes, cursor + 1, encode),
         qtype::GUID_ATOM => deserialize_guid(bytes, cursor + 1, encode),
@@ -232,29 +232,29 @@ async fn deserialize_bytes(bytes: &Vec<u8>, cursor: usize, encode: u8) -> (K, us
     }
 }
 
-fn deserialize_bool(bytes: &Vec<u8>, cursor: usize, _: u8) -> (K, usize) {
+fn deserialize_bool(bytes: &[u8], cursor: usize, _: u8) -> (K, usize) {
     (K::new_bool(bytes[cursor] != 0), cursor + 1)
 }
 
-fn deserialize_guid(bytes: &Vec<u8>, cursor: usize, _: u8) -> (K, usize) {
+fn deserialize_guid(bytes: &[u8], cursor: usize, _: u8) -> (K, usize) {
     (
         K::new_guid(bytes[cursor..cursor + 16].try_into().unwrap()),
         cursor + 16,
     )
 }
 
-fn deserialize_byte(bytes: &Vec<u8>, cursor: usize, _: u8) -> (K, usize) {
+fn deserialize_byte(bytes: &[u8], cursor: usize, _: u8) -> (K, usize) {
     (K::new_byte(bytes[cursor]), cursor + 1)
 }
 
-fn deserialize_char(bytes: &Vec<u8>, cursor: usize, _: u8) -> (K, usize) {
+fn deserialize_char(bytes: &[u8], cursor: usize, _: u8) -> (K, usize) {
     (
         K::new(qtype::CHAR, qattribute::NONE, k0_inner::byte(bytes[cursor])),
         cursor + 1,
     )
 }
 
-fn deserialize_symbol(bytes: &Vec<u8>, cursor: usize, _: u8) -> (K, usize) {
+fn deserialize_symbol(bytes: &[u8], cursor: usize, _: u8) -> (K, usize) {
     let null_location = bytes
         .split_at(cursor)
         .1
@@ -267,7 +267,7 @@ fn deserialize_symbol(bytes: &Vec<u8>, cursor: usize, _: u8) -> (K, usize) {
 }
 
 /// Extract attribute and list length and then proceed the cursor.
-fn get_attribute_and_size(bytes: &Vec<u8>, cursor: usize, encode: u8) -> (i8, usize, usize) {
+fn get_attribute_and_size(bytes: &[u8], cursor: usize, encode: u8) -> (i8, usize, usize) {
     let size = match encode {
         0 => u32::from_be_bytes(bytes[cursor + 1..cursor + 5].try_into().unwrap()),
         _ => u32::from_le_bytes(bytes[cursor + 1..cursor + 5].try_into().unwrap()),
@@ -275,7 +275,7 @@ fn get_attribute_and_size(bytes: &Vec<u8>, cursor: usize, encode: u8) -> (i8, us
     (bytes[cursor] as i8, size as usize, cursor + 5)
 }
 
-fn deserialize_bool_list(bytes: &Vec<u8>, cursor: usize, encode: u8) -> (K, usize) {
+fn deserialize_bool_list(bytes: &[u8], cursor: usize, encode: u8) -> (K, usize) {
     let (attribute, size, cursor) = get_attribute_and_size(bytes, cursor, encode);
     let list = bytes[cursor..cursor + size].to_vec();
     (
@@ -288,7 +288,7 @@ fn deserialize_bool_list(bytes: &Vec<u8>, cursor: usize, encode: u8) -> (K, usiz
     )
 }
 
-async fn deserialize_guid_list(bytes: &Vec<u8>, cursor: usize, encode: u8) -> (K, usize) {
+async fn deserialize_guid_list(bytes: &[u8], cursor: usize, encode: u8) -> (K, usize) {
     let (attribute, size, cursor) = get_attribute_and_size(bytes, cursor, encode);
     let list = bytes[cursor..cursor + 16 * size]
         .chunks(16)
@@ -297,13 +297,13 @@ async fn deserialize_guid_list(bytes: &Vec<u8>, cursor: usize, encode: u8) -> (K
     (K::new_guid_list(list, attribute), cursor + 16 * size)
 }
 
-fn deserialize_byte_list(bytes: &Vec<u8>, cursor: usize, encode: u8) -> (K, usize) {
+fn deserialize_byte_list(bytes: &[u8], cursor: usize, encode: u8) -> (K, usize) {
     let (attribute, size, cursor) = get_attribute_and_size(bytes, cursor, encode);
     let list = bytes[cursor..cursor + size].to_vec();
     (K::new_byte_list(list, attribute), cursor + size)
 }
 
-fn deserialize_string(bytes: &Vec<u8>, cursor: usize, encode: u8) -> (K, usize) {
+fn deserialize_string(bytes: &[u8], cursor: usize, encode: u8) -> (K, usize) {
     let (attribute, size, cursor) = get_attribute_and_size(bytes, cursor, encode);
     (
         K::new_string(
@@ -314,7 +314,7 @@ fn deserialize_string(bytes: &Vec<u8>, cursor: usize, encode: u8) -> (K, usize) 
     )
 }
 
-async fn deserialize_symbol_list(bytes: &Vec<u8>, cursor: usize, encode: u8) -> (K, usize) {
+async fn deserialize_symbol_list(bytes: &[u8], cursor: usize, encode: u8) -> (K, usize) {
     let (attribute, size, mut cursor) = get_attribute_and_size(bytes, cursor, encode);
     let mut list = Vec::<String>::new();
     for _ in 0..size {
@@ -330,7 +330,7 @@ async fn deserialize_symbol_list(bytes: &Vec<u8>, cursor: usize, encode: u8) -> 
     (K::new_symbol_list(list, attribute), cursor)
 }
 
-async fn deserialize_compound_list(bytes: &Vec<u8>, cursor: usize, encode: u8) -> (K, usize) {
+async fn deserialize_compound_list(bytes: &[u8], cursor: usize, encode: u8) -> (K, usize) {
     let (_, size, cursor) = get_attribute_and_size(bytes, cursor, encode);
     let mut list = Vec::<K>::new();
     let mut cursor_ = cursor;
@@ -342,7 +342,7 @@ async fn deserialize_compound_list(bytes: &Vec<u8>, cursor: usize, encode: u8) -
     (K::new_compound_list(list), cursor_)
 }
 
-async fn deserialize_table(bytes: &Vec<u8>, cursor: usize, encode: u8) -> (K, usize) {
+async fn deserialize_table(bytes: &[u8], cursor: usize, encode: u8) -> (K, usize) {
     // Skip table attribute 0x00, dictionary indicator 99 and symbol list indicator 11
     let (headers, cursor) = deserialize_symbol_list(bytes, cursor + 3, encode).await;
     // Skip compound list indicator 0
@@ -355,7 +355,7 @@ async fn deserialize_table(bytes: &Vec<u8>, cursor: usize, encode: u8) -> (K, us
     )
 }
 
-async fn deserialize_dictionary(bytes: &Vec<u8>, cursor: usize, encode: u8) -> (K, usize) {
+async fn deserialize_dictionary(bytes: &[u8], cursor: usize, encode: u8) -> (K, usize) {
     let (keys, cursor) = deserialize_bytes(bytes, cursor, encode).await;
     let (values, cursor) = deserialize_bytes(bytes, cursor, encode).await;
     (
@@ -364,11 +364,11 @@ async fn deserialize_dictionary(bytes: &Vec<u8>, cursor: usize, encode: u8) -> (
     )
 }
 
-fn deserialize_null(_: &Vec<u8>, cursor: usize, _: u8) -> (K, usize) {
+fn deserialize_null(_: &[u8], cursor: usize, _: u8) -> (K, usize) {
     (K::new_null(), cursor + 1)
 }
 
-fn deserialize_error(bytes: &Vec<u8>, cursor: usize, _: u8) -> (K, usize) {
+fn deserialize_error(bytes: &[u8], cursor: usize, _: u8) -> (K, usize) {
     let null_location = bytes
         .split_at(cursor)
         .1
