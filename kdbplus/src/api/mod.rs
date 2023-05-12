@@ -274,6 +274,7 @@ pub type K = *mut k0;
 //%% KUtility %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 /// Trait which defines utility methods to manipulate q object.
+#[allow(clippy::len_without_is_empty)]
 pub trait KUtility {
     /// Derefer `K` as a mutable slice of the specified type. The supported types are:
     /// - `G`: Equivalent to C API macro `kG`.
@@ -313,6 +314,10 @@ pub trait KUtility {
     /// Intuitively the parameter should be `&mut self` but it restricts a manipulating
     ///  `K` objects in the form of slice simultaneously. As copying a pointer is not
     ///  an expensive operation, using `self` should be fine.
+    ///
+    /// # Safety
+    /// self must be a valid pointer to a `K` object.
+    #[allow(clippy::wrong_self_convention)]
     fn as_mut_slice<'a, T>(self) -> &'a mut [T];
 
     /// Get an underlying q byte.
@@ -714,7 +719,10 @@ pub trait KUtility {
     ///  this function does for intuitiveness. To append externally provided list (i.e., passed
     ///  from q process), apply [`increment_reference_count`](fn.increment_reference_count.html)
     ///  before appending the list.
-    fn append(&mut self, list: K) -> Result<K, &'static str>;
+    ///
+    /// # Safety
+    /// you need to track the reference count of the appended list to avoid double free.
+    unsafe fn append(&mut self, list: K) -> Result<K, &'static str>;
 
     /// Add a q object to a q compound list while the appended one is consumed.
     ///  Returns a pointer to the (potentially reallocated) `K` object.
@@ -747,8 +755,11 @@ pub trait KUtility {
     /// In this example we did not allocate an array as `new_list(qtype::COMPOUND_LIST, 0)` to use `push`.
     ///  As `new_list` initializes the internal list size `n` with its argument, preallocating memory with `new_list` and
     ///  then using `push` will crash. If you want to allocate a memory in advance, you can substitute a value
-    ///  after converting the q list object into a slice with [`as_mut_slice`](rait.KUtility.html#tymethod.as_mut_slice).
-    fn push(&mut self, atom: K) -> Result<K, &'static str>;
+    ///  after converting the q list object into a slice with [`as_mut_slice`](trait.KUtility.html#tymethod.as_mut_slice).
+    ///
+    /// # Safety
+    /// Using this after preallocating memory with `new_list` will crash.
+    unsafe fn push(&mut self, atom: K) -> Result<K, &'static str>;
 
     /// Add a raw value to a q simple list and returns a pointer to the (potentially reallocated) `K` object.
     /// # Example
@@ -941,15 +952,22 @@ impl U {
 unsafe impl Send for k0_inner {}
 unsafe impl Send for k0 {}
 
+/// # Safety
+/// input must be a valid pointer
+#[inline(always)]
+fn mut_slice_unsafe<'a, T>(input: K) -> &'a mut [T] {
+    unsafe {
+        std::slice::from_raw_parts_mut(
+            (*input).value.list.G0.as_mut_ptr() as *mut T,
+            (*input).value.list.n as usize,
+        )
+    }
+}
+
 impl KUtility for K {
     #[inline]
     fn as_mut_slice<'a, T>(self) -> &'a mut [T] {
-        unsafe {
-            std::slice::from_raw_parts_mut(
-                (*self).value.list.G0.as_mut_ptr() as *mut T,
-                (*self).value.list.n as usize,
-            )
-        }
+        mut_slice_unsafe(self)
     }
 
     fn get_row(&self, index: usize, enum_sources: &[&str]) -> Result<K, &'static str> {
@@ -965,8 +983,7 @@ impl KUtility for K {
                     let row = new_list(qtype::COMPOUND_LIST, num_columns);
                     let row_slice = row.as_mut_slice::<K>();
                     let mut enum_source_index = 0;
-                    let mut i = 0;
-                    for column in values.as_mut_slice::<K>() {
+                    for (i, column) in values.as_mut_slice::<K>().iter_mut().enumerate() {
                         match column.get_type() {
                             qtype::BOOL_LIST => {
                                 row_slice[i] = new_bool(column.as_mut_slice::<G>()[index] as i32);
@@ -1049,7 +1066,6 @@ impl KUtility for K {
                             // There are no other list type
                             _ => unreachable!(),
                         }
-                        i += 1;
                     }
                     Ok(new_dictionary(increment_reference_count(keys), row))
                 }
@@ -1181,7 +1197,7 @@ impl KUtility for K {
     fn get_error_string(&self) -> Result<&str, &'static str> {
         match unsafe { (**self).qtype } {
             qtype::ERROR => {
-                if unsafe { (**self).value.symbol } != std::ptr::null_mut::<C>() {
+                if !unsafe { (**self).value.symbol }.is_null() {
                     Ok(S_to_str(unsafe { (**self).value.symbol }))
                 } else {
                     Err("not an error\0")
@@ -1202,7 +1218,7 @@ impl KUtility for K {
     }
 
     #[inline]
-    fn append(&mut self, list: K) -> Result<K, &'static str> {
+    unsafe fn append(&mut self, list: K) -> Result<K, &'static str> {
         if unsafe { (**self).qtype } >= 0 && unsafe { (**self).qtype } == unsafe { (*list).qtype } {
             let result = Ok(unsafe { native::jv(self, list) });
             // Free appended list for internally created object.
@@ -1214,7 +1230,7 @@ impl KUtility for K {
     }
 
     #[inline]
-    fn push(&mut self, atom: K) -> Result<K, &'static str> {
+    unsafe fn push(&mut self, atom: K) -> Result<K, &'static str> {
         match unsafe { (**self).qtype } {
             qtype::COMPOUND_LIST => Ok(unsafe { native::jk(self, atom) }),
             _ => Err("not a list or types do not match\0"),
@@ -1380,8 +1396,17 @@ impl k0 {
 /// q)print_symbol a
 /// symbol: `kx
 /// ```
+///
+/// # Safety
+/// input must be a null terminated char array.
 #[inline]
 pub fn S_to_str<'a>(cstring: S) -> &'a str {
+    S_to_str_unsafe(cstring)
+}
+/// # Safety
+/// input must be a null terminated char array.
+#[inline(always)]
+fn S_to_str_unsafe<'a>(cstring: S) -> &'a str {
     unsafe { CStr::from_ptr(cstring).to_str().unwrap() }
 }
 
@@ -1964,8 +1989,17 @@ pub fn new_string_n(string: &str, length: J) -> K {
 /// 0| 2000.01.01 2000.01.02 2000.01.03
 /// 1| "I'm afraid I would crash the application..."
 /// ```
+///
+/// # Safety
+/// inputs must be valid pointers
 #[inline]
 pub fn new_dictionary(keys: K, values: K) -> K {
+    new_dictionary_unsafe(keys, values)
+}
+/// # Safety
+/// inputs must be valid pointers
+#[inline(always)]
+fn new_dictionary_unsafe(keys: K, values: K) -> K {
     unsafe { native::xD(keys, values) }
 }
 
@@ -2062,7 +2096,7 @@ pub fn new_error_os(message: &str) -> K {
 ///  If you want to propagate the error to q side after some operation, you can just return it (See the
 ///  example of [`is_error`](fn.is_error.html)).
 ///
-/// # Warning
+/// # Safety
 /// In q, an error is a 0 pointer. This causes a problem of false positive by `error_to_string`, i.e.,
 ///  `KNULL` is also catched as an error object and its type is set `qtype::ERROR`. In such a case you must NOT
 ///  return the catched object because it causes segmentation fault. If you want to check if the catched object
@@ -2070,6 +2104,12 @@ pub fn new_error_os(message: &str) -> K {
 ///  underlying error string of the catched object, you should use [`get_error_string`](trait.KUtility.html#tymethod.get_error_string).
 #[inline]
 pub fn error_to_string(error: K) -> K {
+    error_to_string_unsafe(error)
+}
+/// # Safety
+/// input must be a valid pointer
+#[inline(always)]
+fn error_to_string_unsafe(error: K) -> K {
     unsafe { native::ee(error) }
 }
 
@@ -2129,10 +2169,16 @@ pub fn error_to_string(error: K) -> K {
 /// In this example `KNULL` is used as a returned value of the function called by another function to demonstrate
 ///  how `is_error` works. However, `KNULL` should not be used in such a way in order to avoid this kind of complexity.
 ///  To return a general null for inner functions, use [`new_null`](fn.new_null.html) instead.
+///
+///  # Safety
+///  The input must be a valid pointer.
 #[inline]
 pub fn is_error(catched: K) -> bool {
-    (unsafe { (*catched).qtype } == qtype::ERROR)
-        && (unsafe { (*catched).value.symbol } != std::ptr::null_mut::<C>())
+    is_error_unsafe(catched)
+}
+/// # Safety unsure K is a valid pointer.
+fn is_error_unsafe(catched: K) -> bool {
+    (unsafe { *catched }).qtype == qtype::ERROR && !(unsafe { (*catched).value.symbol }).is_null()
 }
 
 //%% Symbol %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
@@ -2147,8 +2193,16 @@ pub fn is_error(catched: K) -> bool {
 ///  it as a q symbol type value. q/kdb+ is enumerating all symbol values to optimize comparison
 ///  or memory usage. On the other hand [`new_symbol`] does the enumeration internally and
 ///  therefore it does not need this function.
+/// # Safety
+/// The input must be a valid pointer.
 #[inline]
 pub fn enumerate_n(string: S, n: I) -> S {
+    enumerate_n_unsafe(string, n)
+}
+/// # Safety
+/// The input must be a valid pointer.
+#[inline(always)]
+fn enumerate_n_unsafe(string: S, n: I) -> S {
     unsafe { native::sn(string, n) }
 }
 
@@ -2162,8 +2216,16 @@ pub fn enumerate_n(string: S, n: I) -> S {
 ///  it as a q symbol type value. q/kdb+ is enumerating all symbol values to optimize comparison
 ///  or memory usage. On the other hand [`new_symbol`] does the enumeration internally and
 ///  therefore it does not need this function.
+/// # Safety
+/// The input must be a valid pointer.
 #[inline]
 pub fn enumerate(string: S) -> S {
+    enumerate_unsafe(string)
+}
+/// # Safety
+/// The input must be a valid pointer.
+#[inline(always)]
+fn enumerate_unsafe(string: S) -> S {
     unsafe { native::ss(string) }
 }
 
@@ -2208,8 +2270,16 @@ pub fn enumerate(string: S) -> S {
 /// 2006.05.24D06:16:49.419710368 24.7       
 /// 2008.08.12D23:12:24.018691392 30.5    
 /// ```
+/// # Safety
+/// The input must be a valid pointer.
 #[inline]
 pub fn flip(dictionary: K) -> K {
+    flip_unsafe(dictionary)
+}
+/// # Safety
+/// The input must be a valid pointer.
+#[inline(always)]
+fn flip_unsafe(dictionary: K) -> K {
     match unsafe { (*dictionary).qtype } {
         qtype::DICTIONARY => unsafe { native::xT(dictionary) },
         _ => unsafe { native::krr(null_terminated_str_to_const_S("not a dictionary\0")) },
@@ -2263,8 +2333,17 @@ pub fn flip(dictionary: K) -> K {
 /// 2006.05.24D06:16:49.419710368 24.7       
 /// 2008.08.12D23:12:24.018691392 30.5    
 /// ```
+///
+/// # Safety
+/// input must be a valid pointer
 #[inline]
 pub fn unkey(keyed_table: K) -> K {
+    unkey_unsafe(keyed_table)
+}
+/// # Safety
+/// input must be a valid pointer
+#[inline(always)]
+fn unkey_unsafe(keyed_table: K) -> K {
     match unsafe { (*keyed_table).qtype } {
         qtype::DICTIONARY => unsafe { native::ktd(keyed_table) },
         _ => unsafe { native::krr(null_terminated_str_to_const_S("not a keyed table\0")) },
@@ -2316,8 +2395,17 @@ pub fn unkey(keyed_table: K) -> K {
 /// 2006.05.24D06:16:49.419710368| 24.7       
 /// 2008.08.12D23:12:24.018691392| 30.5  
 /// ```
+///
+/// # Safety
+/// input must be a valid pointer
 #[inline]
 pub fn enkey(table: K, n: J) -> K {
+    enkey_unsafe(table, n)
+}
+/// # Safety
+/// input must be a valid pointer
+#[inline(always)]
+fn enkey_unsafe(table: K, n: J) -> K {
     match unsafe { (*table).qtype } {
         qtype::TABLE => unsafe { native::knt(n, table) },
         _ => unsafe { native::krr(null_terminated_str_to_const_S("not a table\0")) },
@@ -2348,8 +2436,17 @@ pub fn enkey(table: K, n: J) -> K {
 /// q)do_something[]
 /// q)
 /// ```
+///
+/// # Safety
+/// input must be a valid pointer
 #[inline]
 pub fn decrement_reference_count(qobject: K) -> V {
+    decrement_reference_count_unsafe(qobject)
+}
+/// # Safety
+/// input must be a valid pointer
+#[inline(always)]
+fn decrement_reference_count_unsafe(qobject: K) -> V {
     unsafe { native::r0(qobject) }
 }
 
@@ -2392,8 +2489,17 @@ pub fn decrement_reference_count(qobject: K) -> V {
 /// おいしい！
 /// "Collect the clutter of apples!"
 /// ```
+///
+/// # Safety
+/// input must be a valid pointer
 #[inline]
 pub fn increment_reference_count(qobject: K) -> K {
+    increment_reference_count_unsafe(qobject)
+}
+/// # Safety
+/// input must be a valid pointer
+#[inline(always)]
+fn increment_reference_count_unsafe(qobject: K) -> K {
     unsafe { native::r1(qobject) }
 }
 
@@ -2482,8 +2588,17 @@ pub fn register_callback(socket: I, function: extern "C" fn(I) -> K) -> K {
 /// Apply a function to q list object `.[func; args]`.
 /// # Example
 /// See the example of [`error_to_string`](fn.error_to_string.html).
+///
+/// # Safety
+/// inputs must be valid pointers
 #[inline]
 pub fn apply(func: K, args: K) -> K {
+    apply_unsafe(func, args)
+}
+/// # Safety
+/// inputs must be valid pointers
+#[inline(always)]
+fn apply_unsafe(func: K, args: K) -> K {
     unsafe { native::dot(func, args) }
 }
 
@@ -2603,8 +2718,17 @@ pub fn drop_q_object(obj: K) -> K {
 /// q)invade 1b
 /// "The planet earth is a beautiful planet where 7500000000 people reside. Furthermore water is flowing on the surface of it. You shall not curse what God blessed."
 /// ```
+///
+/// # Safety
+/// input `func` must be a valid pointer to a C function that takes `n` `K` objects as arguments and returns a `K` object.
 #[inline]
 pub fn load_as_q_function(func: *const V, n: J) -> K {
+    load_as_q_function_unsafe(func, n)
+}
+/// # Safety
+/// input must be a valid pointer
+#[inline(always)]
+fn load_as_q_function_unsafe(func: *const V, n: J) -> K {
     unsafe { native::dl(func, n) }
 }
 
@@ -2613,12 +2737,8 @@ pub fn load_as_q_function(func: *const V, n: J) -> K {
 /// ```no_run
 /// use kdbplus::api::*;
 ///
-/// fn main(){
-///
-///   let days=ymd_to_days(2020, 4, 1);
-///   assert_eq!(days, 7396);
-///
-/// }
+/// let days=ymd_to_days(2020, 4, 1);
+/// assert_eq!(days, 7396);
 /// ```
 #[inline]
 pub fn ymd_to_days(year: I, month: I, date: I) -> I {
@@ -2630,12 +2750,8 @@ pub fn ymd_to_days(year: I, month: I, date: I) -> I {
 /// ```no_run
 /// use kdbplus::api::*;
 ///
-/// fn main(){
-///
-///   let number=days_to_ymd(7396);
-///   assert_eq!(number, 20200401);
-///
-/// }
+/// let number=days_to_ymd(7396);
+/// assert_eq!(number, 20200401);
 /// ```
 #[inline]
 pub fn days_to_ymd(days: I) -> I {
