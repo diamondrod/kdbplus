@@ -3,6 +3,7 @@ name = "ipc_examples"
 version = "0.1.1"
 authors = ["diamondrod"]
 edition = "2021"
+publish = false
 description = """
 NOT A PACKAGE TO PUBLISH.
 
