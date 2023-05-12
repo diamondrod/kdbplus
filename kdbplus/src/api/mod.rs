@@ -932,7 +932,7 @@ pub trait KUtility {
 impl U {
     /// Create 16-byte GUID object.
     pub fn new(guid: [u8; 16]) -> Self {
-        U { guid: guid }
+        U { guid }
     }
 }
 
@@ -1296,7 +1296,8 @@ impl KUtility for K {
     fn set_attribute(&mut self, attribute: i8) -> Result<(), &'static str> {
         match unsafe { (**self).qtype } {
             _t @ qtype::BOOL_LIST..=qtype::TIME_LIST => {
-                Ok(unsafe { (**self).attribute = attribute })
+                unsafe { (**self).attribute = attribute };
+                Ok(())
             }
             _ => Err("not a simple list\0"),
         }

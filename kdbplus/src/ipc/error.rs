@@ -86,7 +86,7 @@ impl Error {
         Self::InvalidOperation {
             operator,
             operand_type: type_to_string(operand_type),
-            expected: expected.map(|type_id| type_to_string(type_id)),
+            expected: expected.map(type_to_string),
         }
     }
 

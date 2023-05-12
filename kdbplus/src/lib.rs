@@ -331,7 +331,7 @@ pub mod qnull_base {
     /// 1b
     /// `boolean$()
     /// ```
-    pub const S: &'static str = "";
+    pub const S: &str = "";
 }
 
 pub mod qinf_base {

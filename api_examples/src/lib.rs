@@ -729,7 +729,7 @@ pub extern "C" fn enable_counter(socket: K) -> K {
     unsafe {
         let result = sd1(socket.get_int().expect("oh no"), counter);
         if result.get_type() == qtype::NULL || result.get_type() == qtype::ERROR {
-            return krr(null_terminated_str_to_const_S("Failed to hook\0"));
+            krr(null_terminated_str_to_const_S("Failed to hook\0"))
         } else {
             KNULL
         }
@@ -1102,8 +1102,8 @@ impl Planet {
     fn new(name: &str, population: i64, water: bool) -> Self {
         Planet {
             name: name.to_string(),
-            population: population,
-            water: water,
+            population,
+            water,
         }
     }
 
@@ -1123,7 +1123,7 @@ impl Planet {
 /// Example of `set_type`.
 #[no_mangle]
 pub extern "C" fn eden(_: K) -> K {
-    let earth = Planet::new("earth", 7500_000_000, true);
+    let earth = Planet::new("earth", 7_500_000_000, true);
     let mut foreign = new_list(qtype::COMPOUND_LIST, 2);
     let foreign_slice = foreign.as_mut_slice::<K>();
     foreign_slice[0] = drop_q_object as K;

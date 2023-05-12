@@ -104,12 +104,10 @@ fn put_real(real: E, stream: &mut String, precision: usize) {
         stream.push_str("0W")
     } else if real == qninf_base::E {
         stream.push_str("-0W")
+    } else if precision != 0 {
+        stream.push_str(format!("{1:.*}", precision, real).as_str())
     } else {
-        if precision != 0 {
-            stream.push_str(format!("{1:.*}", precision, real).as_str())
-        } else {
-            stream.push_str(format!("{}", real).as_str())
-        }
+        stream.push_str(format!("{}", real).as_str())
     }
 }
 
@@ -120,12 +118,10 @@ fn put_float(float: F, stream: &mut String, precision: usize) {
         stream.push_str("-0w")
     } else if float.is_infinite() {
         stream.push_str("0w")
+    } else if precision != 0 {
+        stream.push_str(format!("{1:.*}", precision, float).as_str())
     } else {
-        if precision != 0 {
-            stream.push_str(format!("{1:.*}", precision, float).as_str())
-        } else {
-            stream.push_str(format!("{}", float).as_str())
-        }
+        stream.push_str(format!("{}", float).as_str())
     }
 }
 
@@ -243,7 +239,7 @@ fn put_timespan(nanos: J, stream: &mut String) -> bool {
                     duration.num_hours().abs() % 24,
                     duration.num_minutes().abs() % 60,
                     duration.num_seconds().abs() % 60,
-                    duration.num_nanoseconds().unwrap_or_else(|| 0).abs() % 1_000_000_000_i64
+                    duration.num_nanoseconds().unwrap_or(0).abs() % 1_000_000_000_i64
                 )
                 .as_str(),
             );
@@ -255,7 +251,7 @@ fn put_timespan(nanos: J, stream: &mut String) -> bool {
                     duration.num_hours() % 24,
                     duration.num_minutes() % 60,
                     duration.num_seconds() % 60,
-                    duration.num_nanoseconds().unwrap_or_else(|| 0) % 1_000_000_000_i64
+                    duration.num_nanoseconds().unwrap_or(0) % 1_000_000_000_i64
                 )
                 .as_str(),
             );
@@ -690,19 +686,17 @@ fn put_compound_list(list: &Vec<K>, stream: &mut String, precision: usize) {
     let size = list.len();
     if size == 0 {
         stream.push_str("()");
+    } else if size == 1 {
+        stream.push(',');
+        put_q(&list[0], stream, precision);
     } else {
-        if size == 1 {
-            stream.push(',');
-            put_q(&list[0], stream, precision);
-        } else {
-            stream.push('(');
-            for i in 0..(size - 1) {
-                put_q(&list[i], stream, precision);
-                stream.push(';');
-            }
-            put_q(&list[size - 1], stream, precision);
-            stream.push(')');
+        stream.push('(');
+        for i in 0..(size - 1) {
+            put_q(&list[i], stream, precision);
+            stream.push(';');
         }
+        put_q(&list[size - 1], stream, precision);
+        stream.push(')');
     }
 }
 

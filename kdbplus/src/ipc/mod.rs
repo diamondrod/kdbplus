@@ -1114,8 +1114,8 @@ impl K {
     /// Base constructor of `K`.
     pub(crate) fn new(qtype: i8, attribute: i8, inner: k0_inner) -> Self {
         K(Box::new(k0 {
-            qtype: qtype,
-            attribute: attribute,
+            qtype,
+            attribute,
             value: inner,
         }))
     }
@@ -1716,7 +1716,7 @@ impl K {
     pub fn new_timestamp_list(list: Vec<DateTime<Utc>>, attribute: i8) -> Self {
         let array = list
             .into_iter()
-            .map(|datetime| datetime_to_q_timestamp(datetime))
+            .map(datetime_to_q_timestamp)
             .collect::<Vec<J>>();
         K::new(
             qtype::TIMESTAMP_LIST,
@@ -1750,7 +1750,7 @@ impl K {
     pub fn new_month_list(list: Vec<NaiveDate>, attribute: i8) -> Self {
         let array = list
             .into_iter()
-            .map(|date| date_to_q_month(date))
+            .map(date_to_q_month)
             .collect::<Vec<I>>();
         K::new(
             qtype::MONTH_LIST,
@@ -1785,7 +1785,7 @@ impl K {
     pub fn new_date_list(list: Vec<NaiveDate>, attribute: i8) -> Self {
         let array = list
             .into_iter()
-            .map(|date| date_to_q_date(date))
+            .map(date_to_q_date)
             .collect::<Vec<I>>();
         K::new(
             qtype::DATE_LIST,
@@ -1823,7 +1823,7 @@ impl K {
     pub fn new_datetime_list(list: Vec<DateTime<Utc>>, attribute: i8) -> Self {
         let array = list
             .into_iter()
-            .map(|datetime| datetime_to_q_datetime(datetime))
+            .map(datetime_to_q_datetime)
             .collect::<Vec<F>>();
         K::new(
             qtype::DATETIME_LIST,
@@ -3074,7 +3074,8 @@ impl K {
             qtype::BOOL_LIST => {
                 if let Some(boolean) = element.downcast_ref::<bool>() {
                     self.increment();
-                    Ok(self.as_mut_vec::<G>().unwrap().push(*boolean as u8))
+                    self.as_mut_vec::<G>().unwrap().push(*boolean as u8);
+                    Ok(())
                 } else {
                     Err(Error::insert_wrong_element(false, qtype::BOOL_LIST, "bool"))
                 }
@@ -3082,7 +3083,8 @@ impl K {
             qtype::GUID_LIST => {
                 if let Some(guid) = element.downcast_ref::<U>() {
                     self.increment();
-                    Ok(self.as_mut_vec::<U>().unwrap().push(*guid))
+                    self.as_mut_vec::<U>().unwrap().push(*guid);
+                    Ok(())
                 } else {
                     Err(Error::insert_wrong_element(
                         false,
@@ -3094,7 +3096,8 @@ impl K {
             qtype::BYTE_LIST => {
                 if let Some(byte) = element.downcast_ref::<u8>() {
                     self.increment();
-                    Ok(self.as_mut_vec::<G>().unwrap().push(*byte))
+                    self.as_mut_vec::<G>().unwrap().push(*byte);
+                    Ok(())
                 } else {
                     Err(Error::insert_wrong_element(false, qtype::BYTE_LIST, "u8"))
                 }
@@ -3102,7 +3105,8 @@ impl K {
             qtype::SHORT_LIST => {
                 if let Some(short) = element.downcast_ref::<i16>() {
                     self.increment();
-                    Ok(self.as_mut_vec::<H>().unwrap().push(*short))
+                    self.as_mut_vec::<H>().unwrap().push(*short);
+                    Ok(())
                 } else {
                     Err(Error::insert_wrong_element(false, qtype::SHORT_LIST, "i16"))
                 }
@@ -3110,7 +3114,8 @@ impl K {
             qtype::INT_LIST => {
                 if let Some(int) = element.downcast_ref::<i32>() {
                     self.increment();
-                    Ok(self.as_mut_vec::<I>().unwrap().push(*int))
+                    self.as_mut_vec::<I>().unwrap().push(*int);
+                    Ok(())
                 } else {
                     Err(Error::insert_wrong_element(
                         false,
@@ -3122,7 +3127,8 @@ impl K {
             qtype::LONG_LIST => {
                 if let Some(long) = element.downcast_ref::<i64>() {
                     self.increment();
-                    Ok(self.as_mut_vec::<J>().unwrap().push(*long))
+                    self.as_mut_vec::<J>().unwrap().push(*long);
+                    Ok(())
                 } else {
                     Err(Error::insert_wrong_element(false, qtype::LONG_LIST, "i64"))
                 }
@@ -3130,7 +3136,8 @@ impl K {
             qtype::REAL_LIST => {
                 if let Some(real) = element.downcast_ref::<f32>() {
                     self.increment();
-                    Ok(self.as_mut_vec::<E>().unwrap().push(*real))
+                    self.as_mut_vec::<E>().unwrap().push(*real);
+                    Ok(())
                 } else {
                     Err(Error::insert_wrong_element(false, qtype::FLOAT_LIST, "f32"))
                 }
@@ -3138,14 +3145,16 @@ impl K {
             qtype::FLOAT_LIST => {
                 if let Some(float) = element.downcast_ref::<f64>() {
                     self.increment();
-                    Ok(self.as_mut_vec::<F>().unwrap().push(*float))
+                    self.as_mut_vec::<F>().unwrap().push(*float);
+                    Ok(())
                 } else {
                     Err(Error::insert_wrong_element(false, qtype::FLOAT_LIST, "f64"))
                 }
             }
             qtype::STRING => {
                 if let Some(ch) = element.downcast_ref::<char>() {
-                    Ok(self.as_mut_string().unwrap().push(*ch))
+                    self.as_mut_string().unwrap().push(*ch);
+                    Ok(())
                 } else {
                     Err(Error::insert_wrong_element(false, qtype::STRING, "char"))
                 }
@@ -3153,7 +3162,8 @@ impl K {
             qtype::SYMBOL_LIST => {
                 if let Some(symbol) = element.downcast_ref::<String>() {
                     self.increment();
-                    Ok(self.as_mut_vec::<S>().unwrap().push(symbol.clone()))
+                    self.as_mut_vec::<S>().unwrap().push(symbol.clone());
+                    Ok(())
                 } else {
                     Err(Error::insert_wrong_element(
                         false,
@@ -3165,10 +3175,11 @@ impl K {
             qtype::TIMESTAMP_LIST => {
                 if let Some(timestamp) = element.downcast_ref::<DateTime<Utc>>() {
                     self.increment();
-                    Ok(self
-                        .as_mut_vec::<J>()
-                        .unwrap()
-                        .push(datetime_to_q_timestamp(*timestamp)))
+                    self
+                    .as_mut_vec::<J>()
+                    .unwrap()
+                    .push(datetime_to_q_timestamp(*timestamp));
+                    Ok(())
                 } else {
                     Err(Error::insert_wrong_element(
                         false,
@@ -3180,10 +3191,11 @@ impl K {
             qtype::MONTH_LIST => {
                 if let Some(month) = element.downcast_ref::<NaiveDate>() {
                     self.increment();
-                    Ok(self
-                        .as_mut_vec::<I>()
-                        .unwrap()
-                        .push(date_to_q_month(*month)))
+                    self
+                    .as_mut_vec::<I>()
+                    .unwrap()
+                    .push(date_to_q_month(*month));
+                    Ok(())
                 } else {
                     Err(Error::insert_wrong_element(
                         false,
@@ -3195,7 +3207,8 @@ impl K {
             qtype::DATE_LIST => {
                 if let Some(date) = element.downcast_ref::<NaiveDate>() {
                     self.increment();
-                    Ok(self.as_mut_vec::<I>().unwrap().push(date_to_q_date(*date)))
+                    self.as_mut_vec::<I>().unwrap().push(date_to_q_date(*date));
+                    Ok(())
                 } else {
                     Err(Error::insert_wrong_element(
                         false,
@@ -3207,10 +3220,11 @@ impl K {
             qtype::DATETIME_LIST => {
                 if let Some(datetime) = element.downcast_ref::<DateTime<Utc>>() {
                     self.increment();
-                    Ok(self
-                        .as_mut_vec::<F>()
-                        .unwrap()
-                        .push(datetime_to_q_datetime(*datetime)))
+                    self
+                    .as_mut_vec::<F>()
+                    .unwrap()
+                    .push(datetime_to_q_datetime(*datetime));
+                    Ok(())
                 } else {
                     Err(Error::insert_wrong_element(
                         false,
@@ -3222,10 +3236,11 @@ impl K {
             qtype::TIMESPAN_LIST => {
                 if let Some(timespan) = element.downcast_ref::<Duration>() {
                     self.increment();
-                    Ok(self
-                        .as_mut_vec::<J>()
-                        .unwrap()
-                        .push(timespan.num_nanoseconds().expect("duration overflow")))
+                    self
+                    .as_mut_vec::<J>()
+                    .unwrap()
+                    .push(timespan.num_nanoseconds().expect("duration overflow"));
+                    Ok(())
                 } else {
                     Err(Error::insert_wrong_element(
                         false,
@@ -3237,10 +3252,11 @@ impl K {
             qtype::MINUTE_LIST => {
                 if let Some(minute) = element.downcast_ref::<Duration>() {
                     self.increment();
-                    Ok(self
-                        .as_mut_vec::<I>()
-                        .unwrap()
-                        .push(minute.num_minutes() as i32))
+                    self
+                    .as_mut_vec::<I>()
+                    .unwrap()
+                    .push(minute.num_minutes() as i32);
+                    Ok(())
                 } else {
                     Err(Error::insert_wrong_element(
                         false,
@@ -3252,10 +3268,11 @@ impl K {
             qtype::SECOND_LIST => {
                 if let Some(second) = element.downcast_ref::<Duration>() {
                     self.increment();
-                    Ok(self
-                        .as_mut_vec::<I>()
-                        .unwrap()
-                        .push(second.num_seconds() as i32))
+                    self
+                    .as_mut_vec::<I>()
+                    .unwrap()
+                    .push(second.num_seconds() as i32);
+                    Ok(())
                 } else {
                     Err(Error::insert_wrong_element(
                         false,
@@ -3267,10 +3284,11 @@ impl K {
             qtype::TIME_LIST => {
                 if let Some(time) = element.downcast_ref::<Duration>() {
                     self.increment();
-                    Ok(self
-                        .as_mut_vec::<I>()
-                        .unwrap()
-                        .push(time.num_milliseconds() as i32))
+                    self
+                    .as_mut_vec::<I>()
+                    .unwrap()
+                    .push(time.num_milliseconds() as i32);
+                    Ok(())
                 } else {
                     Err(Error::insert_wrong_element(
                         false,
@@ -3282,7 +3300,8 @@ impl K {
             qtype::COMPOUND_LIST => {
                 if let Some(k) = element.downcast_ref::<K>() {
                     self.increment();
-                    Ok(self.as_mut_vec::<K>().unwrap().push(k.clone()))
+                    self.as_mut_vec::<K>().unwrap().push(k.clone());
+                    Ok(())
                 } else {
                     Err(Error::insert_wrong_element(
                         false,
@@ -3332,10 +3351,11 @@ impl K {
                 qtype::BOOL_LIST => {
                     if let Some(boolean) = element.downcast_ref::<bool>() {
                         self.increment();
-                        Ok(self
-                            .as_mut_vec::<G>()
-                            .unwrap()
-                            .insert(index, *boolean as u8))
+                        self
+                        .as_mut_vec::<G>()
+                        .unwrap()
+                        .insert(index, *boolean as u8);
+                        Ok(())
                     } else {
                         Err(Error::insert_wrong_element(true, qtype::BOOL_LIST, "bool"))
                     }
@@ -3343,7 +3363,8 @@ impl K {
                 qtype::GUID_LIST => {
                     if let Some(guid) = element.downcast_ref::<U>() {
                         self.increment();
-                        Ok(self.as_mut_vec::<U>().unwrap().insert(index, *guid))
+                        self.as_mut_vec::<U>().unwrap().insert(index, *guid);
+                        Ok(())
                     } else {
                         Err(Error::insert_wrong_element(
                             true,
@@ -3355,7 +3376,8 @@ impl K {
                 qtype::BYTE_LIST => {
                     if let Some(byte) = element.downcast_ref::<u8>() {
                         self.increment();
-                        Ok(self.as_mut_vec::<G>().unwrap().insert(index, *byte))
+                        self.as_mut_vec::<G>().unwrap().insert(index, *byte);
+                        Ok(())
                     } else {
                         Err(Error::insert_wrong_element(true, qtype::BYTE_LIST, "u8"))
                     }
@@ -3363,7 +3385,8 @@ impl K {
                 qtype::SHORT_LIST => {
                     if let Some(short) = element.downcast_ref::<i16>() {
                         self.increment();
-                        Ok(self.as_mut_vec::<H>().unwrap().insert(index, *short))
+                        self.as_mut_vec::<H>().unwrap().insert(index, *short);
+                        Ok(())
                     } else {
                         Err(Error::insert_wrong_element(false, qtype::SHORT_LIST, "i16"))
                     }
@@ -3371,7 +3394,8 @@ impl K {
                 qtype::INT_LIST => {
                     if let Some(int) = element.downcast_ref::<i32>() {
                         self.increment();
-                        Ok(self.as_mut_vec::<I>().unwrap().insert(index, *int))
+                        self.as_mut_vec::<I>().unwrap().insert(index, *int);
+                        Ok(())
                     } else {
                         Err(Error::insert_wrong_element(false, qtype::INT_LIST, "i32"))
                     }
@@ -3379,7 +3403,8 @@ impl K {
                 qtype::LONG_LIST => {
                     if let Some(long) = element.downcast_ref::<i64>() {
                         self.increment();
-                        Ok(self.as_mut_vec::<J>().unwrap().insert(index, *long))
+                        self.as_mut_vec::<J>().unwrap().insert(index, *long);
+                        Ok(())
                     } else {
                         Err(Error::insert_wrong_element(false, qtype::LONG_LIST, "i64"))
                     }
@@ -3387,7 +3412,8 @@ impl K {
                 qtype::REAL_LIST => {
                     if let Some(real) = element.downcast_ref::<f32>() {
                         self.increment();
-                        Ok(self.as_mut_vec::<E>().unwrap().insert(index, *real))
+                        self.as_mut_vec::<E>().unwrap().insert(index, *real);
+                        Ok(())
                     } else {
                         Err(Error::insert_wrong_element(false, qtype::REAL_LIST, "f32"))
                     }
@@ -3395,14 +3421,16 @@ impl K {
                 qtype::FLOAT_LIST => {
                     if let Some(float) = element.downcast_ref::<f64>() {
                         self.increment();
-                        Ok(self.as_mut_vec::<F>().unwrap().insert(index, *float))
+                        self.as_mut_vec::<F>().unwrap().insert(index, *float);
+                        Ok(())
                     } else {
                         Err(Error::insert_wrong_element(false, qtype::FLOAT_LIST, "f64"))
                     }
                 }
                 qtype::STRING => {
                     if let Some(ch) = element.downcast_ref::<char>() {
-                        Ok(self.as_mut_string().unwrap().insert(index, *ch))
+                        self.as_mut_string().unwrap().insert(index, *ch);
+                        Ok(())
                     } else {
                         Err(Error::insert_wrong_element(false, qtype::STRING, "char"))
                     }
@@ -3410,10 +3438,11 @@ impl K {
                 qtype::SYMBOL_LIST => {
                     if let Some(symbol) = element.downcast_ref::<String>() {
                         self.increment();
-                        Ok(self
-                            .as_mut_vec::<S>()
-                            .unwrap()
-                            .insert(index, symbol.clone()))
+                        self
+                        .as_mut_vec::<S>()
+                        .unwrap()
+                        .insert(index, symbol.clone());
+                        Ok(())
                     } else {
                         Err(Error::insert_wrong_element(
                             false,
@@ -3425,10 +3454,11 @@ impl K {
                 qtype::TIMESTAMP_LIST => {
                     if let Some(timestamp) = element.downcast_ref::<DateTime<Utc>>() {
                         self.increment();
-                        Ok(self
-                            .as_mut_vec::<J>()
-                            .unwrap()
-                            .insert(index, datetime_to_q_timestamp(*timestamp)))
+                        self
+                        .as_mut_vec::<J>()
+                        .unwrap()
+                        .insert(index, datetime_to_q_timestamp(*timestamp));
+                        Ok(())
                     } else {
                         Err(Error::insert_wrong_element(
                             false,
@@ -3440,10 +3470,11 @@ impl K {
                 qtype::MONTH_LIST => {
                     if let Some(month) = element.downcast_ref::<NaiveDate>() {
                         self.increment();
-                        Ok(self
-                            .as_mut_vec::<I>()
-                            .unwrap()
-                            .insert(index, date_to_q_month(*month)))
+                        self
+                        .as_mut_vec::<I>()
+                        .unwrap()
+                        .insert(index, date_to_q_month(*month));
+                        Ok(())
                     } else {
                         Err(Error::insert_wrong_element(
                             false,
@@ -3455,10 +3486,11 @@ impl K {
                 qtype::DATE_LIST => {
                     if let Some(date) = element.downcast_ref::<NaiveDate>() {
                         self.increment();
-                        Ok(self
-                            .as_mut_vec::<I>()
-                            .unwrap()
-                            .insert(index, date_to_q_date(*date)))
+                        self
+                        .as_mut_vec::<I>()
+                        .unwrap()
+                        .insert(index, date_to_q_date(*date));
+                        Ok(())
                     } else {
                         Err(Error::insert_wrong_element(
                             false,
@@ -3470,10 +3502,11 @@ impl K {
                 qtype::DATETIME_LIST => {
                     if let Some(datetime) = element.downcast_ref::<DateTime<Utc>>() {
                         self.increment();
-                        Ok(self
-                            .as_mut_vec::<F>()
-                            .unwrap()
-                            .insert(index, datetime_to_q_datetime(*datetime)))
+                        self
+                        .as_mut_vec::<F>()
+                        .unwrap()
+                        .insert(index, datetime_to_q_datetime(*datetime));
+                        Ok(())
                     } else {
                         Err(Error::insert_wrong_element(
                             false,
@@ -3485,10 +3518,11 @@ impl K {
                 qtype::TIMESPAN_LIST => {
                     if let Some(timespan) = element.downcast_ref::<Duration>() {
                         self.increment();
-                        Ok(self.as_mut_vec::<J>().unwrap().insert(
+                        self.as_mut_vec::<J>().unwrap().insert(
                             index,
                             timespan.num_nanoseconds().expect("duration overflow"),
-                        ))
+                        );
+                        Ok(())
                     } else {
                         Err(Error::insert_wrong_element(
                             false,
@@ -3500,10 +3534,11 @@ impl K {
                 qtype::MINUTE_LIST => {
                     if let Some(minute) = element.downcast_ref::<Duration>() {
                         self.increment();
-                        Ok(self
-                            .as_mut_vec::<I>()
-                            .unwrap()
-                            .insert(index, minute.num_minutes() as i32))
+                        self
+                        .as_mut_vec::<I>()
+                        .unwrap()
+                        .insert(index, minute.num_minutes() as i32);
+                        Ok(())
                     } else {
                         Err(Error::insert_wrong_element(
                             false,
@@ -3515,10 +3550,11 @@ impl K {
                 qtype::SECOND_LIST => {
                     if let Some(second) = element.downcast_ref::<Duration>() {
                         self.increment();
-                        Ok(self
-                            .as_mut_vec::<I>()
-                            .unwrap()
-                            .insert(index, second.num_seconds() as i32))
+                        self
+                        .as_mut_vec::<I>()
+                        .unwrap()
+                        .insert(index, second.num_seconds() as i32);
+                        Ok(())
                     } else {
                         Err(Error::insert_wrong_element(
                             false,
@@ -3530,10 +3566,11 @@ impl K {
                 qtype::TIME_LIST => {
                     if let Some(time) = element.downcast_ref::<Duration>() {
                         self.increment();
-                        Ok(self
-                            .as_mut_vec::<I>()
-                            .unwrap()
-                            .insert(index, time.num_milliseconds() as i32))
+                        self
+                        .as_mut_vec::<I>()
+                        .unwrap()
+                        .insert(index, time.num_milliseconds() as i32);
+                        Ok(())
                     } else {
                         Err(Error::insert_wrong_element(
                             false,
@@ -3545,7 +3582,8 @@ impl K {
                 qtype::COMPOUND_LIST => {
                     if let Some(k) = element.downcast_ref::<K>() {
                         self.increment();
-                        Ok(self.as_mut_vec::<K>().unwrap().insert(index, k.clone()))
+                        self.as_mut_vec::<K>().unwrap().insert(index, k.clone());
+                        Ok(())
                     } else {
                         Err(Error::insert_wrong_element(
                             false,
@@ -5237,7 +5275,7 @@ impl K {
     pub fn flip(self) -> Result<Self> {
         match self.0.qtype {
             qtype::DICTIONARY | qtype::SORTED_DICTIONARY => {
-                let keys_values = (&self).as_vec::<K>().unwrap();
+                let keys_values = self.as_vec::<K>().unwrap();
                 if keys_values[0].0.qtype == qtype::SYMBOL_LIST
                     && keys_values[1].0.qtype == qtype::COMPOUND_LIST
                 {
@@ -5376,8 +5414,8 @@ impl K {
                         key_dictionary
                             .as_mut_vec::<K>()
                             .unwrap()
-                            .into_iter()
-                            .zip(value_dictionary.as_mut_vec::<K>().unwrap().into_iter())
+                            .iter_mut()
+                            .zip(value_dictionary.as_mut_vec::<K>().unwrap().iter_mut())
                             .enumerate()
                             .for_each(|(i, (key, value))| {
                                 // Merge key component and value component
@@ -5561,11 +5599,11 @@ pub(crate) fn q_datetime_to_datetime(days: f64) -> DateTime<Utc> {
 
     if days.is_nan() {
         qnull::DATETIME
-    } else if days <= -96476615 as f64 {
+    } else if days <= -96476615_f64 {
         // Consider pulling datetime value from q, not only reverse Rust->q.
         // DateTime::signed_duration_since(chrono::MIN_DATETIME, Utc.ymd(2000,1,1).and_hms_nano(0, 0, 0, 0)).num_days())
         *qninf::DATETIME
-    } else if days >= 95015644 as f64 {
+    } else if days >= 95015644_f64 {
         // Consider pulling datetime value from q, not only reverse Rust->q.
         // DateTime::signed_duration_since(chrono::MAX_DATETIME, Utc.ymd(2000,1,1).and_hms_nano(0, 0, 0, 0)).num_days())
         *qinf::DATETIME

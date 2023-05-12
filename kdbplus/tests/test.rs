@@ -739,7 +739,7 @@ fn getter_test() -> Result<()> {
     // char
     let q_char = K::new_char('C');
     assert_eq!(q_char.get_char(), Ok('C'));
-    assert_eq!(q_char.get_byte(), Ok('C' as u8));
+    assert_eq!(q_char.get_byte(), Ok(b'C'));
     assert_eq!(
         q_char.get_float(),
         Err(Error::InvalidCast {
@@ -1043,7 +1043,7 @@ fn getter_test() -> Result<()> {
     ]);
     let q_dictionary = K::new_dictionary(headers, columns).unwrap();
     assert_eq!(q_dictionary.get_type(), qtype::DICTIONARY);
-    let q_table = q_dictionary.clone().flip().unwrap();
+    let q_table = q_dictionary.flip().unwrap();
     match q_table.get_dictionary() {
         Ok(dictionary) => assert_eq!(dictionary.get_type(), qtype::DICTIONARY),
         Err(_) => assert!(false),
@@ -1460,14 +1460,14 @@ fn push_pop_test() -> Result<()> {
     q_bool_list.insert(1, &false).unwrap();
     assert_eq!(*q_bool_list.as_vec::<G>().unwrap(), vec![0_u8, 0, 1]);
     let mut tail_bool = q_bool_list.pop_bool().unwrap();
-    assert_eq!(tail_bool, true);
+    assert!(tail_bool);
     let mut tail = q_bool_list.pop().unwrap();
-    assert_eq!(tail.get_bool().unwrap(), false);
+    assert!(!tail.get_bool().unwrap());
     tail_bool = q_bool_list.remove_bool(0).unwrap();
-    assert_eq!(tail_bool, false);
+    assert!(!tail_bool);
     q_bool_list.push(&true).unwrap();
     tail = q_bool_list.remove(0).unwrap();
-    assert_eq!(tail.get_bool().unwrap(), true);
+    assert!(tail.get_bool().unwrap());
 
     // guid list
     let mut q_guid_list = K::new_guid_list(
@@ -2056,7 +2056,7 @@ async fn functional_message_test(socket: &mut Qsocket) -> Result<()> {
     let mut res_bool = socket
         .send_sync_message(&add_null!(K::new_bool(true)))
         .await?;
-    assert_eq!(res_bool.get_bool()?, true);
+    assert!(res_bool.get_bool()?);
 
     // GUID
     let mut res_guid = socket
@@ -2555,12 +2555,12 @@ async fn functional_message_test(socket: &mut Qsocket) -> Result<()> {
     // real list
     res_real = socket
         .send_sync_message(&add_null!(K::new_real_list(
-            vec![-1.25_f32, 100.23, 3000.5639],
+            vec![-1.25_f32, 100.23, 3_000.564],
             qattribute::SORTED
         )))
         .await?;
     assert_eq!(res_real.get_attribute(), qattribute::SORTED);
-    assert_eq!(*res_real.as_vec::<E>()?, vec![-1.25, 100.23, 3000.5639]);
+    assert_eq!(*res_real.as_vec::<E>()?, vec![-1.25, 100.23, 3_000.564]);
 
     // float list
     res_float = socket
@@ -2846,7 +2846,7 @@ async fn compression_test() -> Result<()> {
     // Prepare q table which will NOT be compressed
     let mut time_vec = vec![Utc.timestamp_nanos(KDB_TIMESTAMP_OFFSET); 1000];
     for i in 0..1000 {
-        time_vec[i] = time_vec[i] + Duration::nanoseconds(ONE_DAY_NANOS * i as i64);
+        time_vec[i] += Duration::nanoseconds(ONE_DAY_NANOS * i as i64);
     }
 
     let columns = K::new_compound_list(vec![
@@ -2878,7 +2878,7 @@ async fn compression_test() -> Result<()> {
 
     // Compare with `tab` sent before `tab2`
     let mut res_compare = socket.send_sync_message(&"tab ~ tab2").await?;
-    assert_eq!(res_compare.get_bool()?, true);
+    assert!(res_compare.get_bool()?);
 
     // compressed message //-----------------------------/
 
@@ -2904,7 +2904,7 @@ async fn compression_test() -> Result<()> {
     socket.send_async_message(&table_query).await?;
 
     res_compare = socket.send_sync_message(&"tab ~ tab2").await?;
-    assert_eq!(res_compare.get_bool()?, true);
+    assert!(res_compare.get_bool()?);
 
     // compressed message (forced) //--------------------/
 
@@ -2913,7 +2913,7 @@ async fn compression_test() -> Result<()> {
     socket.send_async_message(&table_query).await?;
 
     res_compare = socket.send_sync_message(&"tab ~ tab2").await?;
-    assert_eq!(res_compare.get_bool()?, true);
+    assert!(res_compare.get_bool()?);
 
     Ok(())
 }

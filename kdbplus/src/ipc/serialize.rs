@@ -338,7 +338,7 @@ fn serialize_string(list: &K, stream: &mut Vec<u8>) {
         _ => (vector.len() as u32).to_le_bytes(),
     });
     // Data
-    stream.extend_from_slice(&vector);
+    stream.extend_from_slice(vector);
 }
 
 fn serialize_symbol_list(list: &K, stream: &mut Vec<u8>) {
@@ -355,7 +355,7 @@ fn serialize_symbol_list(list: &K, stream: &mut Vec<u8>) {
     });
     // Data
     vector.iter().for_each(|element| {
-        stream.extend_from_slice(&element.as_bytes());
+        stream.extend_from_slice(element.as_bytes());
         stream.push(0x00);
     });
 }

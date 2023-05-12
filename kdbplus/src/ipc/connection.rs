@@ -326,7 +326,7 @@ impl Query for K {
         if message_length > 1992 && !is_local {
             // encode, message type, 0x00 for compression, 0x00 for reserved and 0x00000000 for total size
             let mut message = Vec::with_capacity(message_length + 8);
-            message.extend_from_slice(&[ENCODING, message_type as u8, 0, 0, 0, 0, 0, 0]);
+            message.extend_from_slice(&[ENCODING, message_type, 0, 0, 0, 0, 0, 0]);
             message.append(&mut byte_message);
             // Try to encode entire message.
             match compress(message).await {
@@ -344,7 +344,7 @@ impl Query for K {
         } else {
             // encode, message type, 0x00 for compression and 0x00 for reserved
             let mut message = Vec::with_capacity(message_length + MessageHeader::size());
-            message.extend_from_slice(&[ENCODING, message_type as u8, 0, 0]);
+            message.extend_from_slice(&[ENCODING, message_type, 0, 0]);
             // Total length of body
             message.extend_from_slice(&total_length_bytes);
             message.append(&mut byte_message);
@@ -364,8 +364,8 @@ impl QStream {
         is_local: bool,
     ) -> Self {
         QStream {
-            stream: stream,
-            method: method,
+            stream,
+            method,
             listener: is_listener,
             local: is_local,
         }
@@ -554,7 +554,7 @@ impl QStream {
                 }
                 // TLS is always a remote connection
                 let mut qstream = QStream::new(
-                    Box::new(TlsStream::from(tls_socket)),
+                    Box::new(tls_socket),
                     ConnectionMethod::TCP,
                     true,
                     false,
@@ -572,7 +572,7 @@ impl QStream {
                 let abstract_sockfile_ = format!("\x00{}", uds_path);
                 let abstract_sockfile = Path::new(&abstract_sockfile_);
                 // Bind to the file
-                let listener = UnixListener::bind(&abstract_sockfile).unwrap();
+                let listener = UnixListener::bind(abstract_sockfile).unwrap();
                 // Listen to the endpoint
                 let (mut socket, _) = listener.accept().await?;
                 // Read untill null bytes and send back capacity.
@@ -721,7 +721,6 @@ impl QStreamInner for TlsStream<TcpStream> {
             // No reason to compress.
             self.send_async_message(&".kdbplus.close_tls_connection_[]", false)
                 .await
-                .into()
         } else {
             self.get_mut().shutdown()?;
             Ok(())
@@ -829,11 +828,11 @@ impl MessageHeader {
     /// Constructor.
     fn new(encoding: u8, message_type: u8, compressed: u8, length: u32) -> Self {
         MessageHeader {
-            encoding: encoding,
-            message_type: message_type,
-            compressed: compressed,
+            encoding,
+            message_type,
+            compressed,
             _unused: 0,
-            length: length,
+            length,
         }
     }
 
@@ -1070,23 +1069,23 @@ async fn build_identity_from_cert() -> Result<Identity> {
             reader.read_to_end(&mut der).await?;
             // Create identity.
             if let Ok(identity) = Identity::from_pkcs12(&der, &password) {
-                return Ok(identity);
+                Ok(identity)
             } else {
-                return Err(
+                Err(
                     io::Error::new(io::ErrorKind::InvalidData, "authentication failed").into(),
-                );
+                )
             }
         } else {
-            return Err(io::Error::new(
+            Err(io::Error::new(
                 io::ErrorKind::NotFound,
                 "KDBPLUS_TLS_KEY_FILE_SECRET is not set",
             )
-            .into());
+            .into())
         }
     } else {
-        return Err(
+        Err(
             io::Error::new(io::ErrorKind::NotFound, "KDBPLUS_TLS_KEY_FILE is not set").into(),
-        );
+        )
     }
 }
 
@@ -1285,12 +1284,12 @@ async fn decompress(compressed: Vec<u8>, encoding: u8) -> Vec<u8> {
     let mut aa = [0_i32; 256];
     while s < decompressed.len() {
         if i == 0 {
-            f = (0xff & compressed[d]) as usize;
+            f = compressed[d] as usize;
             d += 1;
             i = 1;
         }
         if (f & i) != 0 {
-            r = aa[(0xff & compressed[d]) as usize] as usize;
+            r = aa[compressed[d] as usize] as usize;
             d += 1;
             decompressed[s] = decompressed[r];
             s += 1;
@@ -1298,7 +1297,7 @@ async fn decompress(compressed: Vec<u8>, encoding: u8) -> Vec<u8> {
             decompressed[s] = decompressed[r];
             s += 1;
             r += 1;
-            n = (0xff & compressed[d]) as usize;
+            n = compressed[d] as usize;
             d += 1;
             for m in 0..n {
                 decompressed[s + m] = decompressed[r + m];
@@ -1309,7 +1308,7 @@ async fn decompress(compressed: Vec<u8>, encoding: u8) -> Vec<u8> {
             d += 1;
         }
         while p < s - 1 {
-            aa[((0xff & decompressed[p]) ^ (0xff & decompressed[p + 1])) as usize] = p as i32;
+            aa[(decompressed[p] ^ decompressed[p + 1]) as usize] = p as i32;
             p += 1;
         }
         if (f & i) != 0 {
