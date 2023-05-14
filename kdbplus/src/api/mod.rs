@@ -722,7 +722,7 @@ pub trait KUtility {
     ///
     /// # Safety
     /// you need to track the reference count of the appended list to avoid double free.
-    fn append(&mut self, list: K) -> Result<K, &'static str>;
+    unsafe fn append(&mut self, list: K) -> Result<K, &'static str>;
 
     /// Add a q object to a q compound list while the appended one is consumed.
     ///  Returns a pointer to the (potentially reallocated) `K` object.
@@ -759,7 +759,7 @@ pub trait KUtility {
     ///
     /// # Safety
     /// Using this after preallocating memory with `new_list` will crash.
-    fn push(&mut self, atom: K) -> Result<K, &'static str>;
+    unsafe fn push(&mut self, atom: K) -> Result<K, &'static str>;
 
     /// Add a raw value to a q simple list and returns a pointer to the (potentially reallocated) `K` object.
     /// # Example
@@ -1218,7 +1218,7 @@ impl KUtility for K {
     }
 
     #[inline]
-    fn append(&mut self, list: K) -> Result<K, &'static str> {
+    unsafe fn append(&mut self, list: K) -> Result<K, &'static str> {
         if unsafe { (**self).qtype } >= 0 && unsafe { (**self).qtype } == unsafe { (*list).qtype } {
             let result = Ok(unsafe { native::jv(self, list) });
             // Free appended list for internally created object.
@@ -1230,7 +1230,7 @@ impl KUtility for K {
     }
 
     #[inline]
-    fn push(&mut self, atom: K) -> Result<K, &'static str> {
+    unsafe fn push(&mut self, atom: K) -> Result<K, &'static str> {
         match unsafe { (**self).qtype } {
             qtype::COMPOUND_LIST => Ok(unsafe { native::jk(self, atom) }),
             _ => Err("not a list or types do not match\0"),

@@ -114,8 +114,10 @@ pub extern "C" fn pingpong(_: K) -> K {
 }
 
 /// Example of `null_terminated_str_to_const_S`.
+/// # Safety
+/// unsafe because it dereferences a raw pointer.
 #[no_mangle]
-pub extern "C" fn must_be_int(obj: K) -> K {
+pub unsafe extern "C" fn must_be_int(obj: K) -> K {
     unsafe {
         if (*obj).qtype != qtype::INT_ATOM {
             krr(null_terminated_str_to_const_S("not an int\0"))
@@ -317,9 +319,11 @@ pub extern "C" fn pick_row(object: K, index: K) -> K {
 }
 
 /// Example of `append`.
+/// # Safety
+/// unsafe because of `append`.
 #[no_mangle]
-pub extern "C" fn concat_list2(mut list1: K, list2: K) -> K {
-    if let Err(err) = list1.append(increment_reference_count(list2)) {
+pub unsafe extern "C" fn concat_list2(mut list1: K, list2: K) -> K {
+    if let Err(err) = unsafe { list1.append(increment_reference_count(list2)) } {
         new_error(err)
     } else {
         increment_reference_count(list1)
@@ -331,9 +335,9 @@ pub extern "C" fn concat_list2(mut list1: K, list2: K) -> K {
 pub extern "C" fn create_compound_list2(int: K) -> K {
     let mut list = new_list(qtype::COMPOUND_LIST, 0);
     for i in 0..5 {
-        list.push(new_long(i)).unwrap();
+        unsafe { list.push(new_long(i)).unwrap() };
     }
-    list.push(increment_reference_count(int)).unwrap();
+    unsafe { list.push(increment_reference_count(int)).unwrap() };
     list
 }
 
@@ -605,8 +609,10 @@ pub extern "C" fn create_simple_list(_: K) -> K {
 }
 
 /// Example of `jv`.
+/// # Safety
+/// `list1` and `list2` must be valid K lists.
 #[no_mangle]
-pub extern "C" fn concat_list(mut list1: K, list2: K) -> K {
+pub unsafe extern "C" fn concat_list(mut list1: K, list2: K) -> K {
     unsafe {
         jv(&mut list1, list2);
         r1(list1)
@@ -642,8 +648,10 @@ pub extern "C" fn create_compound_list(_: K) -> K {
 }
 
 /// Example of `ee`.
+/// # Safety
+/// This function is unsafe because it dereferences raw pointers.
 #[no_mangle]
-pub extern "C" fn catchy(func: K, args: K) -> K {
+pub unsafe extern "C" fn catchy(func: K, args: K) -> K {
     unsafe {
         let result = ee(dot(func, args));
         if (*result).qtype == qtype::ERROR {
@@ -681,14 +689,18 @@ pub extern "C" fn dictionary_list_to_table() -> K {
 }
 
 /// Example of `b9`.
+/// # Safety
+/// unsafe because of `b9`.
 #[no_mangle]
-pub extern "C" fn conceal(object: K) -> K {
+pub unsafe extern "C" fn conceal(object: K) -> K {
     unsafe { b9(3, object) }
 }
 
 /// Example of `d9`.
+/// # Safety
+/// unsafe because of `d9`.
 #[no_mangle]
-pub extern "C" fn reveal(bytes: K) -> K {
+pub unsafe extern "C" fn reveal(bytes: K) -> K {
     unsafe { d9(bytes) }
 }
 
@@ -754,8 +766,10 @@ pub extern "C" fn idle_man(_: K) -> K {
 }
 
 /// Example of `r1`.
+/// # Safety
+/// unsafe because `r1` is unsafe (dereferences null pointer).
 #[no_mangle]
-pub extern "C" fn pass_through_cave(pedestrian: K) -> K {
+pub unsafe extern "C" fn pass_through_cave(pedestrian: K) -> K {
     unsafe {
         let item = k(0, str_to_S!("get_item1"), r1(pedestrian), KNULL);
         println!(
@@ -778,14 +792,18 @@ pub extern "C" fn pass_through_cave(pedestrian: K) -> K {
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 
 /// Example of `dot`.
+/// # Safety
+/// unsafe because `dot` is unsafe.
 #[no_mangle]
-pub extern "C" fn rust_parse(dollar: K, type_and_text: K) -> K {
+pub unsafe extern "C" fn rust_parse(dollar: K, type_and_text: K) -> K {
     unsafe { dot(dollar, type_and_text) }
 }
 
 /// Example of `setm`.
+/// # Safety
+/// `list` must be a list of symbols
 #[no_mangle]
-pub extern "C" fn parallel_sym_change(list: K) -> K {
+pub unsafe extern "C" fn parallel_sym_change(list: K) -> K {
     unsafe {
         // `K` cannot have `Send` because it is a pointer but `k0` does.
         let mut inner = *list;
@@ -832,8 +850,10 @@ pub extern "C" fn days_to_date(days: K) -> K {
 }
 
 /// Example of `S_to_str`.
+/// # Safety
+/// This function is unsafe because it dereferences a raw pointer.
 #[no_mangle]
-pub extern "C" fn print_symbol(symbol: K) -> K {
+pub unsafe extern "C" fn print_symbol(symbol: K) -> K {
     unsafe {
         if (*symbol).qtype == qtype::SYMBOL_ATOM {
             println!("symbol: `{}", S_to_str((*symbol).value.symbol));
@@ -1146,8 +1166,10 @@ extern "C" fn invade(planet: K, action: K) -> K {
 }
 
 /// Example of `load_as_q_function`.
+/// # Safety
+/// This function is unsafe because it dereferences raw pointer.
 #[no_mangle]
-pub extern "C" fn probe(planet: K) -> K {
+pub unsafe extern "C" fn probe(planet: K) -> K {
     // Return monadic function
     unsafe {
         native::k(
@@ -1170,7 +1192,7 @@ pub extern "C" fn drift(_: K) -> K {
         .as_mut_slice::<K>()
         .copy_from_slice(&[new_symbol("vague"), new_int(-3000)]);
     let mut compound = simple_to_compound(simple, "");
-    compound.append(extra).unwrap()
+    unsafe { compound.append(extra).unwrap() }
 }
 
 /// Second example of `simple_to_compound`.
@@ -1179,7 +1201,7 @@ pub extern "C" fn drift2(_: K) -> K {
     let simple = new_list(qtype::ENUM_LIST, 2);
     simple.as_mut_slice::<J>().copy_from_slice(&[0_i64, 1]);
     let mut compound = simple_to_compound(simple, "enum");
-    compound.push(new_enum("enum2", 2)).unwrap();
-    compound.push(new_month(3)).unwrap();
+    unsafe { compound.push(new_enum("enum2", 2)).unwrap() };
+    unsafe { compound.push(new_month(3)).unwrap() };
     compound
 }
