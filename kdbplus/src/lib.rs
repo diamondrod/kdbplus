@@ -27,7 +27,7 @@ pub mod qtype {
     //! In order to facilitate type check without overflow this module defines atom type indicator
     //!  as well as list type indicators (We don't need to compeletely mirror the C API).
 
-    use std::os::raw::c_schar;
+    use libc::c_schar;
 
     /// Type indicator of q error
     pub const ERROR: c_schar = -128;
@@ -152,7 +152,7 @@ pub mod qnull_base {
     //!  same for `ipc` module for simple types. For `ipc` module, proper null values of each type are
     //!  provided under [`qnull`](../ipc/qnull/index.html) namespace.
 
-    use std::os::raw::{c_double, c_float, c_int, c_longlong, c_short, c_uchar};
+    use libc::{c_double, c_float, c_int, c_longlong, c_short, c_uchar};
 
     /// Null value of GUID.
     /// # Example
@@ -343,7 +343,7 @@ pub mod qinf_base {
     //!  same for `ipc` module for simple types. For `ipc` module, proper infinity values of each type
     //!  are provided under [`qinf`](../ipc/qinf/index.html) namespace.
 
-    use std::os::raw::{c_double, c_float, c_int, c_longlong, c_short};
+    use libc::{c_double, c_float, c_int, c_longlong, c_short};
     /// Infinity value of short.
     /// # Example
     /// See the example of [`qnull_base::H`](../qnull_base/constant.H.html).
@@ -375,7 +375,7 @@ pub mod qninf_base {
     //!  same for `ipc` module for simple types. For `ipc` module, proper negative infinity values of
     //!  each type are provided under [`qninf`](../ipc/qninf/index.html) namespace.
 
-    use std::os::raw::{c_double, c_float, c_int, c_longlong, c_short};
+    use libc::{c_double, c_float, c_int, c_longlong, c_short};
     /// Negative infinity value of short.
     /// # Example
     /// See the example of [`qnull_base::H`](../qnull_base/constant.H.html).
