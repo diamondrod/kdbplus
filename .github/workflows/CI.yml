@@ -55,12 +55,14 @@ jobs:
           override: true
 
       - name: Clippy Dev
+        working-directory: ./kdbplus
         uses: actions-rs/cargo@v1
         with:
           command: clippy
           args: -F ${{ matrix.feature }} -- -D warnings
 
       - name: DocTests
+        working-directory: ./kdbplus
         uses: actions-rs/cargo@v1
         with:
           command: test

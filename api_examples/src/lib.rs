@@ -34,7 +34,7 @@ pub extern "C" fn guid_border(_: K) -> K {
 #[no_mangle]
 pub extern "C" fn short_borders(_: K) -> K {
     let shorts = new_list(qtype::SHORT_LIST, 3);
-    let shorts_slice = shorts.as_mut_slice::<H>();
+    let shorts_slice = unsafe { shorts.as_mut_slice::<H>() };
     shorts_slice[0] = qnull_base::H;
     shorts_slice[1] = qinf_base::H;
     shorts_slice[2] = qninf_base::H;
@@ -45,7 +45,7 @@ pub extern "C" fn short_borders(_: K) -> K {
 #[no_mangle]
 pub extern "C" fn int_borders(_: K) -> K {
     let ints = new_list(qtype::INT_LIST, 3);
-    let ints_slice = ints.as_mut_slice::<I>();
+    let ints_slice = unsafe { ints.as_mut_slice::<I>() };
     ints_slice[0] = qnull_base::I;
     ints_slice[1] = qinf_base::I;
     ints_slice[2] = qninf_base::I;
@@ -56,7 +56,7 @@ pub extern "C" fn int_borders(_: K) -> K {
 #[no_mangle]
 pub extern "C" fn long_borders(_: K) -> K {
     let timestamps = new_list(qtype::TIMESTAMP_LIST, 3);
-    let timestamps_slice = timestamps.as_mut_slice::<J>();
+    let timestamps_slice = unsafe { timestamps.as_mut_slice::<J>() };
     timestamps_slice[0] = qnull_base::J;
     timestamps_slice[1] = qinf_base::J;
     timestamps_slice[2] = qninf_base::J;
@@ -67,7 +67,7 @@ pub extern "C" fn long_borders(_: K) -> K {
 #[no_mangle]
 pub extern "C" fn real_borders(_: K) -> K {
     let reals = new_list(qtype::REAL_LIST, 3);
-    let reals_slice = reals.as_mut_slice::<E>();
+    let reals_slice = unsafe { reals.as_mut_slice::<E>() };
     reals_slice[0] = qnull_base::E;
     reals_slice[1] = qinf_base::E;
     reals_slice[2] = qninf_base::E;
@@ -78,7 +78,7 @@ pub extern "C" fn real_borders(_: K) -> K {
 #[no_mangle]
 pub extern "C" fn float_borders(_: K) -> K {
     let datetimes = new_list(qtype::DATETIME_LIST, 3);
-    let datetimes_slice = datetimes.as_mut_slice::<F>();
+    let datetimes_slice = unsafe { datetimes.as_mut_slice::<F>() };
     datetimes_slice[0] = qnull_base::F;
     datetimes_slice[1] = qinf_base::F;
     datetimes_slice[2] = qninf_base::F;
@@ -95,7 +95,7 @@ pub extern "C" fn char_border(_: K) -> K {
 #[no_mangle]
 pub extern "C" fn string_borders(_: K) -> K {
     let compound = new_list(qtype::COMPOUND_LIST, 2);
-    let compound_slice = compound.as_mut_slice::<K>();
+    let compound_slice = unsafe { compound.as_mut_slice::<K>() };
     compound_slice[0] = new_symbol(qnull_base::S);
     compound_slice[1] = new_string(qnull_base::S);
     compound
@@ -132,13 +132,15 @@ pub unsafe extern "C" fn must_be_int(obj: K) -> K {
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 
 /// Example of `as_mut_slice`.
+/// # Safety
+/// input must be a valid pointer
 #[no_mangle]
-pub extern "C" fn modify_long_list_a_bit(long_list: K) -> K {
+pub unsafe extern "C" fn modify_long_list_a_bit(long_list: K) -> K {
     if long_list.len() >= 2 {
         // Derefer as a mutable i64 slice.
-        long_list.as_mut_slice::<J>()[1] = 30000_i64;
+        unsafe { long_list.as_mut_slice::<J>()[1] = 30000_i64 };
         // Increment the counter for reuse on q side.
-        increment_reference_count(long_list)
+        unsafe { increment_reference_count(long_list) }
     } else {
         new_error("this list is not long enough. how ironic...\0")
     }
@@ -301,7 +303,9 @@ pub extern "C" fn print_string2(string: K) -> K {
 #[no_mangle]
 pub extern "C" fn hidden_key(table: K) -> K {
     match table.get_dictionary() {
-        Ok(dictionary) => dictionary.as_mut_slice::<K>()[0].q_ipc_encode(3).unwrap(),
+        Ok(dictionary) => unsafe { dictionary.as_mut_slice::<K>()[0] }
+            .q_ipc_encode(3)
+            .unwrap(),
         Err(error) => new_error(error),
     }
 }
@@ -331,8 +335,11 @@ pub unsafe extern "C" fn concat_list2(mut list1: K, list2: K) -> K {
 }
 
 /// Example of `push`.
+///
+/// # Safety
+/// input must be a valid pointer
 #[no_mangle]
-pub extern "C" fn create_compound_list2(int: K) -> K {
+pub unsafe extern "C" fn create_compound_list2(int: K) -> K {
     let mut list = new_list(qtype::COMPOUND_LIST, 0);
     for i in 0..5 {
         unsafe { list.push(new_long(i)).unwrap() };
@@ -373,10 +380,13 @@ pub extern "C" fn murmur(list: K) -> K {
 }
 
 /// Example of `set_attribute`.
+///
+/// # Safety
+/// input must be a valid pointer
 #[no_mangle]
-pub extern "C" fn labeling(mut list: K) -> K {
+pub unsafe extern "C" fn labeling(mut list: K) -> K {
     match list.set_attribute(qattribute::SORTED) {
-        Ok(_) => increment_reference_count(list),
+        Ok(_) => unsafe { increment_reference_count(list) },
         Err(error) => new_error(error),
     }
 }
@@ -565,13 +575,13 @@ pub extern "C" fn keyed_to_simple_table(dummy: K) -> K {
 #[no_mangle]
 pub extern "C" fn create_dictionary(_: K) -> K {
     let keys = unsafe { ktn(qtype::INT_LIST as I, 2) };
-    keys.as_mut_slice::<I>().copy_from_slice(&[0, 1]);
+    unsafe { keys.as_mut_slice::<I>().copy_from_slice(&[0, 1]) };
     let values = unsafe { knk(2) };
     let date_list = unsafe { ktn(qtype::DATE_LIST as I, 3) };
     // 2000.01.01 2000.01.02 2000.01.03
-    date_list.as_mut_slice::<I>()[0..3].copy_from_slice(&[0, 1, 2]);
+    unsafe { date_list.as_mut_slice::<I>()[0..3].copy_from_slice(&[0, 1, 2]) };
     let string = unsafe { kp(str_to_S!("I'm afraid I would crash the application...")) };
-    values.as_mut_slice::<K>()[0..2].copy_from_slice(&[date_list, string]);
+    unsafe { values.as_mut_slice::<K>()[0..2].copy_from_slice(&[date_list, string]) };
     // 0 1i!(2000.01.01 2000.01.02 2000.01.03; "I'm afraid I would crash the application...")
     unsafe { xD(keys, values) }
 }
@@ -673,14 +683,14 @@ pub unsafe extern "C" fn catchy(func: K, args: K) -> K {
 #[no_mangle]
 pub extern "C" fn dictionary_list_to_table() -> K {
     let dicts = unsafe { knk(3) };
-    let dicts_slice = dicts.as_mut_slice::<K>();
+    let dicts_slice = unsafe { dicts.as_mut_slice::<K>() };
     for i in 0..3 {
         let keys = unsafe { ktn(qtype::SYMBOL_LIST as i32, 2) };
-        let keys_slice = keys.as_mut_slice::<S>();
+        let keys_slice = unsafe { keys.as_mut_slice::<S>() };
         keys_slice[0] = unsafe { ss(str_to_S!("a")) };
         keys_slice[1] = unsafe { ss(str_to_S!("b")) };
         let values = unsafe { ktn(qtype::INT_LIST as i32, 2) };
-        values.as_mut_slice::<I>()[0..2].copy_from_slice(&[i * 10, i * 100]);
+        unsafe { values.as_mut_slice::<I>()[0..2].copy_from_slice(&[i * 10, i * 100]) };
         dicts_slice[i as usize] = unsafe { xD(keys, values) };
     }
     // Format list of dictionary as a table.
@@ -938,7 +948,7 @@ pub extern "C" fn create_enum(source: K, index: K) -> K {
 #[no_mangle]
 pub extern "C" fn nullify(_: K) -> K {
     let nulls = new_list(qtype::COMPOUND_LIST, 3);
-    let null_slice = nulls.as_mut_slice::<K>();
+    let null_slice = unsafe { nulls.as_mut_slice::<K>() };
     null_slice[0] = new_null();
     null_slice[1] = new_string("null is not a general null");
     null_slice[2] = new_null();
@@ -952,13 +962,16 @@ pub extern "C" fn keep_out(_: K) -> K {
 }
 
 /// Example of `error_to_string`.
+/// # Safety
+/// This function is unsafe because it dereferences a raw pointer.
+/// Input must be a valid pointer.
 #[no_mangle]
-pub extern "C" fn no_panick(func: K, args: K) -> K {
-    let result = error_to_string(apply(func, args));
+pub unsafe extern "C" fn no_panick(func: K, args: K) -> K {
+    let result = unsafe { error_to_string(apply(func, args)) };
     if let Ok(error) = result.get_error_string() {
         println!("FYI: {}", error);
         // Decrement reference count of the error object which is no longer used.
-        decrement_reference_count(result);
+        unsafe { decrement_reference_count(result) };
         KNULL
     } else {
         println!("success!");
@@ -977,21 +990,21 @@ fn love_even(arg: K) -> K {
         }
     } else {
         // Pass through
-        increment_reference_count(arg)
+        unsafe { increment_reference_count(arg) }
     }
 }
 
 /// Example of `is_error`.
 #[no_mangle]
 pub extern "C" fn propagate(arg: K) -> K {
-    let result = error_to_string(love_even(arg));
-    if is_error(result) {
+    let result = unsafe { error_to_string(love_even(arg)) };
+    if unsafe { is_error(result) } {
         // Propagate the error
         result
     } else if result.get_type() == qtype::ERROR {
         // KNULL
         println!("this is KNULL");
-        decrement_reference_count(result);
+        unsafe { decrement_reference_count(result) };
         KNULL
     } else {
         // Other
@@ -1004,35 +1017,41 @@ pub extern "C" fn propagate(arg: K) -> K {
 #[no_mangle]
 pub extern "C" fn create_table2(_: K) -> K {
     let keys = new_list(qtype::SYMBOL_LIST, 2);
-    let keys_slice = keys.as_mut_slice::<S>();
-    keys_slice[0] = enumerate(str_to_S!("time"));
-    keys_slice[1] = enumerate_n(str_to_S!("temperature_and_humidity"), 11);
+    let keys_slice = unsafe { keys.as_mut_slice::<S>() };
+    keys_slice[0] = unsafe { enumerate(str_to_S!("time")) };
+    keys_slice[1] = unsafe { enumerate_n(str_to_S!("temperature_and_humidity"), 11) };
     let values = new_list(qtype::COMPOUND_LIST, 2);
     let time = new_list(qtype::TIMESTAMP_LIST, 3);
     // 2003.10.10D02:24:19.167018272 2006.05.24D06:16:49.419710368 2008.08.12D23:12:24.018691392
-    time.as_mut_slice::<J>().copy_from_slice(&[
-        119067859167018272_i64,
-        201766609419710368,
-        271897944018691392,
-    ]);
+    unsafe {
+        time.as_mut_slice::<J>().copy_from_slice(&[
+            119067859167018272_i64,
+            201766609419710368,
+            271897944018691392,
+        ])
+    };
     let temperature = new_list(qtype::FLOAT_LIST, 3);
-    temperature
-        .as_mut_slice::<F>()
-        .copy_from_slice(&[22.1_f64, 24.7, 30.5]);
-    values
-        .as_mut_slice::<K>()
-        .copy_from_slice(&[time, temperature]);
-    flip(new_dictionary(keys, values))
+    unsafe {
+        temperature
+            .as_mut_slice::<F>()
+            .copy_from_slice(&[22.1_f64, 24.7, 30.5])
+    };
+    unsafe {
+        values
+            .as_mut_slice::<K>()
+            .copy_from_slice(&[time, temperature])
+    };
+    unsafe { flip(new_dictionary(keys, values)) }
 }
 
 #[no_mangle]
 pub extern "C" fn create_keyed_table2(dummy: K) -> K {
-    enkey(create_table(dummy), 1)
+    unsafe { enkey(create_table(dummy), 1) }
 }
 
 #[no_mangle]
 pub extern "C" fn keyed_to_simple_table2(dummy: K) -> K {
-    unkey(create_keyed_table(dummy))
+    unsafe { unkey(create_keyed_table(dummy)) }
 }
 
 //%% Reference Count %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
@@ -1043,7 +1062,7 @@ pub extern "C" fn agriculture(_: K) -> K {
     // Produce an apple.
     let fruit = new_symbol("apple");
     // Sow the apple seed.
-    decrement_reference_count(fruit);
+    unsafe { decrement_reference_count(fruit) };
     // Return null.
     KNULL
 }
@@ -1053,15 +1072,18 @@ fn eat(_apple: K) {
 }
 
 /// Example of `increment_reference_count`.
+///
+/// # Safety
+/// input must be a valid pointer.
 #[no_mangle]
-pub extern "C" fn satisfy_5000_men(apple: K) -> K {
+pub unsafe extern "C" fn satisfy_5000_men(apple: K) -> K {
     for _ in 0..10 {
         eat(apple);
     }
     unsafe {
         k(0, str_to_S!("eat"), increment_reference_count(apple), KNULL);
     }
-    increment_reference_count(apple)
+    unsafe { increment_reference_count(apple) }
 }
 
 // %% Callback %%//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
@@ -1073,10 +1095,10 @@ extern "C" fn callback(socket: I) -> K {
     let mut buffer: [K; 1] = [0 as K];
     unsafe { libc::read(socket, buffer.as_mut_ptr() as *mut V, 8) };
     // Call `shout` function on q side with the received data.
-    let result = error_to_string(unsafe { native::k(0, str_to_S!("shout"), buffer[0], KNULL) });
+    let result = unsafe { error_to_string(native::k(0, str_to_S!("shout"), buffer[0], KNULL)) };
     if result.get_type() == qtype::ERROR {
         eprintln!("Execution error: {}", result.get_symbol().unwrap());
-        decrement_reference_count(result);
+        unsafe { decrement_reference_count(result) };
     };
     KNULL
 }
@@ -1093,10 +1115,10 @@ pub extern "C" fn plumber(_: K) -> K {
     pin_symbol();
     let handle = std::thread::spawn(move || {
         let mut precious = new_list(qtype::SYMBOL_LIST, 3);
-        let precious_array = precious.as_mut_slice::<S>();
-        precious_array[0] = enumerate(null_terminated_str_to_S("belief\0"));
-        precious_array[1] = enumerate(null_terminated_str_to_S("love\0"));
-        precious_array[2] = enumerate(null_terminated_str_to_S("hope\0"));
+        let precious_array = unsafe { precious.as_mut_slice::<S>() };
+        precious_array[0] = unsafe { enumerate(null_terminated_str_to_S("belief\0")) };
+        precious_array[1] = unsafe { enumerate(null_terminated_str_to_S("love\0")) };
+        precious_array[2] = unsafe { enumerate(null_terminated_str_to_S("hope\0")) };
         unsafe {
             libc::write(
                 PIPE[1],
@@ -1145,7 +1167,7 @@ impl Planet {
 pub extern "C" fn eden(_: K) -> K {
     let earth = Planet::new("earth", 7_500_000_000, true);
     let mut foreign = new_list(qtype::COMPOUND_LIST, 2);
-    let foreign_slice = foreign.as_mut_slice::<K>();
+    let foreign_slice = unsafe { foreign.as_mut_slice::<K>() };
     foreign_slice[0] = drop_q_object as K;
     foreign_slice[1] = Box::into_raw(Box::new(earth)) as K;
     // Set as foreign object.
@@ -1154,7 +1176,7 @@ pub extern "C" fn eden(_: K) -> K {
 }
 
 extern "C" fn invade(planet: K, action: K) -> K {
-    let obj = planet.as_mut_slice::<K>()[1] as *const Planet;
+    let obj = unsafe { planet.as_mut_slice::<K>() }[1] as *const Planet;
     println!("{:?}", unsafe { obj.as_ref() }.unwrap());
     let mut desc = unsafe { obj.as_ref() }.unwrap().description();
     if action.get_bool().unwrap() {
@@ -1186,12 +1208,14 @@ pub unsafe extern "C" fn probe(planet: K) -> K {
 #[no_mangle]
 pub extern "C" fn drift(_: K) -> K {
     let simple = new_list(qtype::INT_LIST, 2);
-    simple.as_mut_slice::<I>().copy_from_slice(&[12, 34]);
+    unsafe { simple.as_mut_slice::<I>().copy_from_slice(&[12, 34]) };
     let extra = new_list(qtype::COMPOUND_LIST, 2);
-    extra
-        .as_mut_slice::<K>()
-        .copy_from_slice(&[new_symbol("vague"), new_int(-3000)]);
-    let mut compound = simple_to_compound(simple, "");
+    unsafe {
+        extra
+            .as_mut_slice::<K>()
+            .copy_from_slice(&[new_symbol("vague"), new_int(-3000)])
+    };
+    let mut compound = unsafe { simple_to_compound(simple, "") };
     unsafe { compound.append(extra).unwrap() }
 }
 
@@ -1199,8 +1223,8 @@ pub extern "C" fn drift(_: K) -> K {
 #[no_mangle]
 pub extern "C" fn drift2(_: K) -> K {
     let simple = new_list(qtype::ENUM_LIST, 2);
-    simple.as_mut_slice::<J>().copy_from_slice(&[0_i64, 1]);
-    let mut compound = simple_to_compound(simple, "enum");
+    unsafe { simple.as_mut_slice::<J>().copy_from_slice(&[0_i64, 1]) };
+    let mut compound = unsafe { simple_to_compound(simple, "enum") };
     unsafe { compound.push(new_enum("enum2", 2)).unwrap() };
     unsafe { compound.push(new_month(3)).unwrap() };
     compound
