@@ -659,7 +659,7 @@ pub unsafe fn error_to_string(error: K) -> K {
 ///   }
 ///   else{
 ///     // Pass through
-///     increment_reference_count(arg)
+///     unsafe{increment_reference_count(arg)}
 ///   }
 /// }
 ///
@@ -718,7 +718,7 @@ pub unsafe fn is_error(catched: K) -> bool {
 /// # Safety
 /// The input must be a valid pointer.
 #[inline]
-pub fn enumerate_n(string: S, n: I) -> S {
+pub unsafe fn enumerate_n(string: S, n: I) -> S {
     unsafe { native::sn(string, n) }
 }
 
@@ -735,7 +735,7 @@ pub fn enumerate_n(string: S, n: I) -> S {
 /// # Safety
 /// The input must be a valid pointer.
 #[inline]
-pub fn enumerate(string: S) -> S {
+pub unsafe fn enumerate(string: S) -> S {
     unsafe { native::ss(string) }
 }
 
@@ -801,8 +801,8 @@ pub unsafe fn flip(dictionary: K) -> K {
 ///   // Build keys
 ///   let keys=new_list(qtype::SYMBOL_LIST, 2);
 ///   let keys_slice=unsafe{keys.as_mut_slice::<S>()};
-///   keys_slice[0]=enumerate(str_to_S!("time"));
-///   keys_slice[1]=enumerate_n(str_to_S!("temperature_and_humidity"), 11);
+///   keys_slice[0]=unsafe{enumerate(str_to_S!("time"))};
+///   keys_slice[1]=unsafe{enumerate_n(str_to_S!("temperature_and_humidity"), 11)};
 ///   
 ///   // Build values
 ///   let values=new_list(qtype::COMPOUND_LIST, 2);
@@ -952,7 +952,7 @@ pub unsafe fn decrement_reference_count(qobject: K) -> V {
 ///     eat(apple);
 ///   }
 ///   unsafe{native::k(0, str_to_S!("eat"), increment_reference_count(apple), KNULL);}
-///   increment_reference_count(apple)  
+///   unsafe{increment_reference_count(apple)}
 /// }
 /// ```
 /// ```q
@@ -975,7 +975,7 @@ pub unsafe fn decrement_reference_count(qobject: K) -> V {
 /// # Safety
 /// input must be a valid pointer
 #[inline]
-pub fn increment_reference_count(qobject: K) -> K {
+pub unsafe fn increment_reference_count(qobject: K) -> K {
     unsafe { native::r1(qobject) }
 }
 
@@ -1037,9 +1037,9 @@ pub fn destroy_socket_if(socket: I, condition: bool) {
 ///   let handle=std::thread::spawn(move ||{
 ///     let mut precious=new_list(qtype::SYMBOL_LIST, 3);
 ///     let precious_array=unsafe{precious.as_mut_slice::<S>()};
-///     precious_array[0]=enumerate(null_terminated_str_to_S("belief\0"));
-///     precious_array[1]=enumerate(null_terminated_str_to_S("love\0"));
-///     precious_array[2]=enumerate(null_terminated_str_to_S("hope\0"));
+///     precious_array[0]=unsafe{enumerate(null_terminated_str_to_S("belief\0"))};
+///     precious_array[1]=unsafe{enumerate(null_terminated_str_to_S("love\0"))};
+///     precious_array[2]=unsafe{enumerate(null_terminated_str_to_S("hope\0"))};
 ///     unsafe{libc::write(PIPE[1], std::mem::transmute::<*mut K, *mut V>(&mut precious), 8)};
 ///   });
 ///   handle.join().unwrap();
@@ -1096,7 +1096,10 @@ pub fn unpin_symbol() -> I {
 /// - `obj`: List of (function to free the object; foreign object).
 /// # Example
 /// See the example of [`load_as_q_function`](fn.load_as_q_function.html).
-pub fn drop_q_object(obj: K) -> K {
+///
+/// # Safety
+/// inputs must be valid, non-null, pointers to a list of two elements
+pub unsafe fn drop_q_object(obj: K) -> K {
     let obj_slice = unsafe { obj.as_mut_slice::<K>() };
     // Take ownership of `K` object from a raw pointer and drop at the end of this scope.
     unsafe { Box::from_raw(obj_slice[1]) };
@@ -1234,7 +1237,7 @@ pub fn days_to_ymd(days: I) -> I {
 ///   let extra=new_list(qtype::COMPOUND_LIST, 2);
 ///   unsafe{extra.as_mut_slice::<K>()}.copy_from_slice(&[new_symbol("vague"), new_int(-3000)]);
 ///   // Convert an integer list into a compound list
-///   let mut compound = simple_to_compound(simple, "");
+///   let mut compound = unsafe{simple_to_compound(simple, "")};
 ///   unsafe{compound.append(extra)}.unwrap()
 /// }
 ///
@@ -1244,7 +1247,7 @@ pub fn days_to_ymd(days: I) -> I {
 ///   unsafe{simple.as_mut_slice::<J>()}.copy_from_slice(&[0_i64, 1]);
 ///   // Convert an enum indices into a compound list while creating enum values from the indices which are tied with
 ///   //  an existing enum variable named "enum", i.e., Enum indices [0, 1] in the code are cast into `(enum[0]; enum[1])`.
-///   let mut compound = simple_to_compound(simple, "enum");
+///   let mut compound = unsafe{simple_to_compound(simple, "enum")};
 ///   // Add `enum2[2]`.
 ///   unsafe{compound.push(new_enum("enum2", 2)).unwrap()};
 ///   unsafe{compound.push(new_month(3)).unwrap()};
@@ -1273,7 +1276,11 @@ pub fn days_to_ymd(days: I) -> I {
 /// - Enum elements from different enum sources must be contained in a compound list. Therefore
 ///  this function intentionally restricts the number of enum sources to one so that user switches
 ///  a simple list to a compound list when the second enum sources are provided.
-pub fn simple_to_compound(simple: K, enum_source: &str) -> K {
+///
+/// # Safety
+/// - `simple` must be a valid pointer to a K object containing a simple list.
+/// - `enum_source` must be a valid enum source.
+pub unsafe fn simple_to_compound(simple: K, enum_source: &str) -> K {
     let size = simple.len() as usize;
     let compound = new_list(qtype::COMPOUND_LIST, size as J);
     let compound_slice = unsafe { compound.as_mut_slice::<K>() };

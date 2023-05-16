@@ -55,6 +55,8 @@ async-std = { version = "1.8.0", features = ["tokio1", "attributes"] }
 float-cmp = "0.9"
 # C API test and example
 libc = "0.2"
+# DocTests
+tokio-test = "0.4"
 
 [package.metadata.docs.rs]
 all-features = true

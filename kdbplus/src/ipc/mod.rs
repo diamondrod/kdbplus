@@ -83,7 +83,7 @@
 //!
 //! ### Client
 //!
-//! ```rust
+//! ```no_run
 //! use kdbplus::qattribute;
 //! use kdbplus::ipc::*;
 //!
@@ -219,7 +219,7 @@ pub mod qnull {
 
     /// Null value of GUID (`0Ng`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -234,7 +234,7 @@ pub mod qnull {
 
     /// Null value of short (`0Nh`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -246,7 +246,7 @@ pub mod qnull {
 
     /// Null value of int (`0Ni`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -258,7 +258,7 @@ pub mod qnull {
 
     /// Null value of long (`0N`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -270,7 +270,7 @@ pub mod qnull {
 
     /// Null value of real (`0Ne`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -282,7 +282,7 @@ pub mod qnull {
 
     /// Null value of float (`0n`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -294,7 +294,7 @@ pub mod qnull {
 
     /// Null value of char (`" "`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -306,7 +306,7 @@ pub mod qnull {
 
     /// Null value of symbol (<code>`</code>).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -318,7 +318,7 @@ pub mod qnull {
 
     /// Null value of timestamp (`0Np`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -339,7 +339,7 @@ pub mod qnull {
 
     /// Null value of month (`0Nm`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -353,7 +353,7 @@ pub mod qnull {
 
     /// Null valueo of date (`0Nd`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -367,7 +367,7 @@ pub mod qnull {
 
     /// Null value of datetime (`0Nz`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -381,7 +381,7 @@ pub mod qnull {
 
     /// Null value of timespan (`0Nn`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -393,7 +393,7 @@ pub mod qnull {
 
     /// Null value of minute (`0Nu`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -405,7 +405,7 @@ pub mod qnull {
 
     /// Null value of second (`0Nv`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -417,7 +417,7 @@ pub mod qnull {
 
     /// Null value of time (`0Nt`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -440,7 +440,7 @@ pub mod qinf {
 
     /// Infinity value of short (`0Wh`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -452,7 +452,7 @@ pub mod qinf {
 
     /// Infinity value of int (`0Wi`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -464,7 +464,7 @@ pub mod qinf {
 
     /// Infinity value of long (`0W`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -476,7 +476,7 @@ pub mod qinf {
 
     /// Infinity value of real (`0We`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -488,7 +488,7 @@ pub mod qinf {
 
     /// Infinity value of float (`0w`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -500,7 +500,7 @@ pub mod qinf {
 
     /// Infinity value of timestamp (`0Wp`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -521,7 +521,7 @@ pub mod qinf {
 
     /// Infinity value of month (`0Wm`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -535,7 +535,7 @@ pub mod qinf {
 
     /// Infinity valueo of date (`0Wd`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -549,7 +549,7 @@ pub mod qinf {
 
     /// Infinity value of datetime (`0Wz`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -564,7 +564,7 @@ pub mod qinf {
 
     /// Infinity value of timespan (`0Wn`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -576,7 +576,7 @@ pub mod qinf {
 
     /// Infinity value of minute (`0Wu`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -588,7 +588,7 @@ pub mod qinf {
 
     /// Infinity value of second (`0Wv`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -600,7 +600,7 @@ pub mod qinf {
 
     /// Infinity value of time (`0Wt`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -623,7 +623,7 @@ pub mod qninf {
 
     /// Infinity value of short (`-0Wh`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -635,7 +635,7 @@ pub mod qninf {
 
     /// Infinity value of int (`-0Wi`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -647,7 +647,7 @@ pub mod qninf {
 
     /// Infinity value of long (-`0W`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -659,7 +659,7 @@ pub mod qninf {
 
     /// Infinity value of real (`-0We`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -671,7 +671,7 @@ pub mod qninf {
 
     /// Infinity value of float (`-0w`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -683,7 +683,7 @@ pub mod qninf {
 
     /// Infinity value of timestamp (`-0Wp`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -704,7 +704,7 @@ pub mod qninf {
 
     /// Infinity value of month (`-0Wm`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -718,7 +718,7 @@ pub mod qninf {
 
     /// Infinity valueo of date (`-0Wd`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -732,7 +732,7 @@ pub mod qninf {
 
     /// Infinity value of datetime (`-0Wz`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -747,7 +747,7 @@ pub mod qninf {
 
     /// Infinity value of timespan (`-0Wn`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -759,7 +759,7 @@ pub mod qninf {
 
     /// Infinity value of minute (`-0Wu`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -771,7 +771,7 @@ pub mod qninf {
 
     /// Infinity value of second (`-0Wv`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -783,7 +783,7 @@ pub mod qninf {
 
     /// Infinity value of time (`-0Wt`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -1122,7 +1122,7 @@ impl K {
 
     /// Construct q bool from `bool`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -1140,7 +1140,7 @@ impl K {
 
     /// Construct q GUID from `[u8; 16]`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -1157,7 +1157,7 @@ impl K {
 
     /// Construct q byte from `u8`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -1171,7 +1171,7 @@ impl K {
 
     /// Construct q short from `i16`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -1185,7 +1185,7 @@ impl K {
 
     /// Construct q int from `i32`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -1199,7 +1199,7 @@ impl K {
 
     /// Construct q long from `i64`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -1213,7 +1213,7 @@ impl K {
 
     /// Construct q real from `f32`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -1227,7 +1227,7 @@ impl K {
 
     /// Construct q float from `f64`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -1241,7 +1241,7 @@ impl K {
 
     /// Construct q char from `char`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -1259,7 +1259,7 @@ impl K {
 
     /// Construct q symbol from `String`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -1277,7 +1277,7 @@ impl K {
 
     /// Construct q timestamp from `DateTime<Utc>`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
@@ -1306,7 +1306,7 @@ impl K {
 
     /// Construct q month from `Date<Utc>`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
@@ -1325,7 +1325,7 @@ impl K {
 
     /// Construct q date from `Date<Utc>`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
@@ -1344,7 +1344,7 @@ impl K {
 
     /// Construct q datetime from `DateTime<Utc>`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
@@ -1373,7 +1373,7 @@ impl K {
 
     /// Construct q timespan from `Duration`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
     ///
@@ -1395,7 +1395,7 @@ impl K {
 
     /// Construct q minute from `Duration`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
     ///
@@ -1414,7 +1414,7 @@ impl K {
 
     /// Construct q second from `Duration`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
     ///
@@ -1433,7 +1433,7 @@ impl K {
 
     /// Construct q time from `Duration`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
     ///
@@ -1452,7 +1452,7 @@ impl K {
 
     /// Construct q bool list from `Vec<bool>`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -1479,7 +1479,7 @@ impl K {
 
     /// Construct q GUID list from `Vec<U>`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -1511,7 +1511,7 @@ impl K {
 
     /// Construct q byte list from `Vec<G>`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -1530,7 +1530,7 @@ impl K {
 
     /// Construct q short list from `Vec<H>`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -1553,7 +1553,7 @@ impl K {
 
     /// Construct q int list from `Vec<I>`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -1578,7 +1578,7 @@ impl K {
 
     /// Construct q long list from `Vec<J>`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -1600,7 +1600,7 @@ impl K {
 
     /// Construct q real list from `Vec<E>`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -1619,7 +1619,7 @@ impl K {
 
     /// Construct q float list from `Vec<F>`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -1644,7 +1644,7 @@ impl K {
 
     /// Construct q string from `String`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -1661,7 +1661,7 @@ impl K {
 
     /// Construct q symbol list from `Vec<String>`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -1688,7 +1688,7 @@ impl K {
 
     /// Construct q timestamp list from `Vec<DateTime<Utc>>`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
@@ -1727,7 +1727,7 @@ impl K {
 
     /// Construct q month list from `Vec<Date<Utc>>`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
@@ -1758,7 +1758,7 @@ impl K {
 
     /// Construct q date list from `Vec<Date<Utc>>`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
@@ -1790,7 +1790,7 @@ impl K {
 
     /// Construct q datetime list from `Vec<DateTime<Utc>>`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
@@ -1828,7 +1828,7 @@ impl K {
 
     /// Construct q timespan list from `Vec<Duration>`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
@@ -1862,7 +1862,7 @@ impl K {
 
     /// Construct q minute list from `Vec<Duration>`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
@@ -1889,7 +1889,7 @@ impl K {
 
     /// Construct q second list from `Vec<Duration>`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
@@ -1925,7 +1925,7 @@ impl K {
 
     /// Construct q time list from `Vec<Duration>`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
@@ -1960,7 +1960,7 @@ impl K {
 
     /// Construct q compound list from `Vec<K>`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
@@ -1998,7 +1998,7 @@ impl K {
 
     /// Construct q dictionary from a pair of keys (`K`) and values (`K`).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -2034,7 +2034,7 @@ impl K {
 
     /// Construct q null.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -2048,10 +2048,9 @@ impl K {
 
     /// Construct q error object.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
-    /// fn main(){
     ///   let q_error=K::new_error(String::from("woops"));
     ///   assert_eq!(format!("{}", q_error), String::from("'woops"));
     ///
@@ -2064,7 +2063,7 @@ impl K {
 
     /// Get underlying `bool` value.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -2084,7 +2083,7 @@ impl K {
 
     /// Get underlying `[u8; 16]` value.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -2110,7 +2109,7 @@ impl K {
     /// - byte
     /// - char
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -2130,7 +2129,7 @@ impl K {
 
     /// Get underlying `i16` value.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -2156,7 +2155,7 @@ impl K {
     /// - second
     /// - time
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -2184,7 +2183,7 @@ impl K {
     /// - timestamp
     /// - timespan
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -2204,7 +2203,7 @@ impl K {
 
     /// Get underlying `f32` value.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -2226,7 +2225,7 @@ impl K {
     /// - float
     /// - datetime
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -2246,7 +2245,7 @@ impl K {
 
     /// Get underlying `char` value.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -2266,7 +2265,7 @@ impl K {
 
     /// Get underlying `i32` value.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     ///
     ///  
@@ -2286,7 +2285,7 @@ impl K {
 
     /// Get underlying timestamp value as `DateTime<Utc>`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
@@ -2322,7 +2321,7 @@ impl K {
 
     /// Get underlying month value as `Date<Utc>`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
@@ -2346,7 +2345,7 @@ impl K {
 
     /// Get underlying date value as `Date<Utc>`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
@@ -2370,7 +2369,7 @@ impl K {
 
     /// Get underlying datetime value as `DateTime<Utc>`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
     ///
@@ -2406,7 +2405,7 @@ impl K {
 
     /// Get underlying timespan value as `Duration`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
     ///
@@ -2430,7 +2429,7 @@ impl K {
 
     /// Get underlying minute value as `Duration`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
     ///
@@ -2451,7 +2450,7 @@ impl K {
 
     /// Get underlying second value as `Duration`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
     ///
@@ -2472,7 +2471,7 @@ impl K {
 
     /// Get underlying time value as `Duration`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
     ///
@@ -2493,7 +2492,7 @@ impl K {
 
     /// Get underlying immutable dictionary (flipped table) of table type as `K`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -2533,7 +2532,7 @@ impl K {
 
     /// Get underlying mutable dictionary (flipped table) of table type as `K`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -2583,18 +2582,16 @@ impl K {
 
     /// Get underlying error value as `String`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::ipc::*;
-    ///
-    /// #[tokio::main]
-    /// async fn main() -> Result<()> {
-    ///     let mut socket = QStream::connect(ConnectionMethod::TCP, "localhost", 5000, "kdbuser:pass")
+    /// # use tokio_test;
+    /// # tokio_test::block_on(async {
+    ///    let mut socket = QStream::connect(ConnectionMethod::TCP, "localhost", 5000, "kdbuser:pass")
     ///         .await
     ///         .expect("Failed to connect");
-    ///     let result = socket.send_sync_message(&"1+`a").await?;
+    ///     let result = socket.send_sync_message(&"1+`a").await.unwrap();
     ///     assert_eq!(result.get_error_string(), Ok("type"));
-    ///     Ok(())
-    ///
+    /// # });
     /// ```
     pub fn get_error_string(&self) -> Result<&str> {
         match self.0.qtype {
@@ -2608,7 +2605,7 @@ impl K {
 
     /// Get underlying immutable `String` value.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -2629,7 +2626,7 @@ impl K {
 
     /// Get underlying mutable `String` value.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -2651,7 +2648,7 @@ impl K {
 
     /// Get the underlying mutable vector. If the specified type is wrong, it returns an empty vector.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
@@ -2708,11 +2705,10 @@ impl K {
 
     /// Get the underlying immutable vector. If the specified type is wrong, it returns an empty vector.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main(){
     ///   let bool_list=K::new_bool_list(vec![true, false], qattribute::UNIQUE);
     ///   assert_eq!(*bool_list.as_vec::<G>().unwrap(), vec![1_u8, 0]);
     ///
@@ -2754,7 +2750,7 @@ impl K {
 
     /// Get an immutable column of a table with a specified name.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
@@ -2825,7 +2821,7 @@ impl K {
 
     /// Get a mutable column of a table with a specified name.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
@@ -2952,7 +2948,7 @@ impl K {
 
     /// Get a type of q object.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::*;
     /// use kdbplus::ipc::*;
     ///
@@ -2967,7 +2963,7 @@ impl K {
 
     /// Get an attribute of q object.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
@@ -2991,7 +2987,7 @@ impl K {
 
     /// Set an attribute to the underlying q object.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
@@ -3040,7 +3036,7 @@ impl K {
     /// - `element`: An element to insert. The type needs to be a one used for atom constructor `K::new_*`. For example,
     ///  int element must be a `i32` type and timestamp element must be a `DateTime<Utc>` type.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -3307,7 +3303,7 @@ impl K {
     /// - `element`: An element to insert. The type needs to be a one used for atom constructor `K::new_*`. For example,
     ///  int element must be a `i32` type and timestamp element must be a `DateTime<Utc>` type.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
@@ -3577,7 +3573,7 @@ impl K {
 
     /// Pop a `bool` object from q bool list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -3608,7 +3604,7 @@ impl K {
 
     /// Pop a `[u8; 16]` object from q GUID list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -3645,7 +3641,7 @@ impl K {
 
     /// Pop a `u8` object from q byte list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -3676,7 +3672,7 @@ impl K {
 
     /// Pop a `i16` object from q short list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -3707,7 +3703,7 @@ impl K {
 
     /// Pop a `i32` object from q int list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -3738,7 +3734,7 @@ impl K {
 
     /// Pop a `i64` object from q long list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -3769,7 +3765,7 @@ impl K {
 
     /// Pop a `f32` object from q real list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -3800,7 +3796,7 @@ impl K {
 
     /// Pop a `f64` object from q float list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -3831,7 +3827,7 @@ impl K {
 
     /// Pop a `char` object from q string.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -3859,11 +3855,11 @@ impl K {
 
     /// Pop a `String` object from q symbol list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// fn main(){
+    ///
     ///   let mut q_symbol_list=K::new_symbol_list(vec![String::from("almond"), String::from("macadamia"), String::from("hazel")], qattribute::NONE);
     ///   let tail=q_symbol_list.pop_symbol().unwrap();
     ///   assert_eq!(tail, String::from("hazel"));
@@ -3890,7 +3886,7 @@ impl K {
 
     /// Pop a `DateTime<Utc>` object from q timestamp list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
@@ -3927,7 +3923,7 @@ impl K {
 
     /// Pop a `Date<Utc>` object from q month list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
@@ -3967,7 +3963,7 @@ impl K {
 
     /// Pop a `Date<Utc>` object from q date list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
@@ -4008,7 +4004,7 @@ impl K {
 
     /// Pop a `DateTime<Utc>` object from q datetime list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
@@ -4048,7 +4044,7 @@ impl K {
 
     /// Pop a `Duration` object from q timespan list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
@@ -4088,7 +4084,7 @@ impl K {
 
     /// Pop a `Duration` object from q minute list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
@@ -4125,7 +4121,7 @@ impl K {
 
     /// Pop a `Duration` object from q second list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
@@ -4162,7 +4158,7 @@ impl K {
 
     /// Pop a `Duration` object from q time list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
@@ -4202,7 +4198,7 @@ impl K {
 
     /// Pop an element as `K` from the tail of the underlying list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
@@ -4358,7 +4354,7 @@ impl K {
 
     /// Remove a `bool` object from the underlying q bool list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -4386,7 +4382,7 @@ impl K {
 
     /// Remove a `[u8;16]` object from the underlying q GUID list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -4413,7 +4409,7 @@ impl K {
 
     /// Remove a `u8` object from the underlying q byte list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -4441,7 +4437,7 @@ impl K {
 
     /// Remove a `i16` object from the underlying q short list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -4469,7 +4465,7 @@ impl K {
 
     /// Remove a `i32` object from the underlying q int list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -4497,7 +4493,7 @@ impl K {
 
     /// Remove a `i64` object from the underlying q long list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -4525,7 +4521,7 @@ impl K {
 
     /// Remove a `f32` object from the underlying q real list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -4553,7 +4549,7 @@ impl K {
 
     /// Remove a `f64` object from the underlying q float list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -4581,7 +4577,7 @@ impl K {
 
     /// Remove a `char` object from the underlying q string.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -4609,7 +4605,7 @@ impl K {
 
     /// Remove a `String` object from the underlying q symbol list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -4644,7 +4640,7 @@ impl K {
 
     /// Remove a `DateTime<Utc>` object from the underlying q timestamp list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
@@ -4681,7 +4677,7 @@ impl K {
 
     /// Remove a `Date<Utc>` object from the underlying q month list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
@@ -4718,7 +4714,7 @@ impl K {
 
     /// Remove a `Date<Utc>` object from the underlying q date list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
@@ -4756,7 +4752,7 @@ impl K {
 
     /// Remove a `DateTime<Utc>` object from the underlying q datetime list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
@@ -4793,7 +4789,7 @@ impl K {
 
     /// Remove a `Duration` object from the underlying q timespan list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
@@ -4830,7 +4826,7 @@ impl K {
 
     /// Remove a `Duration` object from the underlying q minute list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
@@ -4864,7 +4860,7 @@ impl K {
 
     /// Remove a `Duration` object from the underlying q second list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
@@ -4898,7 +4894,7 @@ impl K {
 
     /// Remove a `Duration` object from the underlying q time list.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::Duration;
@@ -4936,7 +4932,7 @@ impl K {
 
     /// Remove an element as `K` object from the underlying q list.
     ///  # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
@@ -5024,7 +5020,7 @@ impl K {
 
     /// Add a pair of key-value to a q dictionary.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
@@ -5076,7 +5072,7 @@ impl K {
 
     /// Pop the last key-vaue pair from a q dictionary.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
@@ -5126,7 +5122,7 @@ impl K {
     /// - dictionary: The number of keys.
     /// - general null: 1
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     /// use chrono::prelude::*;
@@ -5216,7 +5212,7 @@ impl K {
     /// - Key type must be a symbol.
     /// - This function does not check if lengths of columns are same.
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -5271,7 +5267,7 @@ impl K {
     ///  In case of error for type mismatch the original object is returned wrapped
     ///  in error enum and can be retrieved by [`into_inner`](error/enum.Error.html#method.into_inner).
     ///  # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
@@ -5333,7 +5329,7 @@ impl K {
     /// Convert a keyed table into an ordinary table. In case of error for type mismatch
     ///  the original object is returned wrapped in error enum and can be retrieved by [`into_inner`](error/enum.Error.html#method.into_inner).
     /// # Example
-    /// ```
+    /// ```no_run
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///

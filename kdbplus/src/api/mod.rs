@@ -295,7 +295,7 @@ pub trait KUtility {
     ///     // Derefer as a mutable i64 slice.
     ///     unsafe{long_list.as_mut_slice::<J>()[1]=30000_i64};
     ///     // Increment the counter to reuse on q side.
-    ///     increment_reference_count(long_list)
+    ///     unsafe{increment_reference_count(long_list)}
     ///   }
     ///   else{
     ///     new_error("this list is not long enough. how ironic...\0")
@@ -697,7 +697,7 @@ pub trait KUtility {
     ///     new_error(err)
     ///   }
     ///   else{
-    ///     increment_reference_count(list1)
+    ///     unsafe{increment_reference_count(list1)}
     ///   }
     /// }
     /// ```
@@ -870,7 +870,7 @@ pub trait KUtility {
     /// #[no_mangle]
     /// pub extern "C" fn labeling(mut list: K) -> K{
     ///   match list.set_attribute(qattribute::SORTED){
-    ///     Ok(_) => increment_reference_count(list),
+    ///     Ok(_) => unsafe{increment_reference_count(list)},
     ///     Err(error) => new_error(error)
     ///   }
     /// }
@@ -1061,8 +1061,7 @@ impl KUtility for K {
                                 if unsafe { (*enum_value).qtype } == qtype::ERROR {
                                     // Error in creating enum object.
                                     unsafe { decrement_reference_count(row) };
-                                    let error =
-                                        unsafe { S_to_str(unsafe { (*enum_value).value.symbol }) };
+                                    let error = unsafe { S_to_str((*enum_value).value.symbol) };
                                     unsafe { decrement_reference_count(enum_value) };
                                     return Err(error);
                                 } else {
@@ -1072,9 +1071,9 @@ impl KUtility for K {
                             }
                             qtype::COMPOUND_LIST => {
                                 // Increment reference count since compound list consumes the element.
-                                row_slice[i] = increment_reference_count(
-                                    unsafe { column.as_mut_slice::<K>() }[index],
-                                );
+                                row_slice[i] = unsafe {
+                                    increment_reference_count(column.as_mut_slice::<K>()[index])
+                                };
                             }
                             // There are no other list type
                             _ => unreachable!(),
@@ -1175,7 +1174,7 @@ impl KUtility for K {
     #[inline]
     fn get_symbol(&self) -> Result<&str, &'static str> {
         match unsafe { (**self).qtype } {
-            qtype::SYMBOL_ATOM => Ok(unsafe { S_to_str(unsafe { (**self).value.symbol }) }),
+            qtype::SYMBOL_ATOM => Ok(unsafe { S_to_str((**self).value.symbol) }),
             _ => Err("not a symbol\0"),
         }
     }
@@ -1211,7 +1210,7 @@ impl KUtility for K {
         match unsafe { (**self).qtype } {
             qtype::ERROR => {
                 if !unsafe { (**self).value.symbol }.is_null() {
-                    Ok(unsafe { S_to_str(unsafe { (**self).value.symbol }) })
+                    Ok(unsafe { S_to_str((**self).value.symbol) })
                 } else {
                     Err("not an error\0")
                 }
@@ -1334,7 +1333,7 @@ impl KUtility for K {
 
     #[inline]
     fn q_ipc_encode(&self, mode: I) -> Result<K, &'static str> {
-        let result = unsafe { error_to_string(unsafe { native::b9(mode, *self) }) };
+        let result = unsafe { error_to_string(native::b9(mode, *self)) };
         match unsafe { (*result).qtype } {
             qtype::ERROR => {
                 unsafe { decrement_reference_count(result) };
@@ -1348,7 +1347,7 @@ impl KUtility for K {
     fn q_ipc_decode(&self) -> Result<K, &'static str> {
         match unsafe { (**self).qtype } {
             qtype::BYTE_LIST => {
-                let result = unsafe { error_to_string(unsafe { native::d9(*self) }) };
+                let result = unsafe { error_to_string(native::d9(*self)) };
                 match unsafe { (*result).qtype } {
                     qtype::ERROR => {
                         unsafe { decrement_reference_count(result) };

@@ -385,8 +385,9 @@ impl QStream {
     /// use kdbplus::qattribute;
     /// use kdbplus::ipc::*;
     ///
-    /// #[tokio::main(flavor = "multi_thread", worker_threads = 2)]
-    /// async fn main() -> Result<()> {
+    /// # use tokio_test;
+    /// # tokio_test::block_on(async {let test:Result<()> = async {
+    ///     // in your tokio main or async function
     ///     let mut socket =
     ///         QStream::connect(ConnectionMethod::UDS, "", 5000_u16, "ideal:person").await?;
     ///     println!("Connection type: {}", socket.get_connection_type());
@@ -415,8 +416,8 @@ impl QStream {
     ///
     ///     socket.shutdown().await?;
     ///
-    ///     Ok(())
-    /// }
+    /// #    Ok(())
+    /// # }.await;});
     /// ```
     pub async fn connect(
         method: ConnectionMethod,

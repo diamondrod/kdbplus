@@ -1,0 +1,73 @@
+# NOTE: doesn't run actual tests because those require Q to be installed on the system, 
+# so this just tests for Clippy Lints, DocTests compiling, and code format
+
+name: CI
+
+on:
+  push:
+    paths:
+      - '**.rs'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '*/Cargo.toml'
+    branches:
+      - main
+  pull_request:
+    paths-ignore:
+      - '**.rs'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '*/Cargo.toml'
+    branches:
+      - main
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
+
+jobs:
+  clippy_fmt_and_doctest:
+    strategy:
+      matrix:
+        feature: [api, ipc]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Cache Rust Dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/            
+          key: ${{ matrix.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ matrix.os }}-cargo-
+
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Clippy Dev
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: -F ${{ matrix.feature }} -- -D warnings
+
+      - name: DocTests
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --doc -F ${{ matrix.feature }}
+
+      - name: fmt
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all -- --check

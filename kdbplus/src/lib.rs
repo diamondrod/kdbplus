@@ -155,182 +155,273 @@ pub mod qnull_base {
     use libc::{c_double, c_float, c_int, c_longlong, c_short, c_uchar};
 
     /// Null value of GUID.
-    /// # Example
-    /// ```no_run
-    /// use kdbplus::*;
-    /// use kdbplus::api::*;
-    ///
-    /// #[no_mangle]
-    /// pub extern "C" fn guid_border(_: K) -> K{
-    ///   new_guid(qnull_base::U)
-    /// }
-    /// ```
-    /// ```q
-    /// q)guid_border: `libapi_examples 2: (`guid_border; 1);
-    /// q)guid_border[]
-    /// 0Ng
-    /// ```
+    #[cfg_attr(feature = "api", doc = r##"# Example"##)]
+    #[cfg_attr(feature = "api", doc = r##"```no_run"##)]
+    #[cfg_attr(feature = "api", doc = r##"use kdbplus::*;"##)]
+    #[cfg_attr(feature = "api", doc = r##"use kdbplus::api::*;"##)]
+    #[cfg_attr(feature = "api", doc = r##""##)]
+    #[cfg_attr(feature = "api", doc = r##"#[no_mangle]"##)]
+    #[cfg_attr(
+        feature = "api",
+        doc = r##"pub extern "C" fn guid_border(_: K) -> K{"##
+    )]
+    #[cfg_attr(feature = "api", doc = r##"  new_guid(qnull_base::U)"##)]
+    #[cfg_attr(feature = "api", doc = r##"}"##)]
+    #[cfg_attr(feature = "api", doc = r##"```"##)]
+    #[cfg_attr(feature = "api", doc = r##"```q"##)]
+    #[cfg_attr(
+        feature = "api",
+        doc = r##"q)guid_border: `libapi_examples 2: (`guid_border; 1);"##
+    )]
+    #[cfg_attr(feature = "api", doc = r##"q)guid_border[]"##)]
+    #[cfg_attr(feature = "api", doc = r##"0Ng"##)]
+    #[cfg_attr(feature = "api", doc = r##"```"##)]
     pub const U: [c_uchar; 16] = [0; 16];
 
     /// Null value of short.
-    /// # Example
-    /// ```no_run
-    /// use kdbplus::*;
-    /// use kdbplus::api::*;
-    ///
-    /// #[no_mangle]
-    /// pub extern "C" fn short_borders(_: K) -> K{
-    ///   let shorts=new_list(qtype::SHORT_LIST, 3);
-    ///   let shorts_slice=shorts.as_mut_slice::<H>();
-    ///   shorts_slice[0]=qnull_base::H;
-    ///   shorts_slice[1]=qinf_base::H;
-    ///   shorts_slice[2]=qninf_base::H;
-    ///   shorts
-    /// }
-    /// ```
-    /// ```q
-    /// q)short_borders: `libapi_examples 2: (`short_borders; 1);
-    /// q)short_borders[]
-    /// 0N 0W -0Wh
-    /// ```
+    #[cfg_attr(feature = "api", doc = r##"# Example"##)]
+    #[cfg_attr(feature = "api", doc = r##"```no_run"##)]
+    #[cfg_attr(feature = "api", doc = r##"use kdbplus::*;"##)]
+    #[cfg_attr(feature = "api", doc = r##"use kdbplus::api::*;"##)]
+    #[cfg_attr(feature = "api", doc = r##""##)]
+    #[cfg_attr(feature = "api", doc = r##"#[no_mangle]"##)]
+    #[cfg_attr(
+        feature = "api",
+        doc = r##"pub extern "C" fn short_borders(_: K) -> K{"##
+    )]
+    #[cfg_attr(
+        feature = "api",
+        doc = r##"  let shorts=new_list(qtype::SHORT_LIST, 3);"##
+    )]
+    #[cfg_attr(
+        feature = "api",
+        doc = r##"  let shorts_slice=unsafe{shorts.as_mut_slice::<H>()};"##
+    )]
+    #[cfg_attr(feature = "api", doc = r##"  shorts_slice[0]=qnull_base::H;"##)]
+    #[cfg_attr(feature = "api", doc = r##"  shorts_slice[1]=qinf_base::H;"##)]
+    #[cfg_attr(feature = "api", doc = r##"  shorts_slice[2]=qninf_base::H;"##)]
+    #[cfg_attr(feature = "api", doc = r##"  shorts"##)]
+    #[cfg_attr(feature = "api", doc = r##"}"##)]
+    #[cfg_attr(feature = "api", doc = r##"```"##)]
+    #[cfg_attr(feature = "api", doc = r##"```q"##)]
+    #[cfg_attr(
+        feature = "api",
+        doc = r##"q)short_borders: `libapi_examples 2: (`short_borders; 1);"##
+    )]
+    #[cfg_attr(feature = "api", doc = r##"q)short_borders[]"##)]
+    #[cfg_attr(feature = "api", doc = r##"0N 0W -0Wh"##)]
+    #[cfg_attr(feature = "api", doc = r##"```"##)]
     pub const H: c_short = c_short::MIN;
 
     /// Null value of int family, i.e., int, month, date, minute, second and time.
-    /// # Example
-    /// ```no_run
-    /// use kdbplus::*;
-    /// use kdbplus::api::*;
-    ///
-    /// #[no_mangle]
-    /// pub extern "C" fn int_borders(_: K) -> K{
-    ///   let ints=new_list(qtype::INT_LIST, 3);
-    ///   let ints_slice=ints.as_mut_slice::<I>();
-    ///   ints_slice[0]=qnull_base::I;
-    ///   ints_slice[1]=qinf_base::I;
-    ///   ints_slice[2]=qninf_base::I;
-    ///   ints
-    /// }
-    /// ```
-    /// ```q
-    /// q)int_borders: `libapi_examples 2: (`int_borders; 1);
-    /// q)int_borders[]
-    /// 0N 0W -0Wi
-    /// ```
+    #[cfg_attr(feature = "api", doc = r##"# Example"##)]
+    #[cfg_attr(feature = "api", doc = r##"```no_run"##)]
+    #[cfg_attr(feature = "api", doc = r##"use kdbplus::*;"##)]
+    #[cfg_attr(feature = "api", doc = r##"use kdbplus::api::*;"##)]
+    #[cfg_attr(feature = "api", doc = r##""##)]
+    #[cfg_attr(feature = "api", doc = r##"#[no_mangle]"##)]
+    #[cfg_attr(
+        feature = "api",
+        doc = r##"pub extern "C" fn int_borders(_: K) -> K{"##
+    )]
+    #[cfg_attr(feature = "api", doc = r##"  let ints=new_list(qtype::INT_LIST, 3);"##)]
+    #[cfg_attr(
+        feature = "api",
+        doc = r##"  let ints_slice=unsafe { ints.as_mut_slice::<I>() };"##
+    )]
+    #[cfg_attr(feature = "api", doc = r##"  ints_slice[0]=qnull_base::I;"##)]
+    #[cfg_attr(feature = "api", doc = r##"  ints_slice[1]=qinf_base::I;"##)]
+    #[cfg_attr(feature = "api", doc = r##"  ints_slice[2]=qninf_base::I;"##)]
+    #[cfg_attr(feature = "api", doc = r##"  ints"##)]
+    #[cfg_attr(feature = "api", doc = r##"}"##)]
+    #[cfg_attr(feature = "api", doc = r##"```"##)]
+    #[cfg_attr(feature = "api", doc = r##"```q"##)]
+    #[cfg_attr(
+        feature = "api",
+        doc = r##"q)int_borders: `libapi_examples 2: (`int_borders; 1);"##
+    )]
+    #[cfg_attr(feature = "api", doc = r##"q)int_borders[]"##)]
+    #[cfg_attr(feature = "api", doc = r##"0N 0W -0Wi"##)]
+    #[cfg_attr(feature = "api", doc = r##"```"##)]
     pub const I: c_int = c_int::MIN;
 
     /// Null value of long family, i.e., long, timestamp and timespan.
-    /// # Example
-    /// ```no_run
-    /// use kdbplus::*;
-    /// use kdbplus::api::*;
-    ///
-    /// #[no_mangle]
-    /// pub extern "C" fn long_borders(_: K) -> K{
-    ///   let timestamps=new_list(qtype::TIMESTAMP_LIST, 3);
-    ///   let timestamps_slice=timestamps.as_mut_slice::<J>();
-    ///   timestamps_slice[0]=qnull_base::J;
-    ///   timestamps_slice[1]=qinf_base::J;
-    ///   timestamps_slice[2]=qninf_base::J;
-    ///   timestamps
-    /// }
-    /// ```
-    /// ```q
-    /// q)timestamp_borders: `libapi_examples 2: (`long_borders; 1);
-    /// q)timestamp_borders[]
-    /// 0N 0W -0Wp
-    /// ```
+    #[cfg_attr(
+        feature = "api",
+        doc = r##"
+    #[cfg_attr( feature = "api", doc = r##"# Example"##
+    )]
+    #[cfg_attr(feature = "api", doc = r##"```no_run"##)]
+    #[cfg_attr(feature = "api", doc = r##"use kdbplus::*;"##)]
+    #[cfg_attr(feature = "api", doc = r##"use kdbplus::api::*;"##)]
+    #[cfg_attr(feature = "api", doc = r##""##)]
+    #[cfg_attr(feature = "api", doc = r##"#[no_mangle]"##)]
+    #[cfg_attr(
+        feature = "api",
+        doc = r##"pub extern "C" fn long_borders(_: K) -> K{"##
+    )]
+    #[cfg_attr(
+        feature = "api",
+        doc = r##"  let timestamps=new_list(qtype::TIMESTAMP_LIST, 3);"##
+    )]
+    #[cfg_attr(
+        feature = "api",
+        doc = r##"  let timestamps_slice=unsafe{timestamps.as_mut_slice::<J>()};"##
+    )]
+    #[cfg_attr(feature = "api", doc = r##"  timestamps_slice[0]=qnull_base::J;"##)]
+    #[cfg_attr(feature = "api", doc = r##"  timestamps_slice[1]=qinf_base::J;"##)]
+    #[cfg_attr(feature = "api", doc = r##"  timestamps_slice[2]=qninf_base::J;"##)]
+    #[cfg_attr(feature = "api", doc = r##"  timestamps"##)]
+    #[cfg_attr(feature = "api", doc = r##"}"##)]
+    #[cfg_attr(feature = "api", doc = r##"```"##)]
+    #[cfg_attr(feature = "api", doc = r##"```q"##)]
+    #[cfg_attr(
+        feature = "api",
+        doc = r##"q)timestamp_borders: `libapi_examples 2: (`long_borders; 1);"##
+    )]
+    #[cfg_attr(feature = "api", doc = r##"q)timestamp_borders[]"##)]
+    #[cfg_attr(feature = "api", doc = r##"0N 0W -0Wp"##)]
+    #[cfg_attr(feature = "api", doc = r##"```"##)]
     pub const J: c_longlong = c_longlong::MIN;
 
     /// Null value of real.
-    /// # Example
-    /// ```no_run
-    /// use kdbplus::*;
-    /// use kdbplus::api::*;
-    ///
-    /// #[no_mangle]
-    /// pub extern "C" fn real_borders(_: K) -> K{
-    ///   let reals=new_list(qtype::REAL_LIST, 3);
-    ///   let reals_slice=reals.as_mut_slice::<E>();
-    ///   reals_slice[0]=qnull_base::E;
-    ///   reals_slice[1]=qinf_base::E;
-    ///   reals_slice[2]=qninf_base::E;
-    ///   reals
-    /// }
-    /// ```
-    /// ```q
-    /// q)real_borders: `libapi_examples 2: (`real_borders; 1);
-    /// q)real_borders[]
-    /// 0N 0W -0We
-    /// ```
+    #[cfg_attr(feature = "api", doc = r##"# Example"##)]
+    #[cfg_attr(feature = "api", doc = r##"```no_run"##)]
+    #[cfg_attr(feature = "api", doc = r##"use kdbplus::*;"##)]
+    #[cfg_attr(feature = "api", doc = r##"use kdbplus::api::*;"##)]
+    #[cfg_attr(feature = "api", doc = r##""##)]
+    #[cfg_attr(feature = "api", doc = r##"#[no_mangle]"##)]
+    #[cfg_attr(
+        feature = "api",
+        doc = r##"pub extern "C" fn real_borders(_: K) -> K{"##
+    )]
+    #[cfg_attr(
+        feature = "api",
+        doc = r##"  let reals=new_list(qtype::REAL_LIST, 3);"##
+    )]
+    #[cfg_attr(
+        feature = "api",
+        doc = r##"  let reals_slice=unsafe{reals.as_mut_slice::<E>()};"##
+    )]
+    #[cfg_attr(feature = "api", doc = r##"  reals_slice[0]=qnull_base::E;"##)]
+    #[cfg_attr(feature = "api", doc = r##"  reals_slice[1]=qinf_base::E;"##)]
+    #[cfg_attr(feature = "api", doc = r##"  reals_slice[2]=qninf_base::E;"##)]
+    #[cfg_attr(feature = "api", doc = r##"  reals"##)]
+    #[cfg_attr(feature = "api", doc = r##"}"##)]
+    #[cfg_attr(feature = "api", doc = r##"```"##)]
+    #[cfg_attr(feature = "api", doc = r##"```q"##)]
+    #[cfg_attr(
+        feature = "api",
+        doc = r##"q)real_borders: `libapi_examples 2: (`real_borders; 1);"##
+    )]
+    #[cfg_attr(feature = "api", doc = r##"q)real_borders[]"##)]
+    #[cfg_attr(feature = "api", doc = r##"0N 0W -0We"##)]
+    #[cfg_attr(feature = "api", doc = r##"```"##)]
     pub const E: c_float = c_float::NAN;
 
     /// Null value of float family, i.e., float and datetime.
-    /// # Example
-    /// ```no_run
-    /// use kdbplus::*;
-    /// use kdbplus::api::*;
-    ///
-    /// #[no_mangle]
-    /// pub extern "C" fn float_borders(_: K) -> K{
-    ///   let datetimes=new_list(qtype::DATETIME_LIST, 3);
-    ///   let datetimes_slice=datetimes.as_mut_slice::<F>();
-    ///   datetimes_slice[0]=qnull_base::F;
-    ///   datetimes_slice[1]=qinf_base::F;
-    ///   datetimes_slice[2]=qninf_base::F;
-    ///   datetimes
-    /// }
-    /// ```
-    /// ```q
-    /// q)datetime_borders: `libapi_examples 2: (`float_borders; 1);
-    /// q)datetime_borders[]
-    /// 0N 0W -0Wz
-    /// ```
+    #[cfg_attr(feature = "api", doc = r##"# Example"##)]
+    #[cfg_attr(feature = "api", doc = r##"```no_run"##)]
+    #[cfg_attr(feature = "api", doc = r##"use kdbplus::*;"##)]
+    #[cfg_attr(feature = "api", doc = r##"use kdbplus::api::*;"##)]
+    #[cfg_attr(feature = "api", doc = r##""##)]
+    #[cfg_attr(feature = "api", doc = r##"#[no_mangle]"##)]
+    #[cfg_attr(
+        feature = "api",
+        doc = r##"pub extern "C" fn float_borders(_: K) -> K{"##
+    )]
+    #[cfg_attr(
+        feature = "api",
+        doc = r##"  let datetimes=new_list(qtype::DATETIME_LIST, 3);"##
+    )]
+    #[cfg_attr(
+        feature = "api",
+        doc = r##"  let datetimes_slice=unsafe{datetimes.as_mut_slice::<F>()};"##
+    )]
+    #[cfg_attr(feature = "api", doc = r##"  datetimes_slice[0]=qnull_base::F;"##)]
+    #[cfg_attr(feature = "api", doc = r##"  datetimes_slice[1]=qinf_base::F;"##)]
+    #[cfg_attr(feature = "api", doc = r##"  datetimes_slice[2]=qninf_base::F;"##)]
+    #[cfg_attr(feature = "api", doc = r##"  datetimes"##)]
+    #[cfg_attr(feature = "api", doc = r##"}"##)]
+    #[cfg_attr(feature = "api", doc = r##"```"##)]
+    #[cfg_attr(feature = "api", doc = r##"```q"##)]
+    #[cfg_attr(
+        feature = "api",
+        doc = r##"q)datetime_borders: `libapi_examples 2: (`float_borders; 1);"##
+    )]
+    #[cfg_attr(feature = "api", doc = r##"q)datetime_borders[]"##)]
+    #[cfg_attr(feature = "api", doc = r##"0N 0W -0Wz"##)]
+    #[cfg_attr(feature = "api", doc = r##"```"##)]
     pub const F: c_double = c_double::NAN;
 
     /// Null value of char.
-    /// # Example
-    /// ```no_run
-    /// use kdbplus::*;
-    /// use kdbplus::api::*;
-    ///
-    /// #[no_mangle]
-    /// pub extern "C" fn char_border(_: K) -> K{
-    ///   new_char(qnull_base::C)
-    /// }
-    /// ```
-    /// ```q
-    /// q)char_border: `libapi_examples 2: (`char_border; 1);
-    /// q)char_border[]
-    /// " "
-    /// q)null char_border[]
-    /// 1b
-    /// ```
+    #[cfg_attr(feature = "api", doc = r##"#Example"##)]
+    #[cfg_attr(feature = "api", doc = r##"```no_run"##)]
+    #[cfg_attr(feature = "api", doc = r##"use kdbplus::*;"##)]
+    #[cfg_attr(feature = "api", doc = r##"use kdbplus::api::*;"##)]
+    #[cfg_attr(feature = "api", doc = r##""##)]
+    #[cfg_attr(feature = "api", doc = r##"#[no_mangle]"##)]
+    #[cfg_attr(
+        feature = "api",
+        doc = r##"pub extern "C" fn char_borders(_: K) -> K{"##
+    )]
+    #[cfg_attr(feature = "api", doc = r##"  new_char(qnull_base::C)"##)]
+    #[cfg_attr(feature = "api", doc = r##"}"##)]
+    #[cfg_attr(feature = "api", doc = r##"```"##)]
+    #[cfg_attr(feature = "api", doc = r##"```q"##)]
+    #[cfg_attr(
+        feature = "api",
+        doc = r##"q)char_borders: `libapi_examples 2: (`char_borders; 1);"##
+    )]
+    #[cfg_attr(feature = "api", doc = r##"q)char_borders[]"##)]
+    #[cfg_attr(feature = "api", doc = r##"" ""##)]
+    #[cfg_attr(feature = "api", doc = r##"q)null char_borders[]"##)]
+    #[cfg_attr(feature = "api", doc = r##"1b"##)]
+    #[cfg_attr(feature = "api", doc = r##"```"##)]
     pub const C: char = ' ';
 
     /// Null value of string family (symbol, string).
-    /// # Example
-    /// ```no_run
-    /// use kdbplus::*;
-    /// use kdbplus::api::*;
-    ///
-    /// #[no_mangle]
-    /// pub extern "C" fn string_borders(_: K) -> K{
-    ///   let compound=new_list(qtype::COMPOUND_LIST, 2);
-    ///   let compound_slice=compound.as_mut_slice::<K>();
-    ///   compound_slice[0]=new_symbol(qnull_base::S);
-    ///   compound_slice[1]=new_string(qnull_base::S);
-    ///   compound
-    /// }
-    /// ```
-    /// ```q
-    /// q)string_borders: `libapi_examples 2: (`string_borders; 1);
-    /// q)string_borders[]
-    /// `
-    /// ""
-    /// q)null each string_borders[]
-    /// 1b
-    /// `boolean$()
-    /// ```
+    #[cfg_attr(feature = "api", doc = r##"# Example"##)]
+    #[cfg_attr(feature = "api", doc = r##"```no_run"##)]
+    #[cfg_attr(feature = "api", doc = r##"use kdbplus::*;"##)]
+    #[cfg_attr(feature = "api", doc = r##"use kdbplus::api::*;"##)]
+    #[cfg_attr(feature = "api", doc = r##""##)]
+    #[cfg_attr(feature = "api", doc = r##"#[no_mangle]"##)]
+    #[cfg_attr(
+        feature = "api",
+        doc = r##"pub extern "C" fn string_borders(_: K) -> K{"##
+    )]
+    #[cfg_attr(
+        feature = "api",
+        doc = r##"  let compound=new_list(qtype::COMPOUND_LIST, 2);"##
+    )]
+    #[cfg_attr(
+        feature = "api",
+        doc = r##"  let compound_slice=unsafe{compound.as_mut_slice::<K>()};"##
+    )]
+    #[cfg_attr(
+        feature = "api",
+        doc = r##"  compound_slice[0]=new_symbol(qnull_base::S);"##
+    )]
+    #[cfg_attr(
+        feature = "api",
+        doc = r##"  compound_slice[1]=new_string(qnull_base::S);"##
+    )]
+    #[cfg_attr(feature = "api", doc = r##"  compound"##)]
+    #[cfg_attr(feature = "api", doc = r##"}"##)]
+    #[cfg_attr(feature = "api", doc = r##"```"##)]
+    #[cfg_attr(feature = "api", doc = r##"```q"##)]
+    #[cfg_attr(
+        feature = "api",
+        doc = r##"q)string_borders: `libapi_examples 2: (`string_borders; 1);"##
+    )]
+    #[cfg_attr(feature = "api", doc = r##"q)string_borders[]"##)]
+    #[cfg_attr(feature = "api", doc = r##"`"##)]
+    #[cfg_attr(feature = "api", doc = r#""""#)]
+    #[cfg_attr(feature = "api", doc = r##"q)null each string_borders[]"##)]
+    #[cfg_attr(feature = "api", doc = r##"1b"##)]
+    #[cfg_attr(feature = "api", doc = r##"`boolean$()"##)]
+    #[cfg_attr(feature = "api", doc = r##"```"##)]
     pub const S: &str = "";
 }
 
