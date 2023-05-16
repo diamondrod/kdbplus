@@ -19,8 +19,7 @@
 //!  The examples below are written without `unsafe` code. You can see how comfortably breathing are the wrapped functions in the code.
 //!
 //! ```no_run
-//! #[macro_use]
-//! extern crate kdbplus;
+//! use kdbplus::str_to_S;
 //! use kdbplus::api::*;
 //! use kdbplus::qtype;
 //!
@@ -36,11 +35,11 @@
 //!
 //! #[no_mangle]
 //! fn no_panick(func: K, args: K) -> K{
-//!   let result=error_to_string(apply(func, args));
+//!   let result=unsafe{error_to_string(apply(func, args))};
 //!   if let Ok(error) = result.get_error_string(){
 //!     println!("FYI: {}", error);
 //!     // Decrement reference count of the error object which is no longer used.
-//!     decrement_reference_count(result);
+//!     unsafe{decrement_reference_count(result)};
 //!     KNULL
 //!   }
 //!   else{
@@ -53,20 +52,20 @@
 //! pub extern "C" fn create_table2(_: K) -> K{
 //!   // Build keys
 //!   let keys=new_list(qtype::SYMBOL_LIST, 2);
-//!   let keys_slice=keys.as_mut_slice::<S>();
-//!   keys_slice[0]=enumerate(str_to_S!("time"));
-//!   keys_slice[1]=enumerate_n(str_to_S!("temperature_and_humidity"), 11);
+//!   let keys_slice=unsafe{keys.as_mut_slice::<S>()};
+//!   keys_slice[0]=unsafe{enumerate(str_to_S!("time"))};
+//!   keys_slice[1]=unsafe{enumerate_n(str_to_S!("temperature_and_humidity"), 11)};
 //!
 //!   // Build values
 //!   let values=new_list(qtype::COMPOUND_LIST, 2);
 //!   let time=new_list(qtype::TIMESTAMP_LIST, 3);
 //!   // 2003.10.10D02:24:19.167018272 2006.05.24D06:16:49.419710368 2008.08.12D23:12:24.018691392
-//!   time.as_mut_slice::<J>().copy_from_slice(&[119067859167018272_i64, 201766609419710368, 271897944018691392]);
+//!   unsafe{time.as_mut_slice::<J>()}.copy_from_slice(&[119067859167018272_i64, 201766609419710368, 271897944018691392]);
 //!   let temperature=new_list(qtype::FLOAT_LIST, 3);
-//!   temperature.as_mut_slice::<F>().copy_from_slice(&[22.1_f64, 24.7, 30.5]);
-//!   values.as_mut_slice::<K>().copy_from_slice(&[time, temperature]);
+//!   unsafe{temperature.as_mut_slice::<F>()}.copy_from_slice(&[22.1_f64, 24.7, 30.5]);
+//!   unsafe{values.as_mut_slice::<K>()}.copy_from_slice(&[time, temperature]);
 //!   
-//!   flip(new_dictionary(keys, values))
+//!   unsafe{flip(new_dictionary(keys, values))}
 //! }
 //! ```
 //!
@@ -104,9 +103,9 @@
 //++++++++++++++++++++++++++++++++++++++++++++++++++//
 
 use crate::qtype;
+use libc::{c_char, c_double, c_float, c_int, c_longlong, c_schar, c_short, c_uchar, c_void};
 use std::convert::TryInto;
 use std::ffi::CStr;
-use libc::{c_char, c_double, c_float, c_int, c_longlong, c_schar, c_short, c_uchar, c_void};
 use std::str;
 pub mod native;
 mod re_exports;
@@ -143,8 +142,8 @@ pub const KNULL: K = 0 as K;
 /// Convert `&str` to `S` (null-terminated character array).
 /// # Example
 /// ```no_run
-/// #[macro_use]
 /// use kdbplus::api::*;
+/// use kdbplus::str_to_S;
 ///
 /// #[no_mangle]
 /// pub extern "C" fn pingpong(_: K) -> K{
@@ -294,7 +293,7 @@ pub trait KUtility {
     /// pub extern "C" fn modify_long_list_a_bit(long_list: K) -> K{
     ///   if long_list.len() >= 2{
     ///     // Derefer as a mutable i64 slice.
-    ///     long_list.as_mut_slice::<J>()[1]=30000_i64;
+    ///     unsafe{long_list.as_mut_slice::<J>()[1]=30000_i64};
     ///     // Increment the counter to reuse on q side.
     ///     increment_reference_count(long_list)
     ///   }
@@ -316,9 +315,9 @@ pub trait KUtility {
     ///  an expensive operation, using `self` should be fine.
     ///
     /// # Safety
-    /// self must be a valid pointer to a `K` object.
+    /// self must be a valid, non-null, pointer to a `K` object.
     #[allow(clippy::wrong_self_convention)]
-    fn as_mut_slice<'a, T>(self) -> &'a mut [T];
+    unsafe fn as_mut_slice<'a, T>(self) -> &'a mut [T];
 
     /// Get an underlying q byte.
     /// # Example
@@ -606,7 +605,7 @@ pub trait KUtility {
     /// #[no_mangle]
     /// pub extern "C" fn hidden_key(table: K) -> K{
     ///   match table.get_dictionary(){
-    ///     Ok(dictionary) => dictionary.as_mut_slice::<K>()[0].q_ipc_encode(3).unwrap(),
+    ///     Ok(dictionary) => unsafe{dictionary.as_mut_slice::<K>()[0]}.q_ipc_encode(3).unwrap(),
     ///     Err(error) => new_error(error)
     ///   }
     /// }
@@ -634,6 +633,7 @@ pub trait KUtility {
     /// ```no_run
     /// use kdbplus::api::*;
     /// use kdbplus::qtype;
+    /// use kdbplus::str_to_S;
     ///
     /// #[no_mangle]
     /// pub extern "C" fn print_row(object: K, index: K) -> K{
@@ -641,8 +641,8 @@ pub trait KUtility {
     ///     qtype::TABLE => {
     ///       match object.get_row(index.get_long().unwrap() as usize, &["sym"]){
     ///         Ok(row) => {
-    ///           let null = unsafe{k(0, str_to_S!("{-1 \"row: \", .Q.s1 x}"), row, KNULL)};
-    ///           decrement_reference_count(null);
+    ///           let null = unsafe{native::k(0, str_to_S!("{-1 \"row: \", .Q.s1 x}"), row, KNULL)};
+    ///           unsafe{decrement_reference_count(null)};
     ///           KNULL
     ///         }
     ///         Err(error) => new_error(error)
@@ -693,7 +693,7 @@ pub trait KUtility {
     ///
     /// #[no_mangle]
     /// pub extern "C" fn concat_list2(mut list1: K, list2: K) -> K{
-    ///   if let Err(err) = list1.append(increment_reference_count(list2)){
+    ///   if let Err(err) = unsafe{list1.append(increment_reference_count(list2))} {
     ///     new_error(err)
     ///   }
     ///   else{
@@ -735,9 +735,9 @@ pub trait KUtility {
     /// pub extern "C" fn create_compound_list(int: K) -> K{
     ///   let mut list=new_list(qtype::COMPOUND_LIST, 0);
     ///   for i in 0..5{
-    ///     list.push(new_long(i)).unwrap();
+    ///     unsafe{list.push(new_long(i))}.unwrap();
     ///   }
-    ///   list.push(increment_reference_count(int)).unwrap();
+    ///   unsafe{list.push(increment_reference_count(int))}.unwrap();
     ///   list
     /// }
     /// ```
@@ -952,106 +952,118 @@ impl U {
 unsafe impl Send for k0_inner {}
 unsafe impl Send for k0 {}
 
-/// # Safety
-/// input must be a valid pointer
-#[inline(always)]
-fn mut_slice_unsafe<'a, T>(input: K) -> &'a mut [T] {
-    unsafe {
-        std::slice::from_raw_parts_mut(
-            (*input).value.list.G0.as_mut_ptr() as *mut T,
-            (*input).value.list.n as usize,
-        )
-    }
-}
-
 impl KUtility for K {
     #[inline]
-    fn as_mut_slice<'a, T>(self) -> &'a mut [T] {
-        mut_slice_unsafe(self)
+    unsafe fn as_mut_slice<'a, T>(self) -> &'a mut [T] {
+        unsafe {
+            std::slice::from_raw_parts_mut(
+                (*self).value.list.G0.as_mut_ptr() as *mut T,
+                (*self).value.list.n as usize,
+            )
+        }
     }
 
     fn get_row(&self, index: usize, enum_sources: &[&str]) -> Result<K, &'static str> {
         match unsafe { (**self).qtype } {
             qtype::TABLE => {
-                let keys = unsafe { (**self).value.table }.as_mut_slice::<K>()[0];
-                let values = unsafe { (**self).value.table }.as_mut_slice::<K>()[1];
+                let keys = unsafe { (**self).value.table.as_mut_slice::<K>() }[0];
+                let values = unsafe { (**self).value.table.as_mut_slice::<K>() }[1];
                 if (unsafe { (*values.as_mut_slice::<K>()[0]).value.list }.n as usize) < index + 1 {
                     // Index out of bounds
                     Err("index out of bounds\0")
                 } else {
                     let num_columns = unsafe { (*keys).value.list }.n;
                     let row = new_list(qtype::COMPOUND_LIST, num_columns);
-                    let row_slice = row.as_mut_slice::<K>();
+                    let row_slice = unsafe { row.as_mut_slice::<K>() };
                     let mut enum_source_index = 0;
-                    for (i, column) in values.as_mut_slice::<K>().iter_mut().enumerate() {
+                    for (i, column) in unsafe { values.as_mut_slice::<K>().iter_mut().enumerate() }
+                    {
                         match column.get_type() {
                             qtype::BOOL_LIST => {
-                                row_slice[i] = new_bool(column.as_mut_slice::<G>()[index] as i32);
+                                row_slice[i] =
+                                    new_bool(unsafe { column.as_mut_slice::<G>() }[index] as i32);
                             }
                             qtype::BYTE_LIST => {
-                                row_slice[i] = new_byte(column.as_mut_slice::<G>()[index] as i32);
+                                row_slice[i] =
+                                    new_byte(unsafe { column.as_mut_slice::<G>() }[index] as i32);
                             }
                             qtype::SHORT_LIST => {
-                                row_slice[i] = new_short(column.as_mut_slice::<H>()[index] as i32);
+                                row_slice[i] =
+                                    new_short(unsafe { column.as_mut_slice::<H>() }[index] as i32);
                             }
                             qtype::INT_LIST => {
-                                row_slice[i] = new_int(column.as_mut_slice::<I>()[index]);
+                                row_slice[i] =
+                                    new_int(unsafe { column.as_mut_slice::<I>() }[index]);
                             }
                             qtype::LONG_LIST => {
-                                row_slice[i] = new_long(column.as_mut_slice::<J>()[index]);
+                                row_slice[i] =
+                                    new_long(unsafe { column.as_mut_slice::<J>() }[index]);
                             }
                             qtype::REAL_LIST => {
-                                row_slice[i] = new_real(column.as_mut_slice::<E>()[index] as f64);
+                                row_slice[i] =
+                                    new_real(unsafe { column.as_mut_slice::<E>() }[index] as f64);
                             }
                             qtype::FLOAT_LIST => {
-                                row_slice[i] = new_float(column.as_mut_slice::<F>()[index]);
+                                row_slice[i] =
+                                    new_float(unsafe { column.as_mut_slice::<F>() }[index]);
                             }
                             qtype::STRING => {
-                                row_slice[i] = new_char(column.as_mut_slice::<G>()[index] as char);
+                                row_slice[i] =
+                                    new_char(unsafe { column.as_mut_slice::<G>() }[index] as char);
                             }
                             qtype::SYMBOL_LIST => {
-                                row_slice[i] =
-                                    new_symbol(S_to_str(column.as_mut_slice::<S>()[index]));
+                                row_slice[i] = new_symbol(unsafe {
+                                    S_to_str(column.as_mut_slice::<S>()[index])
+                                });
                             }
                             qtype::TIMESTAMP_LIST => {
-                                row_slice[i] = new_timestamp(column.as_mut_slice::<J>()[index]);
+                                row_slice[i] =
+                                    new_timestamp(unsafe { column.as_mut_slice::<J>() }[index]);
                             }
                             qtype::MONTH_LIST => {
-                                row_slice[i] = new_month(column.as_mut_slice::<I>()[index]);
+                                row_slice[i] =
+                                    new_month(unsafe { column.as_mut_slice::<I>() }[index]);
                             }
                             qtype::DATE_LIST => {
-                                row_slice[i] = new_date(column.as_mut_slice::<I>()[index]);
+                                row_slice[i] =
+                                    new_date(unsafe { column.as_mut_slice::<I>() }[index]);
                             }
                             qtype::DATETIME_LIST => {
-                                row_slice[i] = new_datetime(column.as_mut_slice::<F>()[index]);
+                                row_slice[i] =
+                                    new_datetime(unsafe { column.as_mut_slice::<F>() }[index]);
                             }
                             qtype::TIMESPAN_LIST => {
-                                row_slice[i] = new_timespan(column.as_mut_slice::<J>()[index]);
+                                row_slice[i] =
+                                    new_timespan(unsafe { column.as_mut_slice::<J>() }[index]);
                             }
                             qtype::MINUTE_LIST => {
-                                row_slice[i] = new_minute(column.as_mut_slice::<I>()[index]);
+                                row_slice[i] =
+                                    new_minute(unsafe { column.as_mut_slice::<I>() }[index]);
                             }
                             qtype::SECOND_LIST => {
-                                row_slice[i] = new_second(column.as_mut_slice::<I>()[index]);
+                                row_slice[i] =
+                                    new_second(unsafe { column.as_mut_slice::<I>() }[index]);
                             }
                             qtype::TIME_LIST => {
-                                row_slice[i] = new_time(column.as_mut_slice::<I>()[index]);
+                                row_slice[i] =
+                                    new_time(unsafe { column.as_mut_slice::<I>() }[index]);
                             }
                             qtype::ENUM_LIST => {
                                 if enum_sources.len() <= enum_source_index {
                                     // Index out of bounds
-                                    decrement_reference_count(row);
+                                    unsafe { decrement_reference_count(row) };
                                     return Err("insufficient enum sources\0");
                                 }
                                 let enum_value = new_enum(
                                     enum_sources[enum_source_index],
-                                    column.as_mut_slice::<J>()[index],
+                                    unsafe { column.as_mut_slice::<J>() }[index],
                                 );
                                 if unsafe { (*enum_value).qtype } == qtype::ERROR {
                                     // Error in creating enum object.
-                                    decrement_reference_count(row);
-                                    let error = S_to_str(unsafe { (*enum_value).value.symbol });
-                                    decrement_reference_count(enum_value);
+                                    unsafe { decrement_reference_count(row) };
+                                    let error =
+                                        unsafe { S_to_str(unsafe { (*enum_value).value.symbol }) };
+                                    unsafe { decrement_reference_count(enum_value) };
                                     return Err(error);
                                 } else {
                                     row_slice[i] = enum_value;
@@ -1060,14 +1072,15 @@ impl KUtility for K {
                             }
                             qtype::COMPOUND_LIST => {
                                 // Increment reference count since compound list consumes the element.
-                                row_slice[i] =
-                                    increment_reference_count(column.as_mut_slice::<K>()[index]);
+                                row_slice[i] = increment_reference_count(
+                                    unsafe { column.as_mut_slice::<K>() }[index],
+                                );
                             }
                             // There are no other list type
                             _ => unreachable!(),
                         }
                     }
-                    Ok(new_dictionary(increment_reference_count(keys), row))
+                    Ok(unsafe { new_dictionary(increment_reference_count(keys), row) })
                 }
             }
             _ => Err("not a table\0"),
@@ -1162,7 +1175,7 @@ impl KUtility for K {
     #[inline]
     fn get_symbol(&self) -> Result<&str, &'static str> {
         match unsafe { (**self).qtype } {
-            qtype::SYMBOL_ATOM => Ok(S_to_str(unsafe { (**self).value.symbol })),
+            qtype::SYMBOL_ATOM => Ok(unsafe { S_to_str(unsafe { (**self).value.symbol }) }),
             _ => Err("not a symbol\0"),
         }
     }
@@ -1198,7 +1211,7 @@ impl KUtility for K {
         match unsafe { (**self).qtype } {
             qtype::ERROR => {
                 if !unsafe { (**self).value.symbol }.is_null() {
-                    Ok(S_to_str(unsafe { (**self).value.symbol }))
+                    Ok(unsafe { S_to_str(unsafe { (**self).value.symbol }) })
                 } else {
                     Err("not an error\0")
                 }
@@ -1321,10 +1334,10 @@ impl KUtility for K {
 
     #[inline]
     fn q_ipc_encode(&self, mode: I) -> Result<K, &'static str> {
-        let result = error_to_string(unsafe { native::b9(mode, *self) });
+        let result = unsafe { error_to_string(unsafe { native::b9(mode, *self) }) };
         match unsafe { (*result).qtype } {
             qtype::ERROR => {
-                decrement_reference_count(result);
+                unsafe { decrement_reference_count(result) };
                 Err("failed to encode\0")
             }
             _ => Ok(result),
@@ -1335,10 +1348,10 @@ impl KUtility for K {
     fn q_ipc_decode(&self) -> Result<K, &'static str> {
         match unsafe { (**self).qtype } {
             qtype::BYTE_LIST => {
-                let result = error_to_string(unsafe { native::d9(*self) });
+                let result = unsafe { error_to_string(unsafe { native::d9(*self) }) };
                 match unsafe { (*result).qtype } {
                     qtype::ERROR => {
-                        decrement_reference_count(result);
+                        unsafe { decrement_reference_count(result) };
                         Err("failed to decode\0")
                     }
                     _ => Ok(result),
@@ -1398,15 +1411,16 @@ impl k0 {
 /// ```
 ///
 /// # Safety
-/// input must be a null terminated char array.
+/// * The memory pointed to by `cstring` must contain a valid nul terminator at the
+///   end of the string.
+/// * `cstring` must be [valid](core::ptr#safety) for reads of bytes up to and including the null terminator.
+///   This means in particular:
+///   * The entire memory range of this `CStr` must be contained within a single allocated object!
+///   * `cstring` must be non-null even for a zero-length cstr.
+/// * The memory referenced by the returned `CStr` must not be mutated for
+///   the duration of lifetime `'a`.
 #[inline]
-pub fn S_to_str<'a>(cstring: S) -> &'a str {
-    S_to_str_unsafe(cstring)
-}
-/// # Safety
-/// input must be a null terminated char array.
-#[inline(always)]
-fn S_to_str_unsafe<'a>(cstring: S) -> &'a str {
+pub unsafe fn S_to_str<'a>(cstring: S) -> &'a str {
     unsafe { CStr::from_ptr(cstring).to_str().unwrap() }
 }
 
