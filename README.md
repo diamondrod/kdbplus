@@ -435,3 +435,9 @@ For details of C API itself, check the documents of KX website.
 
 - [Refernce](https://code.kx.com/q/interfaces/capiref/)
 - [Memory management](https://code.kx.com/q/interfaces/c-client-for-q/#managing-memory-and-reference-counting)
+
+## License
+
+Crate `kdbplus` is licensed under Apache2.0.
+
+See [license in the crate](kdbplus/LICENSE).
