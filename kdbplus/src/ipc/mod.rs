@@ -5497,7 +5497,7 @@ fn datetime_to_q_datetime(datetime: DateTime<Utc>) -> f64 {
 //%% Getter //%%vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 /// Convert q timestamp (elapsed time in nanoseconds since `2000.01.01D00:00:00`) into `DateTime<Utc>`.
-pub(crate) fn q_timestamp_to_datetime(nanos: i64) -> DateTime<Utc> {
+pub fn q_timestamp_to_datetime(nanos: i64) -> DateTime<Utc> {
     // q          |----------------------------------------|
     // Rust  |----------------------------------------------------|
 
@@ -5506,7 +5506,7 @@ pub(crate) fn q_timestamp_to_datetime(nanos: i64) -> DateTime<Utc> {
 }
 
 /// Convert q month (elapsed time in months since `2000.01.01`) into `Date<Utc>`.
-pub(crate) fn q_month_to_date(months: i32) -> NaiveDate {
+pub fn q_month_to_date(months: i32) -> NaiveDate {
     // q     |------------------------------------------------------|
     // Rust        |-----------------------------------------|
 
@@ -5528,7 +5528,7 @@ pub(crate) fn q_month_to_date(months: i32) -> NaiveDate {
 }
 
 /// Convert q month (elapsed time in days since `2000.01.01`) into `Date<Utc>`.
-pub(crate) fn q_date_to_date(days: i32) -> Result<NaiveDate> {
+pub fn q_date_to_date(days: i32) -> Result<NaiveDate> {
     // q     |------------------------------------------------------|
     // Rust        |-----------------------------------------|
 
@@ -5555,7 +5555,7 @@ pub(crate) fn q_date_to_date(days: i32) -> Result<NaiveDate> {
 }
 
 /// Convert q datetime (elapsed time in days with glanularity of milliseconds since `2000.01.01T00:00:00`) into `DateTime<Utc>`.
-pub(crate) fn q_datetime_to_datetime(days: f64) -> DateTime<Utc> {
+pub fn q_datetime_to_datetime(days: f64) -> DateTime<Utc> {
     // q     |------------------------------------------------------|
     // Rust        |-----------------------------------------|
 
@@ -5576,22 +5576,22 @@ pub(crate) fn q_datetime_to_datetime(days: f64) -> DateTime<Utc> {
 }
 
 /// Convert q timespan into `Duration`.
-pub(crate) fn q_timespan_to_duration(nanos: i64) -> Duration {
+pub fn q_timespan_to_duration(nanos: i64) -> Duration {
     Duration::nanoseconds(nanos)
 }
 
 /// Convert q minute into `Duration`.
-pub(crate) fn q_minute_to_duration(minutes: i32) -> Duration {
+pub fn q_minute_to_duration(minutes: i32) -> Duration {
     Duration::minutes(minutes as i64)
 }
 
 /// Convert q second into `Duration`.
-pub(crate) fn q_second_to_duration(seconds: i32) -> Duration {
+pub fn q_second_to_duration(seconds: i32) -> Duration {
     Duration::seconds(seconds as i64)
 }
 
 /// Convert q time into `Duration`.
-pub(crate) fn q_time_to_duration(millis: i32) -> Duration {
+pub fn q_time_to_duration(millis: i32) -> Duration {
     Duration::milliseconds(millis as i64)
 }
 
