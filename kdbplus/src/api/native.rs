@@ -187,8 +187,7 @@ extern "C" {
     /// Constructor of q symbol object.
     /// # Example
     /// ```no_run
-    /// #[macro_use]
-    /// extern crate kdbplus;
+    /// use kdbplus::str_to_S;
     /// use kdbplus::api::*;
     /// use kdbplus::api::native::*;
     ///
@@ -303,8 +302,7 @@ extern "C" {
     /// Constructor of q string object.
     /// # Example
     /// ```no_run
-    /// #[macro_use]
-    /// extern crate kdbplus;
+    /// use kdbplus::str_to_S;
     /// use kdbplus::api::*;
     /// use kdbplus::api::native::*;
     ///
@@ -323,8 +321,7 @@ extern "C" {
     /// Constructor if q string object with a fixed length.
     /// # Example
     /// ```no_run
-    /// #[macro_use]
-    /// extern crate kdbplus;
+    /// use kdbplus::str_to_S;
     /// use kdbplus::api::*;
     /// use kdbplus::api::native::*;
     ///
@@ -345,8 +342,7 @@ extern "C" {
     /// Basically this is a `flip` command of q. Hence the value of the dictionary must have
     ///  lists as its elements.
     /// ```no_run
-    /// #[macro_use]
-    /// extern crate kdbplus;
+    /// use kdbplus::str_to_S;
     /// use kdbplus::qtype;
     /// use kdbplus::api::*;
     /// use kdbplus::api::native::*;
@@ -354,16 +350,16 @@ extern "C" {
     /// #[no_mangle]
     /// pub extern "C" fn create_table(_: K) -> K{
     ///   let keys=unsafe{ktn(qtype::SYMBOL_LIST as I, 2)};
-    ///   let keys_slice=keys.as_mut_slice::<S>();
+    ///   let keys_slice=unsafe{keys.as_mut_slice::<S>()};
     ///   keys_slice[0]=unsafe{ss(str_to_S!("time"))};
     ///   keys_slice[1]=unsafe{ss(str_to_S!("temperature"))};
     ///   let values=unsafe{knk(2)};
     ///   let time=unsafe{ktn(qtype::TIMESTAMP_LIST as I, 3)};
     ///   // 2003.10.10D02:24:19.167018272 2006.05.24D06:16:49.419710368 2008.08.12D23:12:24.018691392
-    ///   time.as_mut_slice::<J>().copy_from_slice(&[119067859167018272_i64, 201766609419710368, 271897944018691392]);
+    ///   unsafe{time.as_mut_slice::<J>()}.copy_from_slice(&[119067859167018272_i64, 201766609419710368, 271897944018691392]);
     ///   let temperature=unsafe{ktn(qtype::FLOAT_LIST as I, 3)};
-    ///   temperature.as_mut_slice::<F>().copy_from_slice(&[22.1_f64, 24.7, 30.5]);
-    ///   values.as_mut_slice::<K>().copy_from_slice(&[time, temperature]);
+    ///   unsafe{temperature.as_mut_slice::<F>()}.copy_from_slice(&[22.1_f64, 24.7, 30.5]);
+    ///   unsafe{values.as_mut_slice::<K>()}.copy_from_slice(&[time, temperature]);
     ///   unsafe{xT(xD(keys, values))}
     /// }
     /// ```
@@ -381,8 +377,7 @@ extern "C" {
     /// Constructor of simple q table object from q keyed table object.
     /// # Example
     /// ```no_run
-    /// #[macro_use]
-    /// extern crate kdbplus;
+    /// use kdbplus::str_to_S;
     /// use kdbplus::qtype;
     /// use kdbplus::api::*;
     /// use kdbplus::api::native::*;
@@ -390,16 +385,16 @@ extern "C" {
     /// #[no_mangle]
     /// pub extern "C" fn create_table(_: K) -> K{
     ///   let keys=unsafe{ktn(qtype::SYMBOL_LIST as I, 2)};
-    ///   let keys_slice=keys.as_mut_slice::<S>();
+    ///   let keys_slice=unsafe{keys.as_mut_slice::<S>()};
     ///   keys_slice[0]=unsafe{ss(str_to_S!("time"))};
     ///   keys_slice[1]=unsafe{ss(str_to_S!("temperature"))};
     ///   let values=unsafe{knk(2)};
     ///   let time=unsafe{ktn(qtype::TIMESTAMP_LIST as I, 3)};
     ///   // 2003.10.10D02:24:19.167018272 2006.05.24D06:16:49.419710368 2008.08.12D23:12:24.018691392
-    ///   time.as_mut_slice::<J>().copy_from_slice(&[119067859167018272_i64, 201766609419710368, 271897944018691392]);
+    ///   unsafe{time.as_mut_slice::<J>()}.copy_from_slice(&[119067859167018272_i64, 201766609419710368, 271897944018691392]);
     ///   let temperature=unsafe{ktn(qtype::FLOAT_LIST as I, 3)};
-    ///   temperature.as_mut_slice::<F>().copy_from_slice(&[22.1_f64, 24.7, 30.5]);
-    ///   values.as_mut_slice::<K>().copy_from_slice(&[time, temperature]);
+    ///   unsafe{temperature.as_mut_slice::<F>()}.copy_from_slice(&[22.1_f64, 24.7, 30.5]);
+    ///   unsafe{values.as_mut_slice::<K>()}.copy_from_slice(&[time, temperature]);
     ///   unsafe{xT(xD(keys, values))}
     /// }
     ///
@@ -427,8 +422,7 @@ extern "C" {
     /// Constructor of q keyed table object.
     /// # Example
     /// ```no_run
-    /// #[macro_use]
-    /// extern crate kdbplus;
+    /// use kdbplus::str_to_S;
     /// use kdbplus::qtype;
     /// use kdbplus::api::*;
     /// use kdbplus::api::native::*;
@@ -436,16 +430,16 @@ extern "C" {
     /// #[no_mangle]
     /// pub extern "C" fn create_table(_: K) -> K{
     ///   let keys=unsafe{ktn(qtype::SYMBOL_LIST as I, 2)};
-    ///   let keys_slice=keys.as_mut_slice::<S>();
+    ///   let keys_slice=unsafe{keys.as_mut_slice::<S>()};
     ///   keys_slice[0]=unsafe{ss(str_to_S!("time"))};
     ///   keys_slice[1]=unsafe{ss(str_to_S!("temperature"))};
     ///   let values=unsafe{knk(2)};
     ///   let time=unsafe{ktn(qtype::TIMESTAMP_LIST as I, 3)};
     ///   // 2003.10.10D02:24:19.167018272 2006.05.24D06:16:49.419710368 2008.08.12D23:12:24.018691392
-    ///   time.as_mut_slice::<J>().copy_from_slice(&[119067859167018272_i64, 201766609419710368, 271897944018691392]);
+    ///   unsafe{time.as_mut_slice::<J>()}.copy_from_slice(&[119067859167018272_i64, 201766609419710368, 271897944018691392]);
     ///   let temperature=unsafe{ktn(qtype::FLOAT_LIST as I, 3)};
-    ///   temperature.as_mut_slice::<F>().copy_from_slice(&[22.1_f64, 24.7, 30.5]);
-    ///   values.as_mut_slice::<K>().copy_from_slice(&[time, temperature]);
+    ///   unsafe{temperature.as_mut_slice::<F>()}.copy_from_slice(&[22.1_f64, 24.7, 30.5]);
+    ///   unsafe{values.as_mut_slice::<K>()}.copy_from_slice(&[time, temperature]);
     ///   unsafe{xT(xD(keys, values))}
     /// }
     ///
@@ -468,8 +462,7 @@ extern "C" {
     /// Constructor of q dictionary object.
     /// # Example
     /// ```no_run
-    /// #[macro_use]
-    /// extern crate kdbplus;
+    /// use kdbplus::str_to_S;
     /// use kdbplus::qtype;
     /// use kdbplus::api::*;
     /// use kdbplus::api::native::*;
@@ -477,13 +470,13 @@ extern "C" {
     /// #[no_mangle]
     /// pub extern "C" fn create_dictionary() -> K{
     ///   let keys=unsafe{ktn(qtype::INT_LIST as I, 2)};
-    ///   keys.as_mut_slice::<I>()[0..2].copy_from_slice(&[0, 1]);
+    ///   unsafe{keys.as_mut_slice::<I>()[0..2].copy_from_slice(&[0, 1])};
     ///   let values=unsafe{knk(2)};
     ///   let date_list=unsafe{ktn(qtype::DATE_LIST as I, 3)};
     ///   // 2000.01.01 2000.01.02 2000.01.03
-    ///   date_list.as_mut_slice::<I>()[0..3].copy_from_slice(&[0, 1, 2]);
+    ///   unsafe{date_list.as_mut_slice::<I>()[0..3].copy_from_slice(&[0, 1, 2])};
     ///   let string=unsafe{kp(str_to_S!("I'm afraid I would crash the application..."))};
-    ///   values.as_mut_slice::<K>()[0..2].copy_from_slice(&[date_list, string]);
+    ///   unsafe{values.as_mut_slice::<K>()[0..2].copy_from_slice(&[date_list, string])};
     ///   unsafe{xD(keys, values)}
     /// }
     /// ```
@@ -573,8 +566,7 @@ extern "C" {
     ///  Returns a pointer to the (potentially reallocated) `K` object.
     /// # Example
     /// ```no_run
-    /// #[macro_use]
-    /// extern crate kdbplus;
+    /// use kdbplus::str_to_S;
     /// use kdbplus::api::*;
     /// use kdbplus::api::native::*;
     ///
@@ -607,8 +599,7 @@ extern "C" {
     ///  Returns a pointer to the (potentially reallocated) `K` object.
     /// # Example
     /// ```no_run
-    /// #[macro_use]
-    /// extern crate kdbplus;
+    /// use kdbplus::str_to_S;
     /// use kdbplus::qtype;
     /// use kdbplus::api::*;
     /// use kdbplus::api::native::*;
@@ -688,8 +679,7 @@ extern "C" {
     ///  As this library is purposed to build shared object, the only choice of `socket` is `0`. This
     ///  executes against the kdb+ process in which it is loaded.
     /// ```no_run
-    /// #[macro_use]
-    /// extern crate kdbplus;
+    /// use kdbplus::str_to_S;
     /// use kdbplus::qtype;
     /// use kdbplus::api::*;
     /// use kdbplus::api::native::*;
@@ -697,14 +687,14 @@ extern "C" {
     /// #[no_mangle]
     /// pub extern "C" fn dictionary_list_to_table() -> K{
     ///   let dicts=unsafe{knk(3)};
-    ///   let dicts_slice=dicts.as_mut_slice::<K>();
+    ///   let dicts_slice=unsafe{dicts.as_mut_slice::<K>()};
     ///   for i in 0..3{
     ///     let keys=unsafe{ktn(qtype::SYMBOL_LIST as I, 2)};
-    ///     let keys_slice=keys.as_mut_slice::<S>();
+    ///     let keys_slice=unsafe{keys.as_mut_slice::<S>()};
     ///     keys_slice[0]=unsafe{ss(str_to_S!("a"))};
     ///     keys_slice[1]=unsafe{ss(str_to_S!("b"))};
     ///     let values=unsafe{ktn(qtype::INT_LIST as I, 4)};
-    ///     values.as_mut_slice::<I>()[0..2].copy_from_slice(&[i*10, i*100]);
+    ///     unsafe{values.as_mut_slice::<I>()[0..2].copy_from_slice(&[i*10, i*100])};
     ///     dicts_slice[i as usize]=unsafe{xD(keys, values)};
     ///   }
     ///    // Format list of dictionary as a table.
@@ -886,8 +876,7 @@ extern "C" {
     ///  See details on [the reference page](https://code.kx.com/q/interfaces/c-client-for-q/#managing-memory-and-reference-counting).
     /// # Example
     /// ```no_run
-    /// #[macro_use]
-    /// extern crate kdbplus;
+    /// use kdbplus::str_to_S;
     /// use kdbplus::api::*;
     /// use kdbplus::api::native::*;
     ///
@@ -944,8 +933,7 @@ extern "C" {
     ///  Returns the previously set value.
     /// # Example
     /// ```no_run
-    /// #[macro_use]
-    /// extern crate kdbplus;
+    /// use kdbplus::str_to_S;
     /// use kdbplus::api::*;
     /// use kdbplus::api::native::*;
     ///

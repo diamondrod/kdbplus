@@ -86,7 +86,7 @@ impl Error {
         Self::InvalidOperation {
             operator,
             operand_type: type_to_string(operand_type),
-            expected: expected.map(|type_id| type_to_string(type_id)),
+            expected: expected.map(type_to_string),
         }
     }
 
@@ -131,7 +131,6 @@ impl Error {
     /// ```
     /// use kdbplus::ipc::*;
     ///
-    /// fn main(){
     ///   let int = K::new_int(777);
     ///   match int.flip(){
     ///     Ok(_) => eprintln!("miracle!!"),
@@ -140,7 +139,7 @@ impl Error {
     ///       assert_eq!(original.get_int().unwrap(), 777);
     ///     }
     ///   }
-    /// }
+    ///
     /// ```
     pub fn into_inner(self) -> Option<K> {
         match self {
