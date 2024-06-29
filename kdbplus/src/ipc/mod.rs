@@ -1275,7 +1275,10 @@ impl K {
         )
     }
 
-    /// Construct q timestamp from `DateTime<Utc>`.
+    /// Construct q timestamp from `DateTime<Utc>`. If the `DateTime` value is not between
+    ///  1677-09-21T00:12:43.145224192 and 2262-04-11T23:47:16.854775807, it returns `0Np` in q/kdb+.
+    /// # Note
+    /// For the range of valid `DateTime`, see [`chrono`](https://docs.rs/chrono/latest/chrono/struct.DateTime.html#method.timestamp_nanos).
     /// # Example
     /// ```
     /// use kdbplus::ipc::*;
@@ -1686,7 +1689,10 @@ impl K {
         )
     }
 
-    /// Construct q timestamp list from `Vec<DateTime<Utc>>`.
+    /// Construct q timestamp list from `Vec<DateTime<Utc>>`. If the `DateTime` value is not between
+    ///  1677-09-21T00:12:43.145224192 and 2262-04-11T23:47:16.854775807, it returns `0Np` in q/kdb+.
+    /// # Note
+    /// For the range of valid `DateTime`, see [`chrono`](https://docs.rs/chrono/latest/chrono/struct.DateTime.html#method.timestamp_nanos).
     /// # Example
     /// ```
     /// use kdbplus::qattribute;
@@ -3069,6 +3075,10 @@ impl K {
     ///     assert_eq!(format!("{}", string_list), String::from("(\"string\";0b)"));
     /// }
     /// ```
+    /// # Note
+    /// If the `DateTime` value for timestamp is not between 1677-09-21T00:12:43.145224192 and 2262-04-11T23:47:16.854775807, it returns `0Np` in q/kdb+.
+    /// # Note
+    /// For the range of valid `DateTime`, see [`chrono`](https://docs.rs/chrono/latest/chrono/struct.DateTime.html#method.timestamp_nanos).
     pub fn push(&mut self, element: &dyn Any) -> Result<()> {
         match self.0.qtype {
             qtype::BOOL_LIST => {
@@ -3295,7 +3305,7 @@ impl K {
         }
     }
 
-    /// Insert an element to the underlying q list at the location specified location by an index.
+    /// Insert an element to the underlying q list at the specified location by an index.
     /// # Parameters
     /// - `index`: Index of the location where the new element is inserted.
     /// - `element`: An element to insert. The type needs to be a one used for atom constructor `K::new_*`. For example,
@@ -5412,6 +5422,9 @@ impl K {
 //%% Constructors //%%vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/
 
 /// Convert `DateTime<Utc>` into `i64`. The returned value is an elapsed time in nanoseconds since `2000.01.01D00:00:00`.
+/// If the nanoseconds value is not between 1677-09-21T00:12:43.145224192 and 2262-04-11T23:47:16.854775807, it returns `i64::MIN` which is `0Np` in q/kdb+.
+/// # Note
+/// For the range of valid `DateTime`, see [`chrono`](https://docs.rs/chrono/latest/chrono/struct.DateTime.html#method.timestamp_nanos).
 fn datetime_to_q_timestamp(timestamp: DateTime<Utc>) -> i64 {
     // q          |----------------------------------------|
     // Rust  |----------------------------------------------------|
@@ -5427,7 +5440,9 @@ fn datetime_to_q_timestamp(timestamp: DateTime<Utc>) -> i64 {
         qinf_base::J
     } else {
         timestamp
-            .timestamp_nanos()
+            .timestamp_nanos_opt()
+            // This is null `0N`
+            .unwrap_or(i64::MIN)
             .saturating_sub(KDB_TIMESTAMP_OFFSET)
     }
 }
