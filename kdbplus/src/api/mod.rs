@@ -2514,7 +2514,7 @@ pub fn unpin_symbol() -> I {
 pub fn drop_q_object(obj: K) -> K {
     let obj_slice = obj.as_mut_slice::<K>();
     // Take ownership of `K` object from a raw pointer and drop at the end of this scope.
-   let _ = unsafe { Box::from_raw(obj_slice[1]) };
+    let _ = unsafe { Box::from_raw(obj_slice[1]) };
     // Fill the list with null.
     obj_slice.copy_from_slice(&[KNULL, KNULL]);
     obj
